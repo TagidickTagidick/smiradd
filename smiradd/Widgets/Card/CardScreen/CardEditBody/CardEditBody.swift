@@ -2,7 +2,7 @@
 //  CardEditBody.swift
 //  smiradd
 //
-//  Created by Минь Дык Фам on 24.04.2024.
+//  Created by Минь Дык Фам on 26.04.2024.
 //
 
 import Foundation
