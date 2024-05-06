@@ -1,8 +1,6 @@
-//
-//  FavoritesSettings.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 02.05.2024.
-//
+import SwiftUI
 
-import Foundation
+class FavoritesSettings: ObservableObject {
+    @Published var favoritesModel: FavoritesModel?
+    @Published var mySpecificities: [String] = []
+}

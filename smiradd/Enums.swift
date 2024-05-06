@@ -1,8 +1,25 @@
-//
-//  Enums.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 14.04.2024.
-//
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case put = "PUT"
+    case delete = "DELETE"
+    case patch = "PATCH"
+}
 
-import Foundation
+enum PageType {
+    case loading
+    case matchNotFound
+    case internetError
+    case otherError
+    case nothingHereProfile
+    case nothingHereFavorites
+    case nothingHereNotifications
+}
+
+enum CardType {
+    case favoriteCard
+    case userCard
+    case myCard
+    case editCard
+    case newCard
+}

@@ -1,8 +1,5 @@
-//
-//  DeleteModel.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 26.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct DeleteModel: Codable {
+    var text: String?
+}

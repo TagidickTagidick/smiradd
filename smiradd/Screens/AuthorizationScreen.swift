@@ -1,9 +1,14 @@
 import SwiftUI
+import FirebaseAuth
+import Firebase
+import GoogleSignIn
 
 struct AuthorizationScreen: View {
     var isSignUp: Bool
     
     @EnvironmentObject var router: Router
+    @EnvironmentObject var profileSettings: ProfileSettings
+    @EnvironmentObject var locationManager: LocationManager
     
     @State private var isLoading: Bool = false
     
@@ -18,7 +23,41 @@ struct AuthorizationScreen: View {
     
     let screenHeight = UIScreen.main.bounds.height
     
-    func fetchData() {
+    func login() {
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+                
+        let config = GIDConfiguration(clientID: clientID)
+
+        GIDSignIn.sharedInstance.configuration = config
+                
+        GIDSignIn.sharedInstance.signIn(withPresenting: AuthorizationScreen(
+            isSignUp: false
+        ).getRootViewController()) { signResult, error in
+                    
+            if let error = error {
+               return
+            }
+                    
+             guard let user = signResult?.user,
+                   let idToken = user.idToken else { return }
+             
+             let accessToken = user.accessToken
+                    
+             let credential = GoogleAuthProvider.credential(
+                withIDToken: idToken.tokenString,
+                accessToken: accessToken.tokenString
+             )
+
+            Auth.auth().signIn(with: credential) { authResult, error in
+                fetchData(
+                    email: authResult?.user.email ?? "",
+                    password: authResult?.user.uid ?? ""
+                )
+            }
+        }
+    }
+    
+    func fetchData(email: String, password: String) {
         self.isLoading = true
         
         guard let url = URL(string: "http://80.90.185.153:5002/api/auth/\(isSignUp ? "registration" : "login")") else { return }
@@ -47,6 +86,9 @@ struct AuthorizationScreen: View {
                 guard let data = data else { return }
                 do {
                     let httpResponse = response as? HTTPURLResponse
+                    print(httpResponse?.statusCode)
+                    let string = String(data: data, encoding: .utf8)
+                    print(string)
                     switch httpResponse?.statusCode {
                     case 200:
                         let authorizationModel = try JSONDecoder().decode(AuthorizationModel.self, from: data)
@@ -59,10 +101,58 @@ struct AuthorizationScreen: View {
                             authorizationModel.refresh_token,
                             forKey: "refresh_token"
                         )
-                        DispatchQueue.main.async {
-                            self.isLoading = false
-                            router.navigate(to: .networkingScreen)
-                        }
+                        locationManager.getLocation()
+                        if let location = locationManager.location {
+                            let body: [String: Double] = [
+                                "latitude": location.coordinate.latitude,
+                                "longitude": location.coordinate.longitude
+                            ]
+                            let finalBody = try! JSONSerialization.data(withJSONObject: body)
+                            makeRequest(
+                                path: "networking/mylocation",
+                                method: .post,
+                                body: finalBody
+                            ) { (result: Result<LocationModel, Error>) in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success(let cards):
+                                        makeRequest(
+                                            path: "templates",
+                                            method: .get
+                                        ) { (result: Result<[TemplateModel], Error>) in
+                                            switch result {
+                                            case .success(let templates):
+                                                DispatchQueue.main.async {
+                                                    self.isLoading = false
+                                                    self.profileSettings.templates = templates
+                                                    router.navigate(to: .networkingScreen)
+                                                }
+                                            case .failure(let error):
+                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                        //                            self.pageType = .internetError
+                        //                        }
+                        //                        else {
+                        //                            self.pageType = .nothingHere
+                        //                        }
+                                                print(error.localizedDescription)
+                                            }
+                                        }
+                                        print("success")
+                                    case .failure(let error):
+                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                //                            self.pageType = .internetError
+                //                        }
+                //                        else {
+                //                            self.pageType = .nothingHere
+                //                        }
+                                        print(error.localizedDescription)
+                                    }
+                                }
+                            }
+                                        print("Latitude: \(location.coordinate.latitude), Longitude: \(location.coordinate.longitude)")
+                                    } else {
+                                        print("Fetching location...")
+                                    }
                     case 400:
                         let string = String(data: data, encoding: .utf8)
                         if string!.contains("Passwords did not match") {
@@ -83,19 +173,10 @@ struct AuthorizationScreen: View {
             }.resume()
         }
     
-//                let url = URL(string: "http://80.90.185.153:5002/api/auth/registration")!
-//                URLSession.shared.dataTask(with: url) { data, response, error in
-//                    guard let data = data else { return }
-//                    do {
-//                        let decodedData = try JSONDecoder().decode(AuthorizationModel.self, from: data)
-//                        print(decodedData)
-//                        DispatchQueue.main.async {
-//                            self.users = decodedData
-//                        }
-//                    } catch {
-//                        print(error)
-//                    }
-//                }.resume()
+    func isValidEmail(_ email: String) -> Bool {
+            let emailRegex = #"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#
+            return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
+        }
     
     var body: some View {
         ZStack {
@@ -183,6 +264,7 @@ struct AuthorizationScreen: View {
                                 )
                                 : textDefault
                             )
+                            .accentColor(.black)
                             .placeholder(when: email.isEmpty) {
                                 Text("Электронная почта")
                                     .foregroundColor(Color(
@@ -241,6 +323,7 @@ struct AuthorizationScreen: View {
                                         )
                                         : textDefault
                                     )
+                                    .accentColor(.black)
                                     .placeholder(when: password.isEmpty) {
                                         Text("Пароль")
                                             .foregroundColor(Color(
@@ -297,6 +380,7 @@ struct AuthorizationScreen: View {
                                         )
                                         : textDefault
                                     )
+                                    .accentColor(.black)
                                     .placeholder(when: password.isEmpty) {
                                         Text("Пароль")
                                             .foregroundColor(Color(
@@ -363,7 +447,11 @@ struct AuthorizationScreen: View {
                                 maxWidth: .infinity,
                                 maxHeight: 56
                             )
-                            .background(textDefault)
+                            .background(
+                                email.isEmpty || password.isEmpty || !isValidEmail(email)
+                                ? textAdditional
+                                : textDefault
+                            )
                             .cornerRadius(28)
                         Text("Войти")
                             .font(
@@ -377,7 +465,7 @@ struct AuthorizationScreen: View {
                     .onTapGesture {
                         emailIsFocused = false
                         passwordIsFocused = false
-                        fetchData()
+                        fetchData(email: email, password: password)
                     }
                     if isSignUp {
                         Spacer()
@@ -452,6 +540,9 @@ struct AuthorizationScreen: View {
                                     )
                                 )
                                 .foregroundStyle(textDefault)
+                        }
+                        .onTapGesture {
+                            login()
                         }
                     }
                     .onTapGesture {

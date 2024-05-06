@@ -1,8 +1,20 @@
-//
-//  CustomIcon.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 25.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct CustomIcon: View {
+    var icon: String
+    var black: Bool
+    
+    var body: some View {
+        ZStack {
+            Image(icon)
+                .renderingMode(.template)
+                .foregroundColor(black ? .white : textDefault)
+        }
+        .frame(
+            width: 48,
+            height: 48
+        )
+        .background(black ? textDefault : .white)
+        .clipShape(Circle())
+    }
+}

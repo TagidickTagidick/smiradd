@@ -1,8 +1,24 @@
-//
-//  CustomButton.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 22.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct CustomButton: View {
+    var text: String
+    
+    var body: some View {
+        ZStack {
+            Text(text)
+                .font(
+                    .custom(
+                        "OpenSans-SemiBold",
+                        size: 16
+                    )
+                )
+                .foregroundStyle(.white)
+        }
+        .frame(
+            width: UIScreen.main.bounds.width - 40,
+            height: 56
+        )
+        .background(textDefault)
+        .cornerRadius(28)
+    }
+}

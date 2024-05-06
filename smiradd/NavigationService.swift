@@ -1,8 +1,5 @@
-//
-//  NavigationService.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 12.04.2024.
-//
+import SwiftUI
 
-import Foundation
+class NavigationService {
+    @State private var presentedNumbers = [Int]()
+}

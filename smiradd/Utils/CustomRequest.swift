@@ -1,10 +1,16 @@
 import SwiftUI
 
-func makeRequest<Model: Codable>(path: String, method: HTTPMethod, body: Data? = nil, completion: @escaping (Result<Model, Error>) -> Void) {
-    let url = URL(string: "https://vizme.pro/api/\(path)")!
+func makeRequest<Model: Codable>(
+    path: String,
+    method: HTTPMethod,
+    body: Data? = nil,
+    isString: Bool = false,
+    completion: @escaping (Result<Model, Error>) -> Void,
+    isProd: Bool = false
+) {
+    let url = URL(string: "http\(isProd ? "s" : "")://\(isProd ? "vizme.pro" : "80.90.185.153:5002")/api/\(path)")!
     
-    print("Request:")
-    print("url: \(url.absoluteString)")
+    print("Request url: \(url.absoluteString):")
     print("type: \(method)")
     
     if body != nil {
@@ -20,6 +26,8 @@ func makeRequest<Model: Codable>(path: String, method: HTTPMethod, body: Data? =
     
     let accessToken = UserDefaults.standard.string(forKey: path.contains("refresh") ? "refresh_token" : "access_token")
     
+    print(accessToken)
+    
     if let token = accessToken {
         request.setValue(
             "Bearer \(token)",
@@ -33,22 +41,28 @@ func makeRequest<Model: Codable>(path: String, method: HTTPMethod, body: Data? =
     
     URLSession.shared.dataTask(with: request) { data, response, error in
         let httpResponse = response as? HTTPURLResponse
-        print("Response:")
+        print("Response url: \(url.absoluteString):")
         print("status code: \(httpResponse?.statusCode)")
-        if let data = data {
-            if let json = data.prettyPrintedJSONString() {
-                print("body:\n\(json)")
-            } else {
-                let string = String(data: data, encoding: .utf8)
-                print("Unable to decode data as JSON. Response data as String:\n\(string ?? "nil")")
-            }
-        }
+        
         if let error = error {
             completion(.failure(error))
             return
         }
+        
+        guard let data = data else {
+            completion(.failure(URLError(.dataNotAllowed)))
+            return
+        }
+        
+        if let json = data.prettyPrintedJSONString() {
+            print("body:\n\(json)")
+        } else {
+            let string = String(data: data, encoding: .utf8)
+            print("Unable to decode data as JSON. Response data as String:\n\(string ?? "nil")")
+        }
+        
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            if httpResponse?.statusCode == 401 {
+            if httpResponse?.statusCode == 401 && !path.contains("refresh") {
                 makeRequest(
                     path: "auth/refresh-token",
                     method: .post
@@ -76,17 +90,17 @@ func makeRequest<Model: Codable>(path: String, method: HTTPMethod, body: Data? =
                     }
                 }
             }
-            completion(.failure(URLError(.badServerResponse)))
-            return
-        }
-        
-        guard let data = data else {
-            completion(.failure(URLError(.dataNotAllowed)))
+            if httpResponse?.statusCode == 400 {
+                completion(.success([] as! Model))
+            }
+            else {
+                completion(.failure(URLError(.badServerResponse)))
+            }
             return
         }
         
         do {
-            if method == .delete {
+            if isString {
                 let string = String(data: data, encoding: .utf8)
                 completion(.success(DeleteModel(text: string ?? "") as! Model))
             }

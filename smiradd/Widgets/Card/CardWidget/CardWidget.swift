@@ -1,66 +1,39 @@
 import SwiftUI
+import CardStack
 
 struct CardWidget: View {
     var cardModel: CardModel
     
+    @EnvironmentObject var router: Router
+    @EnvironmentObject var cardSettings: CardSettings
+    @EnvironmentObject var profileSettings: ProfileSettings
+    
+    @Binding var cards: CardStackModel<CardModel, LeftRight>
+    
     var body: some View {
         ZStack {
             VStack {
-                Image("avatar")
-                VStack {
-                    HStack {
-                        VStack (alignment: .leading) {
-                            Text(cardModel.job_title)
-                                .font(
-                                    .custom(
-                                        "OpenSans-SemiBold",
-                                        size: 20
-                                    )
-                                )
-                                .foregroundStyle(textDefault)
-                            Spacer()
-                                .frame(height: 8)
-                            Text(cardModel.name)
-                                .font(
-                                    .custom(
-                                        "OpenSans-Medium",
-                                        size: 16
-                                    )
-                                )
-                                .foregroundStyle(textDefault)
-                        }
-                        Spacer()
-                        Spacer()
-                            .frame(width: 8)
-                        Image("avatar")
+                if cardModel.avatar_url == nil {
+                    Image("avatar")
+                }
+                else {
+                    AsyncImage(
+                        url: URL(
+                            string: cardModel.avatar_url!
+                        )
+                    ) { image in
+                        image
                             .resizable()
-                            .frame(
-                                width: 56,
-                                height: 56
-                            )
-                            .cornerRadius(8)
+                            .frame(height: 337)
+                    } placeholder: {
+                        ProgressView()
                     }
+                    .frame(height: 337)
+                }
+                VStack {
+                    CardLogo(cardModel: cardModel)
                     if cardModel.bio != nil {
-                        Spacer()
-                            .frame(height: 12)
-                        Text("О себе")
-                            .font(
-                                .custom(
-                                    "OpenSans-Medium",
-                                    size: 14
-                                )
-                            )
-                            .foregroundStyle(textAdditional)
-                        Spacer()
-                            .frame(height: 8)
-                        Text(cardModel.bio!)
-                            .font(
-                                .custom(
-                                    "OpenSans-Regular",
-                                    size: 14
-                                )
-                            )
-                            .foregroundStyle(textDefault)
+                        CardBio(bio: cardModel.bio!)
                     }
                     Spacer()
                     Spacer()
@@ -89,6 +62,23 @@ struct CardWidget: View {
                             Image(systemName: "xmark")
                                 .foregroundColor(.white)
                         }
+                        .onTapGesture {
+                            makeRequest(
+                                path: "cards/\(cardModel.id)/favorites",
+                                method: .delete
+                            ) { (result: Result<DetailsModel, Error>) in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success(_):
+                                        withAnimation {
+                                            cards.swipe(direction: .left, completion: nil)
+                                        }
+                                    case .failure(_):
+                                        print("failure")
+                                    }
+                                }
+                            }
+                        }
                         ZStack {
                             Circle()
                                 .fill(Color(
@@ -102,6 +92,23 @@ struct CardWidget: View {
                                 )
                             Image(systemName: "heart")
                                 .foregroundColor(.white)
+                        }
+                        .onTapGesture {
+                            makeRequest(
+                                path: "cards/\(cardModel.id)/favorites",
+                                method: .post
+                            ) { (result: Result<DetailsModel, Error>) in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success(_):
+                                        withAnimation {
+                                            cards.swipe(direction: .right, completion: nil)
+                                        }
+                                    case .failure(_):
+                                        print("failure")
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -127,5 +134,18 @@ struct CardWidget: View {
             radius: 16,
             y: 4
         )
+        .onTapGesture {
+            cardSettings.cardId = cardModel.id
+            let myCard = profileSettings.cards.first(where: { $0.id == cardModel.id }) ?? nil
+            if myCard == nil {
+                cardSettings.cardType = .userCard
+            }
+            else {
+                cardSettings.cardType = .myCard
+            }
+            cardSettings.achievements = []
+            cardSettings.services = []
+            router.navigate(to: .cardScreen)
+        }
     }
 }

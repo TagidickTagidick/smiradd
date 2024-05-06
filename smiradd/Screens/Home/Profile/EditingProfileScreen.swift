@@ -1,8 +1,7 @@
-//
-//  EditingProfileScreen.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 14.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct EditingProfileScreen: View {
+    var body: some View {
+        Text("editing_profile")
+    }
+}

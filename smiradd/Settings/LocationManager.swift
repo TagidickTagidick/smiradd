@@ -1,8 +1,30 @@
-//
-//  LocationManager.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 27.04.2024.
-//
+import CoreLocation
 
-import Foundation
+class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private var locationManager = CLLocationManager()
+    
+    @Published var location: CLLocation?
+    
+    override init() {
+        super.init()
+        
+        self.locationManager.delegate = self
+    }
+    
+    func getLocation() {
+        self.locationManager.requestWhenInUseAuthorization()
+        self.locationManager.startUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            self.location = location
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if manager.authorizationStatus == .denied {
+            // Handle denied permission
+        }
+    }
+}

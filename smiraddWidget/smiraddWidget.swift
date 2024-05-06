@@ -7,6 +7,7 @@
 
 import WidgetKit
 import SwiftUI
+import CoreImage.CIFilterBuiltins
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
@@ -39,15 +40,46 @@ struct SimpleEntry: TimelineEntry {
 
 struct smiraddWidgetEntryView : View {
     var entry: Provider.Entry
+    
+    let context = CIContext()
+    let filter = CIFilter.qrCodeGenerator()
+    
+    func generateQRCode(from string: String) -> UIImage {
+        filter.message = Data(string.utf8)
+
+        if let outputImage = filter.outputImage {
+            if let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
+                return UIImage(cgImage: cgImage)
+            }
+        }
+
+        return UIImage(systemName: "xmark.circle") ?? UIImage()
+    }
 
     var body: some View {
         VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
-        }
+                Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
+                Image(
+                    uiImage: generateQRCode(
+                        from: "smiradd://vizme.pro?id=1"
+                    )
+                )
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .frame(
+                    width: 110, // Adjusting width for a 2x2 widget
+                    height: 110  // Adjusting height for a 2x2 widget
+                )
+                Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
+                Text("Арт-директор Ozon")
+                    .font(.custom("OpenSans-Bold", size: 16)) // Adjusting font size
+                    .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
+                Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
+            }
+            .padding(7)
+            .background(Color.white)
+            .cornerRadius(12)
     }
 }
 
@@ -59,6 +91,7 @@ struct smiraddWidget: Widget {
             smiraddWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
+        .supportedFamilies([.systemMedium])
     }
 }
 

@@ -27,6 +27,10 @@ struct CardTemplate: View {
             .background(accent50)
             .cornerRadius(24)
         }
+        .frame(
+            minWidth: UIScreen.main.bounds.width - 40,
+            minHeight: 228
+        )
         .onTapGesture {
             router.navigate(to: .templatesScreen)
         }

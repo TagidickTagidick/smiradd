@@ -1,8 +1,16 @@
-//
-//  CustomText.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 21.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct CustomText: View {
+    var text: String
+    
+    var body: some View {
+        Text(text)
+            .font(
+                .custom(
+                    "OpenSans-Medium",
+                    size: 14
+                )
+            )
+            .foregroundStyle(textAdditional)
+    }
+}

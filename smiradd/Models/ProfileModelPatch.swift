@@ -1,8 +1,7 @@
-//
-//  ProfileModelPatch.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 22.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct ProfileModelPatch: Codable {
+    let first_name: String?
+    let last_name: String?
+    let picture_url: String?
+}

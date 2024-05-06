@@ -1,8 +1,9 @@
-//
-//  TemplateModel.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 16.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct TemplateModel: Codable, Identifiable {
+    let id: String
+    let title: String
+    let picture_url: String?
+    let theme: String
+}
+

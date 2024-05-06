@@ -1,7 +1,12 @@
 import SwiftUI
+import CardStack
 
 struct NetworkingScreen: View {
     @EnvironmentObject var router: Router
+    
+    @State var cards = CardStackModel<_, LeftRight>(CardModel.mock)
+    
+    @State private var pageType: PageType = .loading
     
     var body: some View {
         ZStack {
@@ -17,50 +22,54 @@ struct NetworkingScreen: View {
                 Spacer()
                     .frame(height: 20)
                 ZStack {
-                    VStack {
-                        Image("match_not_found")
-                        Spacer()
-                            .frame(height: 14)
-                        Text("Рядом нет активных форумов")
-                            .font(
-                                .custom(
-                                    "OpenSans-Medium",
-                                    size: 16
-                                )
-                            )
-                            .foregroundStyle(textDefault)
-                        Spacer()
-                            .frame(height: 14)
-                        Text("Посетите форум, чтобы увидеть здесь визитки близких по духу людей")
-                            .font(
-                                .custom(
-                                    "OpenSans-Regular",
-                                    size: 14
-                                )
-                            )
-                            .foregroundStyle(Color(
-                                red: 0.6,
-                                green: 0.6,
-                                blue: 0.6
-                            ))
-                    }
-                    .padding(
-                        [.horizontal],
-                        44
+                    CustomWidget(
+                        pageType: $pageType,
+                        onTap: {
+                            self.pageType = .loading
+                            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
+                                switch result {
+                                case .success(let cards):
+                                    self.cards.appendElements(cards)
+                                    self.pageType = .matchNotFound
+                                case .failure(let error):
+                                    if error.localizedDescription == "The Internet connection appears to be offline." {
+                                        self.pageType = .internetError
+                                    }
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
                     )
-        //            .background(Color(
-        //                red: 0.125,
-        //                green: 0.173,
-        //                blue: 0.275,
-        //                opacity: 0.08
-        //            ))
+                    CardStack(
+                        model: cards,
+                        onSwipe: { card, direction in
+                            print("Swiped \(card.name) to \(direction)")
+                        },
+                        content: { card, _ in
+                            CardWidget(
+                                cardModel: card,
+                                cards: $cards
+                            )
+                                .onTapGesture {
+                                    withAnimation {
+                                        cards.swipe(direction: .right, completion: nil)
+                                                                    }
+                                            }
+                                    }
+                        )
+//                    CardStack(
+//                      data: cards,
+//                      onSwipe: { card, direction in // Closure to be called when a card is swiped.
+//                        print("Swiped \(card) to \(direction)")
+//                      },
+//                      content: { card, direction, isOnTop in // View builder function
+//                          CardWidget(cardModel: card)
+//                              .onTapGesture {
+//                                  cards.append(CardModel(id: "ыррыры", job_title: "ыррыры", specificity: "ыррыры", phone: "ыррыры", email: "ыррыры", address: "ыррыры", name: "ыррыры", useful: "ыррыры", seek: "ыррыры", tg_url: "ыррыры", vk_url: "ыррыры", fb_url: "ыррыры", cv_url: "ыррыры", company_logo: "ыррыры", bio: "ыррыры", bc_template_type: "ыррыры", services: nil, achievements: nil, avatar_url: "ыррыры"))
+//                              }
+//                      }
+//                    )
                 }
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity
-                )
-                .background(.white)
-                .cornerRadius(16)
                 Spacer()
                     .frame(height: 78)
             }
@@ -68,18 +77,47 @@ struct NetworkingScreen: View {
                 [.horizontal],
                 20
             )
-            .shadow(
-                color: Color(
-                    red: 0.125,
-                    green: 0.173,
-                    blue: 0.275,
-                    opacity: 0.08
-                ),
-                radius: 16,
-                y: 4
-            )
         }
         .background(accent50)
-        .ignoresSafeArea()
+        .onAppear {
+            makeRequest(
+                path: "networkingv2/aroundme/10",
+                method: .get
+            ) { (result: Result<[CardModel], Error>) in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let cards):
+                        for card in cards {
+                            if card.like != true {
+                                self.cards.appendElement(card)
+                            }
+                        }
+                        self.pageType = .matchNotFound
+                    case .failure(let error):
+                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                            self.pageType = .internetError
+                        }
+                        else {
+                            self.pageType = .otherError
+                        }
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+//            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
+//                DispatchQueue.main.async {
+//                    switch result {
+//                    case .success(let cards):
+//                        self.cards.appendElements(cards)
+//                        self.pageType = .matchNotFound
+//                    case .failure(let error):
+//                        if error.localizedDescription == "The Internet connection appears to be offline." {
+//                            self.pageType = .internetError
+//                        }
+//                        print(error.localizedDescription)
+//                    }
+//                }
+//            }
+        }
     }
 }

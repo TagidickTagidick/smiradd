@@ -1,8 +1,5 @@
-//
-//  GlobalSettings.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 25.04.2024.
-//
+import SwiftUI
 
-import Foundation
+class GlobalSettings: ObservableObject {
+    @Published var templates: [TemplateModel] = []
+}

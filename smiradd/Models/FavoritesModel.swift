@@ -1,8 +1,9 @@
-//
-//  FavoritesModel.swift
-//  smiradd
-//
-//  Created by Минь Дык Фам on 30.04.2024.
-//
+import SwiftUI
 
-import Foundation
+struct FavoritesModel: Codable {
+    let items: [CardModel]
+    let total: Int
+    let page: Int
+    let size: Int
+    let pages: Int
+}

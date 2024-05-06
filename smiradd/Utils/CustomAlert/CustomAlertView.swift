@@ -47,14 +47,18 @@ struct CustomAlertView<T: Hashable, M: View>: View {
 
             if isAnimating {
                 VStack {
-                    VStack {
+                    VStack (alignment: .leading) {
                         /// Title
                         Text(titleKey)
-                            .font(.title2).bold()
-                            .foregroundStyle(.tint)
-                            .padding(8)
-
-                        /// Message
+                            .font(
+                                .custom(
+                                    "OpenSans-Medium",
+                                    size: 14
+                                )
+                            )
+                            .foregroundStyle(textDefault)
+                        Spacer()
+                            .frame(height: 16)
                         Group {
                             if let data, let messageWithValue {
                                 messageWithValue(data)
@@ -62,10 +66,18 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                                 message()
                             }
                         }
-                        .multilineTextAlignment(.center)
+                        .font(
+                            .custom(
+                                "OpenSans-Regular",
+                                size: 14
+                            )
+                        )
+                        .foregroundStyle(textDefault)
+                        //.multilineTextAlignment(.center)
 
                         /// Buttons
                         HStack {
+                            Spacer()
                             CancelButton
                             DoneButton
                         }
@@ -73,10 +85,10 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                         .padding()
                         .frame(maxWidth: .infinity)
                     }
-                    .padding()
+                    .padding([.vertical, .horizontal], 20)
                     .frame(maxWidth: .infinity)
                     .background(.background)
-                    .cornerRadius(35)
+                    .cornerRadius(16)
                 }
                 .padding()
                 .transition(.slide)
@@ -94,14 +106,26 @@ struct CustomAlertView<T: Hashable, M: View>: View {
         Button {
             dismiss()
         } label: {
-            Text("Cancel")
-                .font(.headline)
+            Text("Отмена")
+                .font(
+                    .custom(
+                        "OpenSans-SemiBold",
+                        size: 16
+                    )
+                )
+                .foregroundStyle(textDefault)
                 .foregroundStyle(.tint)
                 .padding()
                 .lineLimit(1)
-                .frame(maxWidth: .infinity)
-                .background(Material.regular)
-                .background(.gray)
+                .frame(
+                    width: 102,
+                    height: 40
+                )
+                .background(Color(
+                    red: 0.949,
+                    green: 0.949,
+                    blue: 0.949
+                ))
                 .clipShape(RoundedRectangle(cornerRadius: 30))
         }
     }
@@ -117,12 +141,24 @@ struct CustomAlertView<T: Hashable, M: View>: View {
             }
         } label: {
             Text(actionTextKey)
-                .font(.headline).bold()
-                .foregroundStyle(Color.white)
+                .font(
+                    .custom(
+                        "OpenSans-SemiBold",
+                        size: 16
+                    )
+                )
+                .foregroundStyle(.white)
                 .padding()
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .background(.tint)
+                .frame(
+                    width: 107,
+                    height: 40
+                )
+                .background(Color(
+                    red: 0.898,
+                    green: 0.271,
+                    blue: 0.267
+                ))
                 .clipShape(RoundedRectangle(cornerRadius: 30.0))
         }
     }
@@ -194,11 +230,5 @@ struct CustomAlertPreview: View {
                 Text("Showing alert for \(value)… And adding a long text for preview.")
             }
         }
-    }
-}
-
-#Preview {
-    VStack {
-        CustomAlertPreview()
     }
 }

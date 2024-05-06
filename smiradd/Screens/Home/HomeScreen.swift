@@ -4,19 +4,40 @@ struct HomeScreen: View {
     @State private var index: Int = 0
     
     @ObservedObject var networkingRouter = Router()
+    @ObservedObject var profileRouter = Router()
+    @ObservedObject var favoritesRouter = Router()
     
     var body: some View {
         ZStack (alignment: .bottom) {
+            NavigationStack(path: $networkingRouter.navPath) {
+                NetworkingScreen()
+                                .navigationDestination(for: Router.Destination.self) { i in
+                                    switch i {
+                                        case .networkingScreen:
+                                            NetworkingScreen()
+                                        case .cardScreen:
+                                            CardScreen()
+                                        default:
+                                            NetworkingScreen()
+                                    }
+                                }
+                                .navigationBarBackButtonHidden(true)
+                            }
+                            .environmentObject(networkingRouter)
+                            .onAppear {
+                                print("рырыр")
+                                networkingRouter.navigate(to: .networkingScreen)
+                            }
             switch index {
             case 0:
                 NavigationStack(path: $networkingRouter.navPath) {
-                    Spacer()
+                    NetworkingScreen()
                     .navigationDestination(for: Router.Destination.self) { i in
                         switch i {
-                            case .networking:
-                                SplashScreen()
+                            case .networkingScreen:
+                                NetworkingScreen()
                             case .cardScreen:
-                                
+                                CardScreen()
                             default:
                                 NetworkingScreen()
                         }
@@ -25,93 +46,40 @@ struct HomeScreen: View {
                 }
                 .environmentObject(networkingRouter)
             case 1:
-                ProfileScreen()
+                NavigationStack(path: $profileRouter.navPath) {
+                    Spacer()
+                    .navigationDestination(for: Router.Destination.self) { i in
+                        switch i {
+                            case .profileScreen:
+                                ProfileScreen()
+                            case .editingProfileScreen:
+                                EditingProfileScreen()
+                            default:
+                                ProfileScreen()
+                        }
+                    }
+                    .navigationBarBackButtonHidden(true)
+                }
+                .environmentObject(profileRouter)
             case 2:
-                FavoritesScreen()
+                NavigationStack(path: $favoritesRouter.navPath) {
+                    Spacer()
+                    .navigationDestination(for: Router.Destination.self) { i in
+                        switch i {
+                            case .favoritesScreen:
+                                FavoritesScreen()
+                            case .filterScreen:
+                                CardScreen()
+                            default:
+                                FavoritesScreen()
+                        }
+                    }
+                    .navigationBarBackButtonHidden(true)
+                }
+                .environmentObject(favoritesRouter)
             default:
                 NetworkingScreen()
             }
-            HStack {
-                VStack {
-                    if index == 0 {
-                        Image("networking_active")
-                    }
-                    else {
-                        Image("networking")
-                    }
-                    Spacer()
-                        .frame(height: 4)
-                    Text("Нетворкинг")
-                        .font(
-                            .custom(
-                                "Roboto-\(index == 0 ? "Medium" : "Regular")",
-                                size: 12
-                            )
-                        )
-                        .foregroundStyle(textDefault)
-                }
-                .onTapGesture {
-                    self.index = 0
-                }
-                VStack {
-                    if index == 1 {
-                        Image("profile_active")
-                    }
-                    else {
-                        Image("profile")
-                    }
-                    Spacer()
-                        .frame(height: 4)
-                    Text("Профиль")
-                        .font(
-                            .custom(
-                                "Roboto-\(index == 1 ? "Medium" : "Regular")",
-                                size: 12
-                            )
-                        )
-                        .foregroundStyle(textDefault)
-                }
-                .onTapGesture {
-                    self.index = 1
-                }
-                VStack {
-                    if index == 2 {
-                        Image("favorites_active")
-                    }
-                    else {
-                        Image("favorites")
-                    }
-                    Spacer()
-                        .frame(height: 4)
-                    Text("Избранное")
-                        .font(
-                            .custom(
-                                "Roboto-\(index == 2 ? "Medium" : "Regular")",
-                                size: 12
-                            )
-                        )
-                        .foregroundStyle(textDefault)
-                }
-                .onTapGesture {
-                    self.index = 2
-                }
-            }
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: 58
-            )
-            .background(.white)
-            .shadow(
-                color: textDefault.opacity(0.04),
-                radius: 1,
-                x: 0,
-                y: -1
-            )
-            .shadow(
-                color: textDefault.opacity(0.08),
-                radius: 16
-            )
-            .padding(.bottom)
         }
         .frame(
             maxWidth: .infinity,
