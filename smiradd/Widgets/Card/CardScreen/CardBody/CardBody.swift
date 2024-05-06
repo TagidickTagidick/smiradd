@@ -322,6 +322,10 @@ struct CardBody: View {
                         }
                     }
                 }
+                .offset(
+                    x: -20,
+                    y: -78
+                )
             }
         }
     }

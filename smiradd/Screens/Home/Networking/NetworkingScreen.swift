@@ -80,6 +80,7 @@ struct NetworkingScreen: View {
         }
         .background(accent50)
         .onAppear {
+            self.cards.removeAllElements()
             makeRequest(
                 path: "networkingv2/aroundme/10",
                 method: .get
@@ -92,6 +93,7 @@ struct NetworkingScreen: View {
                                 self.cards.appendElement(card)
                             }
                         }
+                        print("овыоов \(self.cards)")
                         self.pageType = .matchNotFound
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {

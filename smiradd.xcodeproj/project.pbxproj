@@ -54,6 +54,7 @@
 		607A06142BE90FDD00CA8A14 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06112BE90FDD00CA8A14 /* Roboto-Bold.ttf */; };
 		607A06152BE90FDD00CA8A14 /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06122BE90FDD00CA8A14 /* Roboto-Medium.ttf */; };
 		607A06162BE90FDD00CA8A14 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06132BE90FDD00CA8A14 /* Roboto-Regular.ttf */; };
+		607A06182BE9186900CA8A14 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 607A06172BE9186900CA8A14 /* GoogleService-Info.plist */; };
 		60A212582BCAE28D002A1301 /* NetworkingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A212572BCAE28D002A1301 /* NetworkingScreen.swift */; };
 		60A2125B2BCAE2B5002A1301 /* FavoritesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A2125A2BCAE2B5002A1301 /* FavoritesScreen.swift */; };
 		60A2125E2BCAF265002A1301 /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A2125D2BCAF265002A1301 /* ProfileScreen.swift */; };
@@ -63,7 +64,6 @@
 		60A2127F2BCBBD4B002A1301 /* NetworkingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A2127E2BCBBD4B002A1301 /* NetworkingCard.swift */; };
 		60A212812BCBC23A002A1301 /* CardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A212802BCBC23A002A1301 /* CardModel.swift */; };
 		60D0691F2BD8F56400653AF0 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 60D0691E2BD8F56400653AF0 /* FirebaseAuth */; };
-		60D069232BD8F8B700653AF0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60D069222BD8F8B700653AF0 /* GoogleService-Info.plist */; };
 		60D069262BD8FA9B00653AF0 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 60D069252BD8FA9B00653AF0 /* GoogleSignInSwift */; };
 		60D069282BD8FBEF00653AF0 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D069272BD8FBEF00653AF0 /* AuthService.swift */; };
 		60D0692E2BD930DE00653AF0 /* CardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D0692D2BD930DE00653AF0 /* CardScreen.swift */; };
@@ -192,6 +192,7 @@
 		607A06112BE90FDD00CA8A14 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Bold.ttf"; sourceTree = "<group>"; };
 		607A06122BE90FDD00CA8A14 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		607A06132BE90FDD00CA8A14 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
+		607A06172BE9186900CA8A14 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "smiradd/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		60A212572BCAE28D002A1301 /* NetworkingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingScreen.swift; sourceTree = "<group>"; };
 		60A2125A2BCAE2B5002A1301 /* FavoritesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesScreen.swift; sourceTree = "<group>"; };
 		60A2125D2BCAF265002A1301 /* ProfileScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileScreen.swift; sourceTree = "<group>"; };
@@ -200,7 +201,6 @@
 		60A2127C2BCBBC63002A1301 /* CustomWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWidget.swift; sourceTree = "<group>"; };
 		60A2127E2BCBBD4B002A1301 /* NetworkingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingCard.swift; sourceTree = "<group>"; };
 		60A212802BCBC23A002A1301 /* CardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardModel.swift; sourceTree = "<group>"; };
-		60D069222BD8F8B700653AF0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		60D069272BD8FBEF00653AF0 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		60D0692D2BD930DE00653AF0 /* CardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardScreen.swift; sourceTree = "<group>"; };
 		60D0692F2BD932D600653AF0 /* CardTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTile.swift; sourceTree = "<group>"; };
@@ -562,8 +562,8 @@
 		60EF5D6A2BC09EC400DCDD97 /* smiradd */ = {
 			isa = PBXGroup;
 			children = (
+				607A06172BE9186900CA8A14 /* GoogleService-Info.plist */,
 				607A059D2BE5A9D900CA8A14 /* smiradd.entitlements */,
-				60D069222BD8F8B700653AF0 /* GoogleService-Info.plist */,
 				60727BED2BD072A000A73DC2 /* Settings */,
 				60D8A2D72BCBD4FD0077F7DC /* Utils */,
 				60A2127B2BCBBC37002A1301 /* Widgets */,
@@ -761,11 +761,11 @@
 				607A060D2BE90FB700CA8A14 /* OpenSans-Medium.ttf in Resources */,
 				607A06102BE90FB700CA8A14 /* OpenSans-Bold.ttf in Resources */,
 				607A06162BE90FDD00CA8A14 /* Roboto-Regular.ttf in Resources */,
-				60D069232BD8F8B700653AF0 /* GoogleService-Info.plist in Resources */,
 				607A060E2BE90FB700CA8A14 /* OpenSans-SemiBold.ttf in Resources */,
 				60EF5D732BC09EC500DCDD97 /* Preview Assets.xcassets in Resources */,
 				607A060F2BE90FB700CA8A14 /* OpenSans-Regular.ttf in Resources */,
 				607A06142BE90FDD00CA8A14 /* Roboto-Bold.ttf in Resources */,
+				607A06182BE9186900CA8A14 /* GoogleService-Info.plist in Resources */,
 				60EF5D702BC09EC500DCDD97 /* Assets.xcassets in Resources */,
 				607A06152BE90FDD00CA8A14 /* Roboto-Medium.ttf in Resources */,
 			);
