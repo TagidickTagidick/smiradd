@@ -101,7 +101,6 @@ struct AuthorizationScreen: View {
                             authorizationModel.refresh_token,
                             forKey: "refresh_token"
                         )
-                        locationManager.getLocation()
                         if let location = locationManager.location {
                             let body: [String: Double] = [
                                 "latitude": location.coordinate.latitude,

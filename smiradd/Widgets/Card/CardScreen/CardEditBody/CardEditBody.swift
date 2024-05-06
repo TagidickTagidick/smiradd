@@ -95,10 +95,10 @@ struct CardEditBody: View {
                                 saveLogo()
                             case .failure(let error):
                                 if error.localizedDescription == "The Internet connection appears to be offline." {
-                                    self.pageType = .internetError
+                                    self.pageType = .noResultsFound
                                 }
                                 else {
-                                    self.pageType = .matchNotFound
+                                    self.pageType = .somethingWentWrong
                                 }
                                 print(error.localizedDescription)
                             }
@@ -117,10 +117,10 @@ struct CardEditBody: View {
                             saveLogo()
                         case .failure(let error):
                             if error.localizedDescription == "The Internet connection appears to be offline." {
-                                self.pageType = .internetError
+                                self.pageType = .noResultsFound
                             }
                             else {
-                                self.pageType = .matchNotFound
+                                self.pageType = .somethingWentWrong
                             }
                             print(error.localizedDescription)
                         }
@@ -154,10 +154,10 @@ struct CardEditBody: View {
                                 save()
                             case .failure(let error):
                                 if error.localizedDescription == "The Internet connection appears to be offline." {
-                                    self.pageType = .internetError
+                                    self.pageType = .noResultsFound
                                 }
                                 else {
-                                    self.pageType = .matchNotFound
+                                    self.pageType = .somethingWentWrong
                                 }
                                 print(error.localizedDescription)
                             }
@@ -176,10 +176,10 @@ struct CardEditBody: View {
                             save()
                         case .failure(let error):
                             if error.localizedDescription == "The Internet connection appears to be offline." {
-                                self.pageType = .internetError
+                                self.pageType = .noResultsFound
                             }
                             else {
-                                self.pageType = .matchNotFound
+                                self.pageType = .somethingWentWrong
                             }
                             print(error.localizedDescription)
                         }
@@ -278,10 +278,10 @@ struct CardEditBody: View {
                         print("success")
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                            self.pageType = .internetError
+                            self.pageType = .noResultsFound
                         }
                         else {
-                            self.pageType = .matchNotFound
+                            self.pageType = .somethingWentWrong
                         }
                         print(error.localizedDescription)
                     }
@@ -297,10 +297,10 @@ struct CardEditBody: View {
                         print("success")
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                            self.pageType = .internetError
+                            self.pageType = .noResultsFound
                         }
                         else {
-                            self.pageType = .matchNotFound
+                            self.pageType = .somethingWentWrong
                         }
                         print(error.localizedDescription)
                     }
@@ -943,10 +943,10 @@ struct CardEditBody: View {
                                                                         print("success")
                                                                     case .failure(let error):
                                                                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                                                                            self.pageType = .internetError
+                                                                            self.pageType = .noResultsFound
                                                                         }
                                                                         else {
-                                                                            self.pageType = .matchNotFound
+                                                                            self.pageType = .somethingWentWrong
                                                                         }
                                                                         print(error.localizedDescription)
                                                                     }
@@ -1028,10 +1028,10 @@ struct CardEditBody: View {
                         self.pageType = .matchNotFound
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                            self.pageType = .internetError
+                            self.pageType = .noResultsFound
                         }
                         else {
-                            self.pageType = .matchNotFound
+                            self.pageType = .somethingWentWrong
                         }
                         print(error.localizedDescription)
                     }

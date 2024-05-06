@@ -12,7 +12,7 @@ struct CardBody: View {
     @State private var isAlert: Bool = false
     
     var body: some View {
-        ZStack {
+        ZStack (alignment: .bottomTrailing) {
             ScrollView {
                 VStack (alignment: .leading) {
                     ZStack {
@@ -259,63 +259,65 @@ struct CardBody: View {
                         .frame(height: 78)
                 }
             }
-            HStack {
-                ZStack {
-                    Circle()
-                        .fill(Color(
-                            red: 0.973,
-                            green: 0.404,
-                            blue: 0.4
-                        ))
-                        .frame(
-                            width: 56,
-                            height: 56
-                        )
-                    Image(systemName: "xmark")
-                        .foregroundColor(.white)
-                }
-                .onTapGesture {
-                    makeRequest(
-                        path: "cards/\(cardSettings.cardModel.id)/favorites",
-                        method: .delete
-                    ) { (result: Result<DetailsModel, Error>) in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                router.navigateBack()
-                            case .failure(_):
-                                print("failure")
+            if cardSettings.cardType == .userCard {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(Color(
+                                red: 0.973,
+                                green: 0.404,
+                                blue: 0.4
+                            ))
+                            .frame(
+                                width: 56,
+                                height: 56
+                            )
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
+                    }
+                    .onTapGesture {
+                        makeRequest(
+                            path: "cards/\(cardSettings.cardModel.id)/favorites",
+                            method: .delete
+                        ) { (result: Result<DetailsModel, Error>) in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(_):
+                                    router.navigateBack()
+                                case .failure(_):
+                                    print("failure")
+                                }
                             }
                         }
                     }
-                }
-                Spacer()
-                    .frame(width: 16)
-                ZStack {
-                    Circle()
-                        .fill(Color(
-                            red: 0.408,
-                            green: 0.784,
-                            blue: 0.58
-                        ))
-                        .frame(
-                            width: 56,
-                            height: 56
-                        )
-                    Image(systemName: "heart")
-                        .foregroundColor(.white)
-                }
-                .onTapGesture {
-                    makeRequest(
-                        path: "cards/\(cardSettings.cardModel.id)/favorites",
-                        method: .post
-                    ) { (result: Result<DetailsModel, Error>) in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                router.navigateBack()
-                            case .failure(_):
-                                print("failure")
+                    Spacer()
+                        .frame(width: 16)
+                    ZStack {
+                        Circle()
+                            .fill(Color(
+                                red: 0.408,
+                                green: 0.784,
+                                blue: 0.58
+                            ))
+                            .frame(
+                                width: 56,
+                                height: 56
+                            )
+                        Image(systemName: "heart")
+                            .foregroundColor(.white)
+                    }
+                    .onTapGesture {
+                        makeRequest(
+                            path: "cards/\(cardSettings.cardModel.id)/favorites",
+                            method: .post
+                        ) { (result: Result<DetailsModel, Error>) in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(_):
+                                    router.navigateBack()
+                                case .failure(_):
+                                    print("failure")
+                                }
                             }
                         }
                     }

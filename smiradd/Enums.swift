@@ -9,8 +9,9 @@ enum HTTPMethod: String {
 enum PageType {
     case loading
     case matchNotFound
-    case internetError
-    case otherError
+    case pageNotFound
+    case noResultsFound
+    case somethingWentWrong
     case nothingHereProfile
     case nothingHereFavorites
     case nothingHereNotifications

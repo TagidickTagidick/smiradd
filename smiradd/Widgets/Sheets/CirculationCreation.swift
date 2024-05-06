@@ -71,10 +71,10 @@ struct CirculationCreation: View {
                                     self.isHelp = false
                                 case .failure(let error):
                                     if error.localizedDescription == "The Internet connection appears to be offline." {
-                                        self.pageType = .internetError
+                                        self.pageType = .noResultsFound
                                     }
                                     else {
-                                        self.pageType = .matchNotFound
+                                        self.pageType = .somethingWentWrong
                                     }
                                     self.isHelp = false
                                     print(error.localizedDescription)

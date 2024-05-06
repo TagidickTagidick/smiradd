@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TutorialScreen: View {
-    @EnvironmentObject private var profileSettings: ProfileSettings
+    @Binding var isTutorial: Bool
     
     var body: some View {
         VStack {
@@ -40,7 +40,8 @@ struct TutorialScreen: View {
                 true,
                 forKey: "first_time"
             )
-            profileSettings.isTutorial = false
+            self.isTutorial = false
+            print(isTutorial)
         }
     }
 }

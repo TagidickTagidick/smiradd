@@ -9,9 +9,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         
         self.locationManager.delegate = self
-    }
-    
-    func getLocation() {
         self.locationManager.requestWhenInUseAuthorization()
         self.locationManager.startUpdatingLocation()
     }

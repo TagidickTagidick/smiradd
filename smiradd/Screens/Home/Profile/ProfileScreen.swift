@@ -204,7 +204,7 @@ struct ProfileScreen: View {
                                     }
                                 case .failure(let error):
                                     if error.localizedDescription == "The Internet connection appears to be offline." {
-                                        self.pageType = .internetError
+                                        self.pageType = .noResultsFound
                                     }
                                     print(error.localizedDescription)
                                 }
@@ -212,7 +212,7 @@ struct ProfileScreen: View {
                         }
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                            self.pageType = .internetError
+                            self.pageType = .noResultsFound
                         }
                         print(error.localizedDescription)
                     }

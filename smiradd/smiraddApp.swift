@@ -54,6 +54,8 @@ struct smiraddApp: App, KeyboardReadable {
     
     @StateObject var locationManager = LocationManager()
     
+    @State private var isTutorial: Bool = !UserDefaults.standard.bool(forKey: "first_time")
+    
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "smiradd" else {
             return
@@ -124,8 +126,8 @@ struct smiraddApp: App, KeyboardReadable {
                                     !isKeyboardVisible {
                                 CustomBottomNavigationBar()
                             }
-                            if !profileSettings.isTutorial && i == .networkingScreen {
-                                TutorialScreen()
+                            if isTutorial && i == .networkingScreen {
+                                TutorialScreen(isTutorial: $isTutorial)
                             }
                         }
                         .navigationBarBackButtonHidden(true)
@@ -142,7 +144,6 @@ struct smiraddApp: App, KeyboardReadable {
                     router.navigate(to: .signInScreen)
                 }
                 else {
-                    locationManager.getLocation()
                     if let location = locationManager.location {
                         let body: [String: Double] = [
                             "latitude": location.coordinate.latitude,

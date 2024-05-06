@@ -46,10 +46,11 @@ struct SettingsScreen: View {
                                 save()
                             case .failure(let error):
                                 if error.localizedDescription == "The Internet connection appears to be offline." {
-                                    self.pageType = .internetError
+                                    self.pageType = .noResultsFound
                                 }
                                 else {
-                                    self.pageType = .matchNotFound
+                                    self.pageType = .somethingWentWrong
+                                    
                                 }
                                 print(error.localizedDescription)
                             }
@@ -68,7 +69,7 @@ struct SettingsScreen: View {
                             save()
                         case .failure(let error):
                             if error.localizedDescription == "The Internet connection appears to be offline." {
-                                self.pageType = .internetError
+                                self.pageType = .noResultsFound
                             }
                             else {
                                 self.pageType = .matchNotFound
@@ -98,7 +99,7 @@ struct SettingsScreen: View {
                     router.navigateBack()
                 case .failure(let error):
                     if error.localizedDescription == "The Internet connection appears to be offline." {
-                        self.pageType = .internetError
+                        self.pageType = .noResultsFound
                     }
                     else {
                         self.pageType = .matchNotFound
@@ -335,10 +336,10 @@ struct SettingsScreen: View {
                                                 self.pageType = .matchNotFound
                                             case .failure(let error):
                                                 if error.localizedDescription == "The Internet connection appears to be offline." {
-                                                    self.pageType = .internetError
+                                                    self.pageType = .noResultsFound
                                                 }
                                                 else {
-                                                    self.pageType = .matchNotFound
+                                                    self.pageType = .somethingWentWrong
                                                 }
                                                 UserDefaults.standard.removeObject(forKey: "access_token")
                                                 UserDefaults.standard.removeObject(forKey: "refresh_token")

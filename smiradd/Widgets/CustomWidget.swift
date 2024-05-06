@@ -16,9 +16,11 @@ struct CustomWidget: View {
                             switch pageType {
                             case .matchNotFound:
                                 return "match_not_found"
-                            case .internetError:
+                            case .noResultsFound:
                                 return "no_results_found"
-                            case .otherError:
+                            case .pageNotFound:
+                                return "page_not_found"
+                            case .somethingWentWrong:
                                 return "something_went_wrong"
                             default:
                                 return "nothing_here"
@@ -30,9 +32,11 @@ struct CustomWidget: View {
                         switch pageType {
                         case .matchNotFound:
                             return "Рядом нет активных форумов"
-                        case .internetError:
+                        case .noResultsFound:
                             return "Нет подключения к интернету"
-                        case .otherError:
+                        case .pageNotFound:
+                            return "На этом форуме больше никого нет"
+                        case .somethingWentWrong:
                             return "Упс! Что-то пошло не так..."
                         default:
                             return "Здесь пока пусто"
@@ -55,9 +59,11 @@ struct CustomWidget: View {
                                 return "Сохраняйте визитки, чтобы увидеть их здесь"
                             case .nothingHereNotifications:
                                 return "У вас пока нет уведомлений"
-                            case .internetError:
+                            case .noResultsFound:
                                 return "Проверьте подключение к интернету"
-                            case .otherError:
+                            case .pageNotFound:
+                                return "Посещайте больше форумов, чтобы знакомиться с новыми людьми"
+                            case .somethingWentWrong:
                                 return "Попробуйте перезагрузить приложение"
                             default:
                                 return "Попробуйте перезагрузить приложение"
@@ -76,7 +82,7 @@ struct CustomWidget: View {
                             blue: 0.6
                         ))
                     
-                    if pageType == .internetError {
+                    if pageType == .noResultsFound {
                         VStack {
                             Spacer()
                                 .frame(height: 36)

@@ -33,7 +33,7 @@ struct NetworkingScreen: View {
                                     self.pageType = .matchNotFound
                                 case .failure(let error):
                                     if error.localizedDescription == "The Internet connection appears to be offline." {
-                                        self.pageType = .internetError
+                                        self.pageType = .noResultsFound
                                     }
                                     print(error.localizedDescription)
                                 }
@@ -95,10 +95,10 @@ struct NetworkingScreen: View {
                         self.pageType = .matchNotFound
                     case .failure(let error):
                         if error.localizedDescription == "The Internet connection appears to be offline." {
-                            self.pageType = .internetError
+                            self.pageType = .noResultsFound
                         }
                         else {
-                            self.pageType = .otherError
+                            self.pageType = .somethingWentWrong
                         }
                         print(error.localizedDescription)
                     }
