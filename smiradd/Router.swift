@@ -22,6 +22,8 @@ final class Router: ObservableObject {
     
     @Published var navPath = NavigationPath()
     
+    @Published var index: Int = 0
+    
     func navigate(to destination: Destination) {
         navPath.append(destination)
     }

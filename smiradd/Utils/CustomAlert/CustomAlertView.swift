@@ -2,8 +2,6 @@ import SwiftUI
 
 struct CustomAlertView<T: Hashable, M: View>: View {
 
-    @Namespace private var namespace
-
     @Binding private var isPresented: Bool
     @State private var titleKey: LocalizedStringKey
     @State private var actionTextKey: LocalizedStringKey
@@ -15,7 +13,6 @@ struct CustomAlertView<T: Hashable, M: View>: View {
     private var action: (() -> ())?
     private var message: (() -> M)?
 
-    // Animation
     @State private var isAnimating = false
     private let animationDuration = 0.5
 
@@ -48,7 +45,6 @@ struct CustomAlertView<T: Hashable, M: View>: View {
             if isAnimating {
                 VStack {
                     VStack (alignment: .leading) {
-                        /// Title
                         Text(titleKey)
                             .font(
                                 .custom(
@@ -75,7 +71,6 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                         .foregroundStyle(textDefault)
                         //.multilineTextAlignment(.center)
 
-                        /// Buttons
                         HStack {
                             Spacer()
                             CancelButton
@@ -91,17 +86,21 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                     .cornerRadius(16)
                 }
                 .padding()
-                .transition(.slide)
+                .transition(.moveAndFadeFromBottom)
                 .zIndex(2)
+                .onTapGesture {}
             }
         }
         .ignoresSafeArea()
+        .environment(\.sizeCategory, .medium)
         .onAppear {
             show()
         }
+        .onTapGesture {
+            dismiss()
+        }
     }
 
-    // MARK: Buttons
     var CancelButton: some View {
         Button {
             dismiss()
@@ -187,7 +186,129 @@ struct CustomAlertView<T: Hashable, M: View>: View {
     }
 }
 
-// MARK: - Overload
+struct ForumCodeView<T: Hashable, M: View>: View {
+
+    @Binding private var isPresented: Bool
+    @State private var titleKey: LocalizedStringKey
+    @State private var actionTextKey: LocalizedStringKey
+
+    private var data: T?
+    private var actionWithValue: ((T) -> ())?
+    private var messageWithValue: ((T) -> M)?
+
+    private var action: (() -> ())?
+    private var message: (() -> M)?
+
+    @State private var isAnimating = false
+    private let animationDuration = 0.5
+    
+    @Binding private var pinCode: String
+
+    init(
+        _ titleKey: LocalizedStringKey,
+        _ isPresented: Binding<Bool>,
+        _ pinCode: Binding<String>,
+        presenting data: T?,
+        actionTextKey: LocalizedStringKey,
+        action: @escaping (T) -> (),
+        @ViewBuilder message: @escaping (T) -> M
+    ) {
+        _titleKey = State(wrappedValue: titleKey)
+        _actionTextKey = State(wrappedValue: actionTextKey)
+        _isPresented = isPresented
+        _pinCode = pinCode
+
+        self.data = data
+        self.action = nil
+        self.message = nil
+        self.actionWithValue = action
+        self.messageWithValue = message
+    }
+
+    var body: some View {
+        ZStack {
+            Color.gray
+                .ignoresSafeArea()
+                .opacity(isPresented ? 0.6 : 0)
+                .zIndex(1)
+
+            if isAnimating {
+                VStack {
+                    VStack (alignment: .center) {
+                        Image("no_event")
+                        Spacer()
+                            .frame(height: 16)
+                        Text("Введите код форума")
+                            .font(
+                                .custom(
+                                    "OpenSans-SemiBold",
+                                    size: 18
+                                )
+                            )
+                            .foregroundStyle(textDefault)
+                        Spacer()
+                            .frame(height: 12)
+                        Text("Начните знакомство с остальными участниками прямо сейчас!")
+                            .font(
+                                .custom(
+                                    "OpenSans-Regular",
+                                    size: 14
+                                )
+                            )
+                            .foregroundStyle(textSecondary)
+                        PinEntryView(pinLimit: 4, pinCode: $pinCode)
+                            .onChange(of: pinCode, {
+                                if (pinCode.count == 4) {
+                                    isPresented = false
+                                }
+                            })
+                    }
+                    .padding([.vertical, .horizontal], 20)
+                    .padding([.top], 16)
+                    .frame(maxWidth: .infinity)
+                    .background(.background)
+                    .cornerRadius(16)
+                }
+                .padding()
+                .transition(.moveAndFadeFromBottom)
+                .zIndex(2)
+                .onTapGesture {}
+            }
+        }
+        .ignoresSafeArea()
+        .environment(\.sizeCategory, .medium)
+        .onAppear {
+            show()
+        }
+        .onTapGesture {
+            dismiss()
+        }
+    }
+
+    func dismiss() {
+        if #available(iOS 17.0, *) {
+            withAnimation(.easeInOut(duration: animationDuration)) {
+                isAnimating = false
+            } completion: {
+                isPresented = false
+            }
+        } else {
+            withAnimation(.easeInOut(duration: animationDuration)) {
+                isAnimating = false
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+                isPresented = false
+            }
+        }
+    }
+
+    func show() {
+        withAnimation(.easeInOut(duration: animationDuration)) {
+            isAnimating = true
+        }
+    }
+}
+
 extension CustomAlertView where T == Never {
 
     init(
@@ -209,26 +330,32 @@ extension CustomAlertView where T == Never {
     }
 }
 
-// MARK: - Preview
-struct CustomAlertPreview: View {
-    @State private var isPresented = false
-    @State private var test = "Some Value"
+extension ForumCodeView where T == Never {
 
-    var body: some View {
-        VStack {
-            Button("Show Alert") {
-                isPresented = true
-            }
-            .customAlert(
-                "Alert Title",
-                isPresented: $isPresented,
-                presenting: test,
-                actionText: "Yes, Done"
-            ) { value in
-                // Action...
-            } message: { value in
-                Text("Showing alert for \(value)… And adding a long text for preview.")
-            }
-        }
+    init(
+        _ titleKey: LocalizedStringKey,
+        _ isPresented: Binding<Bool>,
+        _ pinCode: Binding<String>,
+        actionTextKey: LocalizedStringKey,
+        action: @escaping () -> (),
+        @ViewBuilder message: @escaping () -> M
+    ) where T == Never {
+        _titleKey = State(wrappedValue: titleKey)
+        _actionTextKey = State(wrappedValue: actionTextKey)
+        _isPresented = isPresented
+        _pinCode = pinCode
+
+        self.data = nil
+        self.action = action
+        self.message = message
+        self.actionWithValue = nil
+        self.messageWithValue = nil
+    }
+}
+
+extension AnyTransition {
+    static var moveAndFadeFromBottom: AnyTransition {
+        AnyTransition.move(edge: .bottom)
+            .combined(with: .opacity)
     }
 }

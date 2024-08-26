@@ -8,6 +8,10 @@ struct NetworkingScreen: View {
     
     @State private var pageType: PageType = .loading
     
+    @State private var isSheet: Bool = false
+    
+    @State private var pinCode: String = ""
+    
     var body: some View {
         ZStack {
             VStack (alignment: .leading) {
@@ -25,17 +29,22 @@ struct NetworkingScreen: View {
                     CustomWidget(
                         pageType: $pageType,
                         onTap: {
-                            self.pageType = .loading
-                            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
-                                switch result {
-                                case .success(let cards):
-                                    self.cards.appendElements(cards)
-                                    self.pageType = .matchNotFound
-                                case .failure(let error):
-                                    if error.localizedDescription == "The Internet connection appears to be offline." {
-                                        self.pageType = .noResultsFound
+                            if self.pageType == .matchNotFound {
+                                self.isSheet = true
+                            }
+                            else {
+                                self.pageType = .loading
+                                makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
+                                    switch result {
+                                    case .success(let cards):
+                                        self.cards.appendElements(cards)
+                                        self.pageType = .matchNotFound
+                                    case .failure(let error):
+                                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                                            self.pageType = .noResultsFound
+                                        }
+                                        print(error.localizedDescription)
                                     }
-                                    print(error.localizedDescription)
                                 }
                             }
                         }
@@ -50,25 +59,25 @@ struct NetworkingScreen: View {
                                 cardModel: card,
                                 cards: $cards
                             )
-                                .onTapGesture {
-                                    withAnimation {
-                                        cards.swipe(direction: .right, completion: nil)
-                                                                    }
-                                            }
-                                    }
-                        )
-//                    CardStack(
-//                      data: cards,
-//                      onSwipe: { card, direction in // Closure to be called when a card is swiped.
-//                        print("Swiped \(card) to \(direction)")
-//                      },
-//                      content: { card, direction, isOnTop in // View builder function
-//                          CardWidget(cardModel: card)
-//                              .onTapGesture {
-//                                  cards.append(CardModel(id: "ыррыры", job_title: "ыррыры", specificity: "ыррыры", phone: "ыррыры", email: "ыррыры", address: "ыррыры", name: "ыррыры", useful: "ыррыры", seek: "ыррыры", tg_url: "ыррыры", vk_url: "ыррыры", fb_url: "ыррыры", cv_url: "ыррыры", company_logo: "ыррыры", bio: "ыррыры", bc_template_type: "ыррыры", services: nil, achievements: nil, avatar_url: "ыррыры"))
-//                              }
-//                      }
-//                    )
+                            .onTapGesture {
+                                withAnimation {
+                                    cards.swipe(direction: .right, completion: nil)
+                                }
+                            }
+                        }
+                    )
+                    //                    CardStack(
+                    //                      data: cards,
+                    //                      onSwipe: { card, direction in // Closure to be called when a card is swiped.
+                    //                        print("Swiped \(card) to \(direction)")
+                    //                      },
+                    //                      content: { card, direction, isOnTop in // View builder function
+                    //                          CardWidget(cardModel: card)
+                    //                              .onTapGesture {
+                    //                                  cards.append(CardModel(id: "ыррыры", job_title: "ыррыры", specificity: "ыррыры", phone: "ыррыры", email: "ыррыры", address: "ыррыры", name: "ыррыры", useful: "ыррыры", seek: "ыррыры", tg_url: "ыррыры", vk_url: "ыррыры", fb_url: "ыррыры", cv_url: "ыррыры", company_logo: "ыррыры", bio: "ыррыры", bc_template_type: "ыррыры", services: nil, achievements: nil, avatar_url: "ыррыры"))
+                    //                              }
+                    //                      }
+                    //                    )
                 }
                 Spacer()
                     .frame(height: 78)
@@ -106,20 +115,32 @@ struct NetworkingScreen: View {
                     }
                 }
             }
-//            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
-//                DispatchQueue.main.async {
-//                    switch result {
-//                    case .success(let cards):
-//                        self.cards.appendElements(cards)
-//                        self.pageType = .matchNotFound
-//                    case .failure(let error):
-//                        if error.localizedDescription == "The Internet connection appears to be offline." {
-//                            self.pageType = .internetError
-//                        }
-//                        print(error.localizedDescription)
-//                    }
-//                }
-//            }
+            //            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
+            //                DispatchQueue.main.async {
+            //                    switch result {
+            //                    case .success(let cards):
+            //                        self.cards.appendElements(cards)
+            //                        self.pageType = .matchNotFound
+            //                    case .failure(let error):
+            //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+            //                            self.pageType = .internetError
+            //                        }
+            //                        print(error.localizedDescription)
+            //                    }
+            //                }
+            //            }
         }
+        .forumCode(
+            "Удалить визитку?",
+            isPresented: $isSheet,
+            pinCode: $pinCode,
+            actionText: "Удалить",
+            action: {
+                self.isSheet = false
+            },
+            message: {
+                Text("Визитка и вся информация в ней будут удалены. Удалить визитку?")
+            }
+        )
     }
 }

@@ -8,9 +8,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.878876237854-m047lr6kbvmeo86uu72r3siaugc9iqo3</string>
-			</array>
+			<array/>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
@@ -20,6 +18,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>smiradd</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.222824816339-3lr2jccintgcgqa3nci5ie0s0fdpts49</string>
 			</array>
 		</dict>
 	</array>
@@ -43,5 +49,16 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
+    <key>GIDClientID</key>
+    <string>222824816339-3lr2jccintgcgqa3nci5ie0s0fdpts49.apps.googleusercontent.com</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.222824816339-3lr2jccintgcgqa3nci5ie0s0fdpts49</string>
+        </array>
+      </dict>
+    </array>
 </dict>
 </plist>

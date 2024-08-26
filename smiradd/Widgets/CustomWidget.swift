@@ -82,6 +82,33 @@ struct CustomWidget: View {
                             blue: 0.6
                         ))
                     
+                    if pageType == .matchNotFound {
+                        VStack {
+                            Spacer()
+                                .frame(height: 24)
+                            ZStack {
+                                Spacer()
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        maxHeight: 56
+                                    )
+                                    .background(textDefault)
+                                    .cornerRadius(28)
+                                Text("Войти по коду")
+                                    .font(
+                                        .custom(
+                                            "OpenSans-SemiBold",
+                                            size: 16
+                                        )
+                                    )
+                                    .foregroundStyle(.white)
+                            }
+                            .onTapGesture {
+                                self.onTap()
+                            }
+                        }
+                    }
+                    
                     if pageType == .noResultsFound {
                         VStack {
                             Spacer()
@@ -98,7 +125,7 @@ struct CustomWidget: View {
                                         RoundedRectangle(cornerRadius: 28)
                                             .stroke(textDefault)
                                     )
-                                Text("Повторить")
+                                Text(pageType == .noResultsFound ? "Повторить" : "Войти по коду")
                                     .font(
                                         .custom(
                                             "OpenSans-SemiBold",

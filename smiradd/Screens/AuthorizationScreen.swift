@@ -2,13 +2,13 @@ import SwiftUI
 import FirebaseAuth
 import Firebase
 import GoogleSignIn
+import GoogleSignInSwift
 
 struct AuthorizationScreen: View {
     var isSignUp: Bool
     
     @EnvironmentObject var router: Router
     @EnvironmentObject var profileSettings: ProfileSettings
-    @EnvironmentObject var locationManager: LocationManager
     
     @State private var isLoading: Bool = false
     
@@ -23,31 +23,61 @@ struct AuthorizationScreen: View {
     
     let screenHeight = UIScreen.main.bounds.height
     
-    func login() {
-        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
-                
-        let config = GIDConfiguration(clientID: clientID)
-
-        GIDSignIn.sharedInstance.configuration = config
-                
-        GIDSignIn.sharedInstance.signIn(withPresenting: AuthorizationScreen(
-            isSignUp: false
-        ).getRootViewController()) { signResult, error in
-                    
+//    func login() {
+//        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+//        
+//        let config = GIDConfiguration(clientID: clientID)
+//        
+//        GIDSignIn.sharedInstance.configuration = config
+//        
+//        GIDSignIn.sharedInstance.signIn(withPresenting: AuthorizationScreen(
+//            isSignUp: false
+//        ).getRootViewController()) { signResult, error in
+//            
+//            if let error = error {
+//                return
+//            }
+//            
+//            guard let user = signResult?.user,
+//                  let idToken = user.idToken else { return }
+//            
+//            let accessToken = user.accessToken
+//            
+//            let credential = GoogleAuthProvider.credential(
+//                withIDToken: idToken.tokenString,
+//                accessToken: accessToken.tokenString
+//            )
+//            
+//            Auth.auth().signIn(with: credential) { authResult, error in
+//                fetchData(
+//                    email: authResult?.user.email ?? "",
+//                    password: authResult?.user.uid ?? ""
+//                )
+//            }
+//        }
+//    }
+    
+    
+    func handleSignInButton() {
+        guard let rootViewController = (UIApplication.shared.connectedScenes.first
+                  as? UIWindowScene)?.windows.first?.rootViewController
+              else {return}
+      GIDSignIn.sharedInstance.signIn(
+        withPresenting: rootViewController) { signInResult, error in
             if let error = error {
-               return
+                return
             }
-                    
-             guard let user = signResult?.user,
-                   let idToken = user.idToken else { return }
-             
-             let accessToken = user.accessToken
-                    
-             let credential = GoogleAuthProvider.credential(
+            
+            guard let user = signInResult?.user,
+                  let idToken = user.idToken else { return }
+            
+            let accessToken = user.accessToken
+            
+            let credential = GoogleAuthProvider.credential(
                 withIDToken: idToken.tokenString,
                 accessToken: accessToken.tokenString
-             )
-
+            )
+            
             Auth.auth().signIn(with: credential) { authResult, error in
                 fetchData(
                     email: authResult?.user.email ?? "",
@@ -60,122 +90,131 @@ struct AuthorizationScreen: View {
     func fetchData(email: String, password: String) {
         self.isLoading = true
         
-        guard let url = URL(string: "http://80.90.185.153:5002/api/auth/\(isSignUp ? "registration" : "login")") else { return }
-            
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue(
-                "application/json",
-                forHTTPHeaderField: "Content-Type"
-            )
-
-            let parameters: [String: Any] = [
-                "email": email,
-                "password": password,
-                "role": "user"
-            ]
-
+        guard let url = URL(
+            string: "https://smiradd.ru/api/auth/\(isSignUp ? "registration" : "login")"
+        ) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        
+        let parameters: [String: Any] = [
+            "email": email,
+            "password": password,
+            "role": "user"
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            print("Error encoding parameters: \(error)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data else { return }
             do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
-            } catch {
-                print("Error encoding parameters: \(error)")
-                return
-            }
-
-            URLSession.shared.dataTask(with: request) { data, response, error in
-                guard let data = data else { return }
-                do {
-                    let httpResponse = response as? HTTPURLResponse
-                    print(httpResponse?.statusCode)
-                    let string = String(data: data, encoding: .utf8)
-                    print(string)
-                    switch httpResponse?.statusCode {
-                    case 200:
-                        let authorizationModel = try JSONDecoder().decode(AuthorizationModel.self, from: data)
-                        print(authorizationModel)
-                        UserDefaults.standard.set(
-                            authorizationModel.access_token,
-                            forKey: "access_token"
-                        )
-                        UserDefaults.standard.set(
-                            authorizationModel.refresh_token,
-                            forKey: "refresh_token"
-                        )
-                        if let location = locationManager.location {
-                            let body: [String: Double] = [
-                                "latitude": location.coordinate.latitude,
-                                "longitude": location.coordinate.longitude
-                            ]
-                            let finalBody = try! JSONSerialization.data(withJSONObject: body)
-                            makeRequest(
-                                path: "networking/mylocation",
-                                method: .post,
-                                body: finalBody
-                            ) { (result: Result<LocationModel, Error>) in
-                                DispatchQueue.main.async {
+                let httpResponse = response as? HTTPURLResponse
+                print(httpResponse?.statusCode)
+                let string = String(data: data, encoding: .utf8)
+                print(string)
+                switch httpResponse?.statusCode {
+                case 200:
+                    let authorizationModel = try JSONDecoder().decode(AuthorizationModel.self, from: data)
+                    print(authorizationModel)
+                    UserDefaults.standard.set(
+                        authorizationModel.access_token,
+                        forKey: "access_token"
+                    )
+                    UserDefaults.standard.set(
+                        authorizationModel.refresh_token,
+                        forKey: "refresh_token"
+                    )
+                    let body: [String: Double] = [
+                        "latitude": 0,
+                        "longitude": 0,
+                    ]
+                    let finalBody = try! JSONSerialization.data(withJSONObject: body)
+                    makeRequest(
+                        path: "networking/mylocation?code=9933",
+                        method: .post,
+                        body: finalBody
+                    ) { (result: Result<LocationModel, Error>) in
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .success(let cards):
+                                makeRequest(
+                                    path: "templates",
+                                    method: .get
+                                ) { (result: Result<[TemplateModel], Error>) in
                                     switch result {
-                                    case .success(let cards):
-                                        makeRequest(
-                                            path: "templates",
-                                            method: .get
-                                        ) { (result: Result<[TemplateModel], Error>) in
-                                            switch result {
-                                            case .success(let templates):
-                                                DispatchQueue.main.async {
-                                                    self.isLoading = false
-                                                    self.profileSettings.templates = templates
-                                                    router.navigate(to: .networkingScreen)
-                                                }
-                                            case .failure(let error):
-                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                        //                            self.pageType = .internetError
-                        //                        }
-                        //                        else {
-                        //                            self.pageType = .nothingHere
-                        //                        }
-                                                print(error.localizedDescription)
-                                            }
+                                    case .success(let templates):
+                                        DispatchQueue.main.async {
+                                            self.isLoading = false
+                                            self.profileSettings.templates = templates
+                                            router.navigateToRoot()
+                                            router.navigate(to: .networkingScreen)
                                         }
-                                        print("success")
                                     case .failure(let error):
-                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                //                            self.pageType = .internetError
-                //                        }
-                //                        else {
-                //                            self.pageType = .nothingHere
-                //                        }
+                                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                                        //                            self.pageType = .internetError
+                                        //                        }
+                                        //                        else {
+                                        //                            self.pageType = .nothingHere
+                                        //                        }
                                         print(error.localizedDescription)
                                     }
                                 }
+                                print("success")
+                            case .failure(let error):
+                                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+                                //                            self.pageType = .internetError
+                                //                        }
+                                //                        else {
+                                //                            self.pageType = .nothingHere
+                                //                        }
+                                print(error.localizedDescription)
                             }
-                                        print("Latitude: \(location.coordinate.latitude), Longitude: \(location.coordinate.longitude)")
-                                    } else {
-                                        print("Fetching location...")
-                                    }
-                    case 400:
-                        let string = String(data: data, encoding: .utf8)
-                        if string!.contains("Passwords did not match") {
-                            self.passwordIsError = true
                         }
-                        else {
-                            self.emailIsError = true
-                        }
-                        self.isLoading = false
-                    case 404:
-                        self.emailIsError = true
-                        self.isLoading = false
-                    default:
-                        self.isLoading = false
-                        break
                     }
-                } catch {}
-            }.resume()
-        }
+                    //                        if let location = locationManager.location {
+                    //                            let body: [String: Double] = [
+                    //                                "latitude": location.coordinate.latitude,
+                    //                                "longitude": location.coordinate.longitude
+                    //                            ]
+                    //                            let finalBody = try! JSONSerialization.data(withJSONObject: body)
+                    
+                    //                                        print("Latitude: \(location.coordinate.latitude), Longitude: \(location.coordinate.longitude)")
+                    //                                    } else {
+                    //                                        print("Fetching location...")
+                    //                                    }
+                case 400:
+                    let string = String(data: data, encoding: .utf8)
+                    if string!.contains("Passwords did not match") {
+                        self.passwordIsError = true
+                    }
+                    else {
+                        self.emailIsError = true
+                    }
+                    self.isLoading = false
+                case 404:
+                    self.emailIsError = true
+                    self.isLoading = false
+                default:
+                    self.isLoading = false
+                    break
+                }
+            } catch {}
+        }.resume()
+    }
     
     func isValidEmail(_ email: String) -> Bool {
-            let emailRegex = #"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#
-            return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
-        }
+        let emailRegex = #"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#
+        return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
+    }
     
     var body: some View {
         ZStack {
@@ -194,14 +233,14 @@ struct AuthorizationScreen: View {
                         ? "Регистрация"
                         : "Добро пожаловать!"
                     )
-                        .multilineTextAlignment(.center)
-                        .font(
-                            .custom(
-                                "OpenSans-SemiBold",
-                                size: 30
-                            )
+                    .multilineTextAlignment(.center)
+                    .font(
+                        .custom(
+                            "OpenSans-SemiBold",
+                            size: 30
                         )
-                        .foregroundStyle(textDefault)
+                    )
+                    .foregroundStyle(textDefault)
                     Spacer()
                         .frame(height: screenHeight / 70) //16
                     Text(
@@ -209,14 +248,14 @@ struct AuthorizationScreen: View {
                         ? "Пожалуйста, укажите следующие детали для Вашей новой учетной записи"
                         : "Войдите, чтобы продолжить"
                     )
-                        .multilineTextAlignment(.center)
-                        .font(
-                            .custom(
-                                "OpenSans-Regular",
-                                size: 14
-                            )
+                    .multilineTextAlignment(.center)
+                    .font(
+                        .custom(
+                            "OpenSans-Regular",
+                            size: 14
                         )
-                        .foregroundStyle(textDefault)
+                    )
+                    .foregroundStyle(textDefault)
                     Spacer()
                         .frame(height: screenHeight / 40) //32
                     VStack (alignment: .leading) {
@@ -226,19 +265,19 @@ struct AuthorizationScreen: View {
                                 ? "Аккаунт с такой эл. почтой уже существует"
                                 : "Не существует аккаунта с такой эл. почтой"
                             )
-                                .font(
-                                    .custom(
-                                        "OpenSans-Regular",
-                                        size: 14
-                                    )
+                            .font(
+                                .custom(
+                                    "OpenSans-Regular",
+                                    size: 14
                                 )
-                                .foregroundStyle(
-                                    Color(
-                                        red: 0.898,
-                                        green: 0.271,
-                                        blue: 0.267
-                                    )
+                            )
+                            .foregroundStyle(
+                                Color(
+                                    red: 0.898,
+                                    green: 0.271,
+                                    blue: 0.267
                                 )
+                            )
                         }
                         TextField(
                             "Электронная почта",
@@ -247,57 +286,57 @@ struct AuthorizationScreen: View {
                                 print(changed)
                             }
                         )
-                            .focused($emailIsFocused)
-                            .font(
-                                .custom(
-                                    "OpenSans-Regular",
-                                    size: 16
-                                )
+                        .focused($emailIsFocused)
+                        .font(
+                            .custom(
+                                "OpenSans-Regular",
+                                size: 16
                             )
-                            .foregroundStyle(
-                                emailIsError
-                                ? Color(
-                                    red: 0.898,
-                                    green: 0.271,
-                                    blue: 0.267
-                                )
-                                : textDefault
+                        )
+                        .foregroundStyle(
+                            emailIsError
+                            ? Color(
+                                red: 0.898,
+                                green: 0.271,
+                                blue: 0.267
                             )
-                            .accentColor(.black)
-                            .placeholder(when: email.isEmpty) {
-                                Text("Электронная почта")
-                                    .foregroundColor(Color(
+                            : textDefault
+                        )
+                        .accentColor(.black)
+                        .placeholder(when: email.isEmpty) {
+                            Text("Электронная почта")
+                                .foregroundColor(Color(
+                                    red: 0.4,
+                                    green: 0.4,
+                                    blue: 0.4
+                                ))
+                        }
+                        .frame(height: 56)
+                        .padding(EdgeInsets(
+                            top: 0,
+                            leading: 20,
+                            bottom: 0,
+                            trailing: 20
+                        ))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(
+                                    emailIsError
+                                    ? Color(red: 0.898, green: 0.271, blue: 0.267)
+                                    : emailIsFocused
+                                    ? accent400
+                                    : Color(
                                         red: 0.4,
                                         green: 0.4,
                                         blue: 0.4
-                                ))
-                            }
-                            .frame(height: 56)
-                            .padding(EdgeInsets(
-                                top: 0,
-                                leading: 20,
-                                bottom: 0,
-                                trailing: 20
-                            ))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(
-                                        emailIsError
-                                        ? Color(red: 0.898, green: 0.271, blue: 0.267)
-                                        : emailIsFocused
-                                        ? accent400
-                                        : Color(
-                                            red: 0.4,
-                                            green: 0.4,
-                                            blue: 0.4
-                                        ),
-                                        lineWidth: emailIsFocused ? 2 : 1
-                                    )
-                            )
-                            .onTapGesture {
-                                emailIsFocused = true
-                                emailIsError = false
-                            }
+                                    ),
+                                    lineWidth: emailIsFocused ? 2 : 1
+                                )
+                        )
+                        .onTapGesture {
+                            emailIsFocused = true
+                            emailIsError = false
+                        }
                         Spacer()
                             .frame(height: screenHeight / 70) //16
                         ZStack (alignment: .trailing) {
@@ -306,114 +345,114 @@ struct AuthorizationScreen: View {
                                     "Пароль",
                                     text: $password
                                 )
-                                    .focused($passwordIsFocused)
-                                    .font(
-                                        .custom(
-                                            "OpenSans-Regular",
-                                            size: 16
-                                        )
+                                .focused($passwordIsFocused)
+                                .font(
+                                    .custom(
+                                        "OpenSans-Regular",
+                                        size: 16
                                     )
-                                    .foregroundStyle(
-                                        passwordIsError
-                                        ? Color(
-                                            red: 0.898,
-                                            green: 0.271,
-                                            blue: 0.267
-                                        )
-                                        : textDefault
+                                )
+                                .foregroundStyle(
+                                    passwordIsError
+                                    ? Color(
+                                        red: 0.898,
+                                        green: 0.271,
+                                        blue: 0.267
                                     )
-                                    .accentColor(.black)
-                                    .placeholder(when: password.isEmpty) {
-                                        Text("Пароль")
-                                            .foregroundColor(Color(
+                                    : textDefault
+                                )
+                                .accentColor(.black)
+                                .placeholder(when: password.isEmpty) {
+                                    Text("Пароль")
+                                        .foregroundColor(Color(
+                                            red: 0.4,
+                                            green: 0.4,
+                                            blue: 0.4
+                                        ))
+                                }
+                                .frame(height: 56)
+                                .padding(EdgeInsets(
+                                    top: 0,
+                                    leading: 20,
+                                    bottom: 0,
+                                    trailing: 50
+                                ))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            passwordIsError
+                                            ? Color(red: 0.898, green: 0.271, blue: 0.267)
+                                            : passwordIsFocused
+                                            ? accent400
+                                            : Color(
                                                 red: 0.4,
                                                 green: 0.4,
                                                 blue: 0.4
-                                        ))
-                                    }
-                                    .frame(height: 56)
-                                    .padding(EdgeInsets(
-                                        top: 0,
-                                        leading: 20,
-                                        bottom: 0,
-                                        trailing: 50
-                                    ))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(
-                                                passwordIsError
-                                                ? Color(red: 0.898, green: 0.271, blue: 0.267)
-                                                : passwordIsFocused
-                                                ? accent400
-                                                : Color(
-                                                    red: 0.4,
-                                                    green: 0.4,
-                                                    blue: 0.4
-                                                ),
-                                                lineWidth: passwordIsFocused ? 2 : 1
-                                            )
-                                    )
-                                    .onTapGesture {
-                                        passwordIsFocused = true
-                                        passwordIsError = false
-                                    }
+                                            ),
+                                            lineWidth: passwordIsFocused ? 2 : 1
+                                        )
+                                )
+                                .onTapGesture {
+                                    passwordIsFocused = true
+                                    passwordIsError = false
+                                }
                             }
                             else {
                                 SecureField(
                                     "Пароль",
                                     text: $password
                                 )
-                                    .focused($passwordIsFocused)
-                                    .font(
-                                        .custom(
-                                            "OpenSans-Regular",
-                                            size: 16
-                                        )
+                                .focused($passwordIsFocused)
+                                .font(
+                                    .custom(
+                                        "OpenSans-Regular",
+                                        size: 16
                                     )
-                                    .foregroundStyle(
-                                        passwordIsError
-                                        ? Color(
-                                            red: 0.898,
-                                            green: 0.271,
-                                            blue: 0.267
-                                        )
-                                        : textDefault
+                                )
+                                .foregroundStyle(
+                                    passwordIsError
+                                    ? Color(
+                                        red: 0.898,
+                                        green: 0.271,
+                                        blue: 0.267
                                     )
-                                    .accentColor(.black)
-                                    .placeholder(when: password.isEmpty) {
-                                        Text("Пароль")
-                                            .foregroundColor(Color(
+                                    : textDefault
+                                )
+                                .accentColor(.black)
+                                .placeholder(when: password.isEmpty) {
+                                    Text("Пароль")
+                                        .foregroundColor(Color(
+                                            red: 0.4,
+                                            green: 0.4,
+                                            blue: 0.4
+                                        ))
+                                }
+                                .frame(height: 56)
+                                .padding(EdgeInsets(
+                                    top: 0,
+                                    leading: 20,
+                                    bottom: 0,
+                                    trailing: 50
+                                ))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            passwordIsError
+                                            ? Color(red: 0.898, green: 0.271, blue: 0.267)
+                                            : passwordIsFocused
+                                            ? accent400
+                                            : Color(
                                                 red: 0.4,
                                                 green: 0.4,
                                                 blue: 0.4
-                                        ))
-                                    }
-                                    .frame(height: 56)
-                                    .padding(EdgeInsets(
-                                        top: 0,
-                                        leading: 20,
-                                        bottom: 0,
-                                        trailing: 50
-                                    ))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(
-                                                passwordIsError
-                                                ? Color(red: 0.898, green: 0.271, blue: 0.267)
-                                                : passwordIsFocused
-                                                ? accent400
-                                                : Color(
-                                                    red: 0.4,
-                                                    green: 0.4,
-                                                    blue: 0.4
-                                                ),
-                                                lineWidth: passwordIsFocused ? 2 : 1
-                                            )
-                                    )
-                                    .onTapGesture {
-                                        passwordIsFocused = true
-                                        passwordIsError = false
-                                    }
+                                            ),
+                                            lineWidth: passwordIsFocused ? 2 : 1
+                                        )
+                                )
+                                .onTapGesture {
+                                    passwordIsFocused = true
+                                    passwordIsError = false
+                                }
                             }
                             Image(passwordIsShown ? "eye_close" : "eye_open")
                                 .offset(x: -16)
@@ -481,7 +520,7 @@ struct AuthorizationScreen: View {
                                 green: 0.4,
                                 blue: 0.4
                             ))
-                            + Text("политикой конфиденциальности")
+                        + Text("политикой конфиденциальности")
                             .font(
                                 .custom(
                                     "OpenSans-Regular",
@@ -525,6 +564,7 @@ struct AuthorizationScreen: View {
                                 RoundedRectangle(cornerRadius: 28)
                                     .stroke(textDefault)
                             )
+                        //GoogleSignInButton(action: handleSignInButton)
                         HStack {
                             Image("google")
                             Text(
@@ -532,16 +572,16 @@ struct AuthorizationScreen: View {
                                 ? "Продолжить с Google"
                                 : "Войти c Google"
                             )
-                                .font(
-                                    .custom(
-                                        "OpenSans-SemiBold",
-                                        size: 16
-                                    )
+                            .font(
+                                .custom(
+                                    "OpenSans-SemiBold",
+                                    size: 16
                                 )
-                                .foregroundStyle(textDefault)
+                            )
+                            .foregroundStyle(textDefault)
                         }
                         .onTapGesture {
-                            login()
+                            handleSignInButton()
                         }
                     }
                     .onTapGesture {
@@ -555,25 +595,25 @@ struct AuthorizationScreen: View {
                             ? "Уже есть аккаунт?"
                             : "Нет аккаунта? "
                         )
-                            .font(
-                                .custom(
-                                    "OpenSans-Regular",
-                                    size: 16
-                                )
+                        .font(
+                            .custom(
+                                "OpenSans-Regular",
+                                size: 16
                             )
-                            .foregroundStyle(textDefault)
+                        )
+                        .foregroundStyle(textDefault)
                         Text(
                             isSignUp
                             ? "Войти"
                             : "Создать аккаунт"
                         )
-                            .font(
-                                .custom(
-                                    "OpenSans-SemiBold",
-                                    size: 16
-                                )
+                        .font(
+                            .custom(
+                                "OpenSans-SemiBold",
+                                size: 16
                             )
-                            .foregroundStyle(textDefault)
+                        )
+                        .foregroundStyle(textDefault)
                     }
                     .onTapGesture {
                         router.navigate(

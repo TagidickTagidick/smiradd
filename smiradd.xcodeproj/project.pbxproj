@@ -18,6 +18,8 @@
 		602221862BE4C96C00AA1293 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 602221852BE4C96C00AA1293 /* CodeScanner */; };
 		603BA43A2BE0E0B200DDC40A /* NotificationsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603BA4392BE0E0B200DDC40A /* NotificationsModel.swift */; };
 		603BA43C2BE0E4F500DDC40A /* FavoritesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603BA43B2BE0E4F500DDC40A /* FavoritesModel.swift */; };
+		606B8C302C3D2B1A00BFB3D1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 606B8C2F2C3D2B1A00BFB3D1 /* GoogleService-Info.plist */; };
+		606B8C322C3DBCCE00BFB3D1 /* PinEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606B8C312C3DBCCE00BFB3D1 /* PinEntryView.swift */; };
 		60727BE82BD005CC00A73DC2 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60727BE72BD005CC00A73DC2 /* CameraView.swift */; };
 		60727BEA2BD04DF200A73DC2 /* ServiceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60727BE92BD04DF200A73DC2 /* ServiceScreen.swift */; };
 		60727BEC2BD05A6800A73DC2 /* CustomBottomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60727BEB2BD05A6800A73DC2 /* CustomBottomNavigationBar.swift */; };
@@ -54,7 +56,7 @@
 		607A06142BE90FDD00CA8A14 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06112BE90FDD00CA8A14 /* Roboto-Bold.ttf */; };
 		607A06152BE90FDD00CA8A14 /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06122BE90FDD00CA8A14 /* Roboto-Medium.ttf */; };
 		607A06162BE90FDD00CA8A14 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 607A06132BE90FDD00CA8A14 /* Roboto-Regular.ttf */; };
-		607A06182BE9186900CA8A14 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 607A06172BE9186900CA8A14 /* GoogleService-Info.plist */; };
+		607A06222BE933FC00CA8A14 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607A06212BE933FC00CA8A14 /* NotificationManager.swift */; };
 		60A212582BCAE28D002A1301 /* NetworkingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A212572BCAE28D002A1301 /* NetworkingScreen.swift */; };
 		60A2125B2BCAE2B5002A1301 /* FavoritesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A2125A2BCAE2B5002A1301 /* FavoritesScreen.swift */; };
 		60A2125E2BCAF265002A1301 /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A2125D2BCAF265002A1301 /* ProfileScreen.swift */; };
@@ -79,7 +81,6 @@
 		60D069462BDC3A8F00653AF0 /* DeleteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D069452BDC3A8F00653AF0 /* DeleteModel.swift */; };
 		60D069482BDC4B7F00653AF0 /* ExpandableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D069472BDC4B7F00653AF0 /* ExpandableText.swift */; };
 		60D0694A2BDD3F0100653AF0 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 60D069492BDD3F0100653AF0 /* FirebaseMessaging */; };
-		60D0694C2BDD777A00653AF0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D0694B2BDD777A00653AF0 /* LocationManager.swift */; };
 		60D0694E2BDD7BD200653AF0 /* LocationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D0694D2BDD7BD200653AF0 /* LocationModel.swift */; };
 		60D069502BDD972100653AF0 /* QRCodeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D0694F2BDD972100653AF0 /* QRCodeScreen.swift */; };
 		60D069522BDF868000653AF0 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D069512BDF868000653AF0 /* BackButton.swift */; };
@@ -155,6 +156,8 @@
 		602221822BE3E5D600AA1293 /* FavoritesSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesSettings.swift; sourceTree = "<group>"; };
 		603BA4392BE0E0B200DDC40A /* NotificationsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsModel.swift; sourceTree = "<group>"; };
 		603BA43B2BE0E4F500DDC40A /* FavoritesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesModel.swift; sourceTree = "<group>"; };
+		606B8C2F2C3D2B1A00BFB3D1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		606B8C312C3DBCCE00BFB3D1 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
 		60727BE72BD005CC00A73DC2 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		60727BE92BD04DF200A73DC2 /* ServiceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceScreen.swift; sourceTree = "<group>"; };
 		60727BEB2BD05A6800A73DC2 /* CustomBottomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBottomNavigationBar.swift; sourceTree = "<group>"; };
@@ -192,7 +195,7 @@
 		607A06112BE90FDD00CA8A14 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Bold.ttf"; sourceTree = "<group>"; };
 		607A06122BE90FDD00CA8A14 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		607A06132BE90FDD00CA8A14 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
-		607A06172BE9186900CA8A14 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "smiradd/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
+		607A06212BE933FC00CA8A14 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		60A212572BCAE28D002A1301 /* NetworkingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingScreen.swift; sourceTree = "<group>"; };
 		60A2125A2BCAE2B5002A1301 /* FavoritesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesScreen.swift; sourceTree = "<group>"; };
 		60A2125D2BCAF265002A1301 /* ProfileScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileScreen.swift; sourceTree = "<group>"; };
@@ -214,7 +217,6 @@
 		60D069432BDBD69900653AF0 /* CustomFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFormatter.swift; sourceTree = "<group>"; };
 		60D069452BDC3A8F00653AF0 /* DeleteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteModel.swift; sourceTree = "<group>"; };
 		60D069472BDC4B7F00653AF0 /* ExpandableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableText.swift; sourceTree = "<group>"; };
-		60D0694B2BDD777A00653AF0 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		60D0694D2BDD7BD200653AF0 /* LocationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModel.swift; sourceTree = "<group>"; };
 		60D0694F2BDD972100653AF0 /* QRCodeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScreen.swift; sourceTree = "<group>"; };
 		60D069512BDF868000653AF0 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
@@ -329,8 +331,8 @@
 			children = (
 				60727BEE2BD072B500A73DC2 /* CardSettings.swift */,
 				60727C182BD617FC00A73DC2 /* ProfileSettings.swift */,
-				60D0694B2BDD777A00653AF0 /* LocationManager.swift */,
 				602221822BE3E5D600AA1293 /* FavoritesSettings.swift */,
+				607A06212BE933FC00CA8A14 /* NotificationManager.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -468,6 +470,7 @@
 				60727BFF2BD25A0A00A73DC2 /* DeleteWidget.swift */,
 				60727C092BD5373200A73DC2 /* CustomText.swift */,
 				60D069362BDA476600653AF0 /* CustomIcon.swift */,
+				606B8C312C3DBCCE00BFB3D1 /* PinEntryView.swift */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -562,7 +565,7 @@
 		60EF5D6A2BC09EC400DCDD97 /* smiradd */ = {
 			isa = PBXGroup;
 			children = (
-				607A06172BE9186900CA8A14 /* GoogleService-Info.plist */,
+				606B8C2F2C3D2B1A00BFB3D1 /* GoogleService-Info.plist */,
 				607A059D2BE5A9D900CA8A14 /* smiradd.entitlements */,
 				60727BED2BD072A000A73DC2 /* Settings */,
 				60D8A2D72BCBD4FD0077F7DC /* Utils */,
@@ -765,7 +768,7 @@
 				60EF5D732BC09EC500DCDD97 /* Preview Assets.xcassets in Resources */,
 				607A060F2BE90FB700CA8A14 /* OpenSans-Regular.ttf in Resources */,
 				607A06142BE90FDD00CA8A14 /* Roboto-Bold.ttf in Resources */,
-				607A06182BE9186900CA8A14 /* GoogleService-Info.plist in Resources */,
+				606B8C302C3D2B1A00BFB3D1 /* GoogleService-Info.plist in Resources */,
 				60EF5D702BC09EC500DCDD97 /* Assets.xcassets in Resources */,
 				607A06152BE90FDD00CA8A14 /* Roboto-Medium.ttf in Resources */,
 			);
@@ -825,7 +828,6 @@
 				60A2125B2BCAE2B5002A1301 /* FavoritesScreen.swift in Sources */,
 				60A2127F2BCBBD4B002A1301 /* NetworkingCard.swift in Sources */,
 				60727BEF2BD072B500A73DC2 /* CardSettings.swift in Sources */,
-				60D0694C2BDD777A00653AF0 /* LocationManager.swift in Sources */,
 				60A212812BCBC23A002A1301 /* CardModel.swift in Sources */,
 				60D8A2EF2BCE72670077F7DC /* AchievementScreen.swift in Sources */,
 				60727C192BD617FC00A73DC2 /* ProfileSettings.swift in Sources */,
@@ -871,7 +873,9 @@
 				60727C152BD60FEB00A73DC2 /* CustomButton.swift in Sources */,
 				60D069282BD8FBEF00653AF0 /* AuthService.swift in Sources */,
 				600EBC4B2BC9853400AC5FBB /* NavigationService.swift in Sources */,
+				606B8C322C3DBCCE00BFB3D1 /* PinEntryView.swift in Sources */,
 				60727BEA2BD04DF200A73DC2 /* ServiceScreen.swift in Sources */,
+				607A06222BE933FC00CA8A14 /* NotificationManager.swift in Sources */,
 				60D069372BDA476600653AF0 /* CustomIcon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

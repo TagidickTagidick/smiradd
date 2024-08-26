@@ -19,7 +19,7 @@ struct CustomTextField: View {
     
     var body: some View {
         TextField(
-            hintText,
+            "",
             text: $value,
             axis: isLongText ? .vertical : .horizontal
         )

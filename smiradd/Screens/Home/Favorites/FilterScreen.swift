@@ -13,137 +13,139 @@ struct FilterScreen: View {
     
     var body: some View {
         ZStack (alignment: .bottom) {
-            ScrollView {
-                VStack (alignment: .leading) {
-                    HStack {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(buttonClick)
-                            .onTapGesture {
-                                router.navigateBack()
-                            }
-                        Spacer()
-                            .frame(width: 24)
-                        Text("Фильтр")
+            VStack (alignment: .leading) {
+                HStack {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(buttonClick)
+                        .onTapGesture {
+                            router.navigateBack()
+                        }
+                    Spacer()
+                        .frame(width: 24)
+                    Text("Фильтр")
+                        .font(
+                            .custom(
+                                "OpenSans-SemiBold",
+                                size: 24
+                            )
+                        )
+                        .foregroundStyle(textDefault)
+                    Spacer()
+                    if !find.isEmpty {
+                        Text("Очистить")
                             .font(
                                 .custom(
                                     "OpenSans-SemiBold",
-                                    size: 24
+                                    size: 16
                                 )
                             )
-                            .foregroundStyle(textDefault)
-                        Spacer()
-                        if !find.isEmpty {
-                            Text("Очистить")
-                                .font(
-                                    .custom(
-                                        "OpenSans-SemiBold",
-                                        size: 16
-                                    )
-                                )
-                                .foregroundStyle(Color(
-                                    red: 0.898,
-                                    green: 0.271,
-                                    blue: 0.267
-                                ))
-                                .onTapGesture {
-                                    find = ""
-                                }
-                        }
+                            .foregroundStyle(Color(
+                                red: 0.898,
+                                green: 0.271,
+                                blue: 0.267
+                            ))
+                            .onTapGesture {
+                                find = ""
+                            }
                     }
-                    .padding(
-                        [.vertical],
-                        8
-                    )
-                    Spacer()
-                        .frame(height: 12)
-                    CustomTextField(
-                        value: $find,
-                        hintText: "Найти",
-                        focused: $findIsFocused
-                    )
-                    .onChange(of: find) {
-                        if find.isEmpty {
-                            currentSpecifities = specificityList
-                        }
-                        else {
-                            currentSpecifities = []
-                            for specificity in specificityList {
-                                if specificity.name.contains(find) {
-                                    currentSpecifities.append(specificity)
-                                }
-                            }
-                        }
-                    }
-                    ForEach(currentSpecifities) {
-                        specificity in
-                        HStack {
-                            Text(specificity.name)
-                                .font(
-                                    .custom(
-                                        mySpecificities.contains(specificity.name)
-                                        ? "OpenSans-SemiBold"
-                                        : "OpenSans-Regular",
-                                        size: 16
-                                    )
-                                )
-                                .foregroundStyle(textDefault)
-                            Spacer()
-                            ZStack {
-                                if mySpecificities.contains(specificity.name) {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.white)
-                                        .frame(
-                                            width: 10,
-                                            height: 8
-                                        )
-                                }
-                            }
-                            .frame(
-                                width: 20,
-                                height: 20
-                            )
-                            .background(
-                                mySpecificities.contains(specificity.name)
-                                ? Color(
-                                    red: 0.408,
-                                    green: 0.784,
-                                    blue: 0.58
-                                )
-                                : .white
-                            )
-                            .cornerRadius(5)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(
-                                        accent100,
-                                        lineWidth: 1
-                                    )
-                            )
-                        }
-                        .padding([.vertical], 12)
-                        .background(.white)
-                        .onTapGesture {
-                            if mySpecificities.contains(specificity.name) {
-                                for i in 0..<mySpecificities.count {
-                                    if mySpecificities[i] == specificity.name {
-                                        mySpecificities.remove(at: i)
-                                        break
-                                    }
-                                }
-                            }
-                            else {
-                                mySpecificities.append(specificity.name)
-                            }
-                        }
-                    }
-                    Spacer()
-                        .frame(height: 70)
                 }
                 .padding(
-                    [.horizontal],
-                    20
+                    [.vertical],
+                    8
                 )
+                Spacer()
+                    .frame(height: 12)
+                CustomTextField(
+                    value: $find,
+                    hintText: "Найти",
+                    focused: $findIsFocused
+                )
+                .onChange(of: find) {
+                    if find.isEmpty {
+                        currentSpecifities = specificityList
+                    }
+                    else {
+                        currentSpecifities = []
+                        for specificity in specificityList {
+                            if specificity.name.contains(find) {
+                                currentSpecifities.append(specificity)
+                            }
+                        }
+                    }
+                }
+                ScrollView (showsIndicators: false) {
+                    VStack (alignment: .leading) {
+                        ForEach(currentSpecifities) {
+                            specificity in
+                            HStack {
+                                Text(specificity.name)
+                                    .font(
+                                        .custom(
+                                            mySpecificities.contains(specificity.name)
+                                            ? "OpenSans-SemiBold"
+                                            : "OpenSans-Regular",
+                                            size: 16
+                                        )
+                                    )
+                                    .foregroundStyle(textDefault)
+                                Spacer()
+                                ZStack {
+                                    if mySpecificities.contains(specificity.name) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.white)
+                                            .frame(
+                                                width: 10,
+                                                height: 8
+                                            )
+                                    }
+                                }
+                                .frame(
+                                    width: 20,
+                                    height: 20
+                                )
+                                .background(
+                                    mySpecificities.contains(specificity.name)
+                                    ? Color(
+                                        red: 0.408,
+                                        green: 0.784,
+                                        blue: 0.58
+                                    )
+                                    : .white
+                                )
+                                .cornerRadius(5)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(
+                                            accent100,
+                                            lineWidth: 1
+                                        )
+                                )
+                            }
+                            .padding([.vertical], 12)
+                            .background(.white)
+                            .onTapGesture {
+                                if mySpecificities.contains(specificity.name) {
+                                    for i in 0..<mySpecificities.count {
+                                        if mySpecificities[i] == specificity.name {
+                                            mySpecificities.remove(at: i)
+                                            break
+                                        }
+                                    }
+                                }
+                                else {
+                                    mySpecificities.append(specificity.name)
+                                }
+                            }
+                        }
+                        Spacer()
+                            .frame(height: 142)
+                    }
+                }
             }
+            .padding(
+                [.horizontal],
+                20
+            )
             CustomButton(text: "Применить")
                 .offset(y: mySpecificities == favoritesSettings.mySpecificities ? 0 : -74)
                 .animation(.spring())

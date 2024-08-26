@@ -6,15 +6,16 @@ func makeRequest<Model: Codable>(
     body: Data? = nil,
     isString: Bool = false,
     completion: @escaping (Result<Model, Error>) -> Void,
-    isProd: Bool = false
+    isProd: Bool = true
 ) {
-    let url = URL(string: "http\(isProd ? "s" : "")://\(isProd ? "vizme.pro" : "80.90.185.153:5002")/api/\(path)")!
+    
+    let url = URL(string: "http\(isProd ? "s" : "")://\(isProd ? "smiradd.ru/" : "80.90.185.153:5002")/api/\(path)")!
     
     print("Request url: \(url.absoluteString):")
     print("type: \(method)")
     
     if body != nil {
-        print("body: \(body!.prettyPrintedJSONString())")
+        print("body: \(body!.prettyPrintedJSONString() ?? "")")
     }
     
     var request = URLRequest(url: url)
@@ -26,7 +27,7 @@ func makeRequest<Model: Codable>(
     
     let accessToken = UserDefaults.standard.string(forKey: path.contains("refresh") ? "refresh_token" : "access_token")
     
-    print(accessToken)
+    print("accessToken: \(accessToken!)")
     
     if let token = accessToken {
         request.setValue(
@@ -42,7 +43,7 @@ func makeRequest<Model: Codable>(
     URLSession.shared.dataTask(with: request) { data, response, error in
         let httpResponse = response as? HTTPURLResponse
         print("Response url: \(url.absoluteString):")
-        print("status code: \(httpResponse?.statusCode)")
+        print("status code: \(httpResponse!.statusCode)")
         
         if let error = error {
             completion(.failure(error))
@@ -90,7 +91,7 @@ func makeRequest<Model: Codable>(
                     }
                 }
             }
-            if httpResponse?.statusCode == 400 {
+            if httpResponse?.statusCode == 400 || httpResponse?.statusCode == 423 {
                 completion(.success([] as! Model))
             }
             else {
@@ -143,8 +144,8 @@ func uploadImageToServer<Model: Codable>(image: Image, completion: @escaping (Re
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                    print(httpResponse.statusCode)
-                }
+                print(httpResponse.statusCode)
+            }
             
             if let data = data {
                 if let responseString = String(data: data, encoding: .utf8) {
@@ -193,8 +194,8 @@ func uploadUIImageToServer<Model: Codable>(image: UIImage, completion: @escaping
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                    print(httpResponse.statusCode)
-                }
+                print(httpResponse.statusCode)
+            }
             
             if let data = data {
                 if let responseString = String(data: data, encoding: .utf8) {
@@ -215,12 +216,12 @@ func uploadUIImageToServer<Model: Codable>(image: UIImage, completion: @escaping
 }
 
 extension View {
-// This function changes our View to UIView, then calls another function
-// to convert the newly-made UIView to a UIImage.
+    // This function changes our View to UIView, then calls another function
+    // to convert the newly-made UIView to a UIImage.
     public func asUIImage() -> UIImage {
         let controller = UIHostingController(rootView: self)
         
- // Set the background to be transparent incase the image is a PNG, WebP or (Static) GIF
+        // Set the background to be transparent incase the image is a PNG, WebP or (Static) GIF
         controller.view.backgroundColor = .clear
         
         controller.view.frame = CGRect(x: 0, y: CGFloat(Int.max), width: 1, height: 1)
@@ -230,7 +231,7 @@ extension View {
         controller.view.bounds = CGRect(origin: .zero, size: size)
         controller.view.sizeToFit()
         
-// here is the call to the function that converts UIView to UIImage: `.asUIImage()`
+        // here is the call to the function that converts UIView to UIImage: `.asUIImage()`
         let image = controller.view.asUIImage()
         controller.view.removeFromSuperview()
         return image
@@ -238,7 +239,7 @@ extension View {
 }
 
 extension UIView {
-// This is the function to convert UIView to UIImage
+    // This is the function to convert UIView to UIImage
     public func asUIImage() -> UIImage {
         let renderer = UIGraphicsImageRenderer(bounds: bounds)
         return renderer.image { rendererContext in
@@ -254,6 +255,7 @@ extension Data {
               let prettyPrintedString = String(data: jsonData, encoding: .utf8) else {
             return nil
         }
+        
         return prettyPrintedString
     }
 }

@@ -25,6 +25,8 @@ struct SettingsScreen: View {
     @State private var isExit: Bool = false
     @State private var isDelete: Bool = false
     
+    @State private var offset: CGFloat = 0
+    
     func saveAvatar() {
         if (!avatarUrl.isEmpty
             || avatarImage != nil
@@ -378,6 +380,5 @@ struct SettingsScreen: View {
                 lastNameIsFocused = false
             }
         }
-        //.lazyPop()
     }
 }

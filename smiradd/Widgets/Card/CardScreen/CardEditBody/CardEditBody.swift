@@ -77,7 +77,7 @@ struct CardEditBody: View {
         if (!avatarUrl.isEmpty
             || avatarImage != nil
             || avatarUIImage != nil
-              ) {
+        ) {
             if avatarUIImage == nil {
                 if !avatarUrl.isEmpty {
                     saveLogo()
@@ -137,7 +137,7 @@ struct CardEditBody: View {
         if (!logoUrl.isEmpty
             || logoImage != nil
             || logoUIImage != nil
-              ) {
+        ) {
             if logoUIImage == nil {
                 if !logoUrl.isEmpty {
                     save()
@@ -210,7 +210,7 @@ struct CardEditBody: View {
                 "cover_url": service.coverUrl
             ]
         }
-
+        
         var body: [String: Any?] = [
             "job_title": jobTitle,
             "specificity": specificity,
@@ -342,7 +342,7 @@ struct CardEditBody: View {
                                                 .frame(
                                                     width: UIScreen.main.bounds.width,
                                                     height: 360
-                                                    )
+                                                )
                                         } placeholder: {
                                             ProgressView()
                                         }
@@ -353,10 +353,15 @@ struct CardEditBody: View {
                                             .frame(
                                                 width: UIScreen.main.bounds.width,
                                                 height: 360
-                                                )
+                                            )
                                     }
                                     else {
                                         Image("avatar")
+                                            .resizable()
+                                            .frame(
+                                                width: UIScreen.main.bounds.width,
+                                                height: 360
+                                            )
                                     }
                                 }
                                 else {
@@ -365,7 +370,7 @@ struct CardEditBody: View {
                                         .frame(
                                             width: UIScreen.main.bounds.width,
                                             height: 360
-                                            )
+                                        )
                                 }
                                 VStack {
                                     Spacer()
@@ -396,44 +401,44 @@ struct CardEditBody: View {
                                         Button("Выбрать из галереи", action: {
                                             self.showAvatarPicker = true
                                         })
-                                            } label: {
-                                                ZStack {
-                                                    HStack {
-                                                        Image("edit")
-                                                        Spacer()
-                                                            .frame(width: 10)
-                                                        Text("Загрузить фотографию")
-                                                            .font(
-                                                                .custom(
-                                                                    "OpenSans-SemiBold",
-                                                                    size: 16
-                                                                )
-                                                            )
-                                                            .foregroundStyle(textDefault)
-                                                    }
-                                                    .frame(
-                                                        minWidth: UIScreen.main.bounds.width - 40,
-                                                        minHeight: 48
+                                    } label: {
+                                        ZStack {
+                                            HStack {
+                                                Image("edit")
+                                                Spacer()
+                                                    .frame(width: 10)
+                                                Text("Загрузить фотографию")
+                                                    .font(
+                                                        .custom(
+                                                            "OpenSans-SemiBold",
+                                                            size: 16
+                                                        )
                                                     )
-                                                    .background(.white.opacity(0.4))
-                                                    .cornerRadius(28)
-                                                }
+                                                    .foregroundStyle(textDefault)
                                             }
-                                            .fullScreenCover(isPresented: self.$showAvatarCamera) {
-                                                accessCameraView(selectedImage: self.$avatarUIImage)
-                                                    .edgesIgnoringSafeArea(.all)
+                                            .frame(
+                                                minWidth: UIScreen.main.bounds.width - 40,
+                                                minHeight: 48
+                                            )
+                                            .background(.white.opacity(0.4))
+                                            .cornerRadius(28)
+                                        }
+                                    }
+                                    .fullScreenCover(isPresented: self.$showAvatarCamera) {
+                                        accessCameraView(selectedImage: self.$avatarUIImage)
+                                            .edgesIgnoringSafeArea(.all)
+                                    }
+                                    .photosPicker(isPresented: $showAvatarPicker, selection: $avatarItem)
+                                    .onChange(of: avatarItem) {
+                                        Task {
+                                            if let loaded = try? await avatarItem?.loadTransferable(type: Image.self) {
+                                                avatarImage = loaded
+                                                avatarUIImage = nil
+                                            } else {
+                                                print("Failed")
                                             }
-                                            .photosPicker(isPresented: $showAvatarPicker, selection: $avatarItem)
-                                            .onChange(of: avatarItem) {
-                                                Task {
-                                                    if let loaded = try? await avatarItem?.loadTransferable(type: Image.self) {
-                                                        avatarImage = loaded
-                                                        avatarUIImage = nil
-                                                    } else {
-                                                        print("Failed")
-                                                    }
-                                                }
-                                            }
+                                        }
+                                    }
                                 }
                                 .padding([.vertical, .horizontal], 20)
                             }
@@ -460,20 +465,20 @@ struct CardEditBody: View {
                                                 specificity = specificityModel.name
                                             }) {
                                                 Text(specificityModel.name)
-                                                }
                                             }
-                                            } label: {
-                                                ZStack (alignment: .trailing) {
-                                                    CustomTextField(
-                                                        value: $specificity,
-                                                        hintText: "Выберите специфику",
-                                                        focused: $specificityIsFocused
-                                                    )
-                                                    Image(systemName: "chevron.down")
-                                                        .foregroundColor(textSecondary)
-                                                        .offset(x: -20)
-                                                }
-                                            }
+                                        }
+                                    } label: {
+                                        ZStack (alignment: .trailing) {
+                                            CustomTextField(
+                                                value: $specificity,
+                                                hintText: "Выберите специфику",
+                                                focused: $specificityIsFocused
+                                            )
+                                            Image(systemName: "chevron.down")
+                                                .foregroundColor(textSecondary)
+                                                .offset(x: -20)
+                                        }
+                                    }
                                     Spacer()
                                         .frame(height: 16)
                                     CustomText(text: "Имя*")
@@ -670,59 +675,59 @@ struct CardEditBody: View {
                                             Button("Выбрать из галереи", action: {
                                                 self.showLogoPicker = true
                                             })
-                                                } label: {
-                                                    if logoUIImage == nil {
-                                                        if logoImage == nil {
-                                                            ZStack {
-                                                                Image(systemName: "plus")
-                                                                    .frame(
-                                                                        width: 36,
-                                                                        height: 36
-                                                                    )
-                                                                    .foregroundStyle(textAdditional)
-                                                            }
+                                        } label: {
+                                            if logoUIImage == nil {
+                                                if logoImage == nil {
+                                                    ZStack {
+                                                        Image(systemName: "plus")
                                                             .frame(
-                                                                width: 80,
-                                                                height: 80
+                                                                width: 36,
+                                                                height: 36
                                                             )
-                                                            .background(accent50)
-                                                            .cornerRadius(16)
-                                                        }
-                                                        else {
-                                                            logoImage?
-                                                                .resizable()
-                                                                .frame(
-                                                                    width: 80,
-                                                                    height: 80
-                                                                )
-                                                                .cornerRadius(16)
-                                                        }
+                                                            .foregroundStyle(textAdditional)
                                                     }
-                                                    else {
-                                                        Image(uiImage: logoUIImage!)
-                                                            .resizable()
-                                                            .frame(
-                                                                width: 80,
-                                                                height: 80
-                                                            )
-                                                            .cornerRadius(16)
-                                                    }
+                                                    .frame(
+                                                        width: 80,
+                                                        height: 80
+                                                    )
+                                                    .background(accent50)
+                                                    .cornerRadius(16)
                                                 }
-                                                .fullScreenCover(isPresented: self.$showLogoCamera) {
-                                                    accessCameraView(selectedImage: self.$logoUIImage)
-                                                        .edgesIgnoringSafeArea(.all)
+                                                else {
+                                                    logoImage?
+                                                        .resizable()
+                                                        .frame(
+                                                            width: 80,
+                                                            height: 80
+                                                        )
+                                                        .cornerRadius(16)
                                                 }
-                                                .photosPicker(isPresented: $showLogoPicker, selection: $logoItem)
-                                                .onChange(of: logoItem) {
-                                                    Task {
-                                                        if let loaded = try? await logoItem?.loadTransferable(type: Image.self) {
-                                                            logoImage = loaded
-                                                            logoUIImage = nil
-                                                        } else {
-                                                            print("Failed")
-                                                        }
-                                                    }
+                                            }
+                                            else {
+                                                Image(uiImage: logoUIImage!)
+                                                    .resizable()
+                                                    .frame(
+                                                        width: 80,
+                                                        height: 80
+                                                    )
+                                                    .cornerRadius(16)
+                                            }
+                                        }
+                                        .fullScreenCover(isPresented: self.$showLogoCamera) {
+                                            accessCameraView(selectedImage: self.$logoUIImage)
+                                                .edgesIgnoringSafeArea(.all)
+                                        }
+                                        .photosPicker(isPresented: $showLogoPicker, selection: $logoItem)
+                                        .onChange(of: logoItem) {
+                                            Task {
+                                                if let loaded = try? await logoItem?.loadTransferable(type: Image.self) {
+                                                    logoImage = loaded
+                                                    logoUIImage = nil
+                                                } else {
+                                                    print("Failed")
                                                 }
+                                            }
+                                        }
                                         Spacer()
                                             .frame(width: 16)
                                         Menu {
@@ -732,27 +737,27 @@ struct CardEditBody: View {
                                             Button("Выбрать из галереи", action: {
                                                 self.showLogoPicker = true
                                             })
-                                                } label: {
-                                                    HStack {
-                                                        Image("edit")
-                                                        Spacer()
-                                                            .frame(width: 8)
-                                                        Text("Изменить логотип")
-                                                            .font(
-                                                                .custom(
-                                                                    "OpenSans-SemiBold",
-                                                                    size: 18
-                                                                )
-                                                            )
-                                                            .foregroundStyle(textDefault)
-                                                    }
-                                                    .frame(
-                                                        minWidth: UIScreen.main.bounds.width - 152,
-                                                        minHeight: 48
+                                        } label: {
+                                            HStack {
+                                                Image("edit")
+                                                Spacer()
+                                                    .frame(width: 8)
+                                                Text("Изменить логотип")
+                                                    .font(
+                                                        .custom(
+                                                            "OpenSans-SemiBold",
+                                                            size: 18
+                                                        )
                                                     )
-                                                    .background(accent50)
-                                                    .cornerRadius(24)
-                                                }
+                                                    .foregroundStyle(textDefault)
+                                            }
+                                            .frame(
+                                                minWidth: UIScreen.main.bounds.width - 152,
+                                                minHeight: 48
+                                            )
+                                            .background(accent50)
+                                            .cornerRadius(24)
+                                        }
                                     }
                                     Spacer()
                                         .frame(width: 16)
@@ -927,34 +932,34 @@ struct CardEditBody: View {
                                                 isAlert.toggle()
                                             }
                                             .customAlert(
-                                                            "Удалить визитку?",
-                                                            isPresented: $isAlert,
-                                                            actionText: "Удалить"
-                                                        ) {
-                                                            makeRequest(
-                                                                path: "cards/\(cardSettings.cardModel.id)",
-                                                                method: .delete,
-                                                                isString: true
-                                                            ) { (result: Result<DeleteModel, Error>) in
-                                                                DispatchQueue.main.async {
-                                                                    switch result {
-                                                                    case .success(_):
-                                                                        router.navigateBack()
-                                                                        print("success")
-                                                                    case .failure(let error):
-                                                                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                                                                            self.pageType = .noResultsFound
-                                                                        }
-                                                                        else {
-                                                                            self.pageType = .somethingWentWrong
-                                                                        }
-                                                                        print(error.localizedDescription)
-                                                                    }
-                                                                }
+                                                "Удалить визитку?",
+                                                isPresented: $isAlert,
+                                                actionText: "Удалить"
+                                            ) {
+                                                makeRequest(
+                                                    path: "cards/\(cardSettings.cardModel.id)",
+                                                    method: .delete,
+                                                    isString: true
+                                                ) { (result: Result<DeleteModel, Error>) in
+                                                    DispatchQueue.main.async {
+                                                        switch result {
+                                                        case .success(_):
+                                                            router.navigateBack()
+                                                            print("success")
+                                                        case .failure(let error):
+                                                            if error.localizedDescription == "The Internet connection appears to be offline." {
+                                                                self.pageType = .noResultsFound
                                                             }
-                                                        } message: {
-                                                            Text("Визитка и вся информация в ней будут удалены. Удалить визитку?")
+                                                            else {
+                                                                self.pageType = .somethingWentWrong
+                                                            }
+                                                            print(error.localizedDescription)
                                                         }
+                                                    }
+                                                }
+                                            } message: {
+                                                Text("Визитка и вся информация в ней будут удалены. Удалить визитку?")
+                                            }
                                         Spacer()
                                             .frame(height: 32)
                                     }
@@ -1019,7 +1024,7 @@ struct CardEditBody: View {
                     cardSettings.achievements = cardSettings.cardModel.achievements ?? []
                 }
             }
-//            cardSettings.achievements.append(AchievementModel(name: "ырыррsjsbjjs", description: "вырыррыdsbhhbdbhdhbdhbdhbdhbdhbhbdhbdhbdhbdhbdbdbhbdhbhdbhhbdbhdhbdhbhbdhbdhbdhbhdbhbdhbdhbdhbhbd", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Earth_from_Space.jpg/1200px-Earth_from_Space.jpg"))
+            //            cardSettings.achievements.append(AchievementModel(name: "ырыррsjsbjjs", description: "вырыррыdsbhhbdbhdhbdhbdhbdhbdhbhbdhbdhbdhbdhbdbdbhbdhbhdbhhbdbhdhbdhbhbdhbdhbdhbhdbhbdhbdhbdhbhbd", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Earth_from_Space.jpg/1200px-Earth_from_Space.jpg"))
             makeRequest(path: "specifity", method: .get) { (result: Result<[SpecificityModel], Error>) in
                 DispatchQueue.main.async {
                     switch result {

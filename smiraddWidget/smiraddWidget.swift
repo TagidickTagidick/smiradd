@@ -1,10 +1,3 @@
-//
-//  smiraddWidget.swift
-//  smiraddWidget
-//
-//  Created by Минь Дык Фам on 06.05.2024.
-//
-
 import WidgetKit
 import SwiftUI
 import CoreImage.CIFilterBuiltins
@@ -68,14 +61,14 @@ struct smiraddWidgetEntryView : View {
                 .resizable()
                 .scaledToFit()
                 .frame(
-                    width: 110, // Adjusting width for a 2x2 widget
-                    height: 110  // Adjusting height for a 2x2 widget
+                    width: 50, // Adjusting width for a 2x2 widget
+                    height: 50  // Adjusting height for a 2x2 widget
                 )
-                Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
+                Spacer().frame(height: 2) // Adjusting spacing for a 2x2 widget
                 Text("Арт-директор Ozon")
                     .font(.custom("OpenSans-Bold", size: 16)) // Adjusting font size
                     .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
-                Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
+                Spacer().frame(height: 2) // Adjusting spacing for a 2x2 widget
             }
             .padding(7)
             .background(Color.white)
@@ -91,7 +84,7 @@ struct smiraddWidget: Widget {
             smiraddWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .supportedFamilies([.systemMedium])
+        .supportedFamilies([.systemSmall])
     }
 }
 
@@ -107,11 +100,4 @@ extension ConfigurationAppIntent {
         intent.favoriteEmoji = "🤩"
         return intent
     }
-}
-
-#Preview(as: .systemSmall) {
-    smiraddWidget()
-} timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
 }

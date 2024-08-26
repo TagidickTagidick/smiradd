@@ -3,13 +3,11 @@ import SwiftUI
 struct CustomBottomNavigationBar: View {
     @EnvironmentObject var router: Router
     
-    @State private var index: Int = 0
-    
     var body: some View {
         HStack {
             Spacer()
             VStack {
-                if index == 0 {
+                if router.index == 0 {
                     Image("networking_active")
                 }
                 else {
@@ -20,7 +18,7 @@ struct CustomBottomNavigationBar: View {
                 Text("Нетворкинг")
                     .font(
                         .custom(
-                            "Roboto-\(index == 0 ? "Medium" : "Regular")",
+                            "Roboto-\(router.index == 0 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
@@ -29,11 +27,11 @@ struct CustomBottomNavigationBar: View {
             .onTapGesture {
                 router.navigateToRoot()
                 router.navigate(to: .networkingScreen)
-                self.index = 0
+                router.index = 0
             }
             Spacer()
             VStack {
-                if index == 1 {
+                if router.index == 1 {
                     Image("profile_active")
                 }
                 else {
@@ -44,7 +42,7 @@ struct CustomBottomNavigationBar: View {
                 Text("Профиль")
                     .font(
                         .custom(
-                            "Roboto-\(index == 1 ? "Medium" : "Regular")",
+                            "Roboto-\(router.index == 1 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
@@ -53,11 +51,11 @@ struct CustomBottomNavigationBar: View {
             .onTapGesture {
                 router.navigateToRoot()
                 router.navigate(to: .profileScreen)
-                self.index = 1
+                router.index = 1
             }
             Spacer()
             VStack {
-                if index == 2 {
+                if router.index == 2 {
                     Image("favorites_active")
                 }
                 else {
@@ -68,7 +66,7 @@ struct CustomBottomNavigationBar: View {
                 Text("Избранное")
                     .font(
                         .custom(
-                            "Roboto-\(index == 2 ? "Medium" : "Regular")",
+                            "Roboto-\(router.index == 2 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
@@ -77,7 +75,7 @@ struct CustomBottomNavigationBar: View {
             .onTapGesture {
                 router.navigateToRoot()
                 router.navigate(to: .favoritesScreen)
-                self.index = 2
+                router.index = 2
             }
             Spacer()
         }
