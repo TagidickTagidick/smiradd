@@ -92,18 +92,29 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct smiraddApp: App, KeyboardReadable {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    @ObservedObject var router = Router()
+    @ObservedObject var navigationService = NavigationService()
     
     @State private var scrollOffset: CGFloat = 0
     
-    @StateObject var cardSettings = CardSettings()
-    @StateObject var profileSettings = ProfileSettings()
+    @StateObject var profileViewModel: ProfileViewModel
+    
     @StateObject var favoritesSettings = FavoritesSettings()
     
     @State private var isEnabled: Bool = false
     @State private var isKeyboardVisible: Bool = false
     
     @State private var isTutorial: Bool = !UserDefaults.standard.bool(forKey: "first_time")
+    
+    init() {
+        _profileViewModel = StateObject(
+            wrappedValue: ProfileViewModel(
+                    repository: ProfileRepository(
+                        networkService: NetworkService()
+                    ),
+                    navigationService: NavigationService()
+                )
+        )
+    }
     
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "smiradd" else {
@@ -124,46 +135,63 @@ struct smiraddApp: App, KeyboardReadable {
             print("Recipe name not found")
             return
         }
-        
-        cardSettings.cardId = recipeName
-        router.navigate(to: .cardScreen)
+
+        navigationService.navigate(to: .cardScreen(cardId: recipeName, cardType: .userCard))
     }
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.navPath) {
+            NavigationStack(path: $navigationService.navPath) {
                 Spacer()
-                    .navigationDestination(for: Router.Destination.self) { i in
+                    .navigationDestination(for: NavigationService.Destination.self) { i in
                         ZStack (alignment: .bottom) {
                             switch i {
                             case .splashScreen:
                                 SplashScreen()
                             case .signInScreen:
-                                AuthorizationScreen(isSignUp: false)
+                                AuthorizationPageView(
+                                    isSignUp: false,
+                                    repository: AuthorizationRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: navigationService
+                                )
                             case .signUpScreen:
-                                AuthorizationScreen(isSignUp: true)
+                                AuthorizationPageView(
+                                    isSignUp: true,
+                                    repository: AuthorizationRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: navigationService
+                                )
                             case .networkingScreen:
-                                NetworkingScreen()
-                            case .cardScreen:
-                                CardScreen()
+                                NetworkingPageView(
+                                    repository: MockNetworkRepository(),
+                                    navigationService: navigationService
+                                )
+                            case .cardScreen(let cardId, let cardType):
+                                CardPageView(
+                                    repository: CardRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: navigationService,
+                                    cardId: cardId,
+                                    cardType: cardType
+                                )
                             case .settingsScreen:
-                                SettingsScreen()
-                            case .templatesScreen:
-                                TemplatesScreen()
+                                SettingsPageView()
                             case .profileScreen:
-                                ProfileScreen()
+                                ProfilePageView()
                             case .favoritesScreen:
                                 FavoritesScreen()
                             case .filterScreen:
                                 FilterScreen()
-                            case .achievementScreen:
-                                AchievementScreen()
                             case .serviceScreen:
-                                ServiceScreen()
+                                ServicePageView()
                             case .qrCodeScreen:
-                                QRCodeScreen()
+                                QRCodePageView()
                             case .notificationsScreen:
-                                NotificationsScreen()
+                                NotificationsPageView()
                             default:
                                 SplashScreen()
                             }
@@ -176,7 +204,7 @@ struct smiraddApp: App, KeyboardReadable {
                                 CustomBottomNavigationBar()
                             }
                             if isTutorial && i == .networkingScreen {
-                                TutorialScreen(isTutorial: $isTutorial)
+                                TutorialView(isTutorial: $isTutorial)
                             }
                         }
                         .navigationBarBackButtonHidden(true)
@@ -190,7 +218,7 @@ struct smiraddApp: App, KeyboardReadable {
             .onAppear {
                 let accessToken = UserDefaults.standard.string(forKey: "access_token")
                 if accessToken == nil {
-                    router.navigate(to: .signInScreen)
+                    navigationService.navigate(to: .signInScreen)
                 }
                 else {
                     let body: [String: Double] = [
@@ -198,46 +226,61 @@ struct smiraddApp: App, KeyboardReadable {
                         "longitude": 0,
                     ]
                     let finalBody = try! JSONSerialization.data(withJSONObject: body)
-                    makeRequest(
-                        path: "networking/mylocation?code=9933",
-                        method: .post,
-                        body: finalBody
-                    ) { (result: Result<LocationModel, Error>) in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(let cards):
-                                makeRequest(
-                                    path: "templates",
-                                    method: .get
-                                ) { (result: Result<[TemplateModel], Error>) in
-                                    switch result {
-                                    case .success(let templates):
-                                        DispatchQueue.main.async {
-                                            self.profileSettings.templates = templates
-                                            router.navigate(to: .networkingScreen)
-                                        }
-                                    case .failure(let error):
-                                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                                        //                            self.pageType = .internetError
-                                        //                        }
-                                        //                        else {
-                                        //                            self.pageType = .nothingHere
-                                        //                        }
-                                        print(error.localizedDescription)
-                                    }
-                                }
-                                print("success")
-                            case .failure(let error):
-                                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                                //                            self.pageType = .internetError
-                                //                        }
-                                //                        else {
-                                //                            self.pageType = .nothingHere
-                                //                        }
-                                print(error.localizedDescription)
-                            }
-                        }
-                    }
+                    let networkService = NetworkService()
+                    
+                    navigationService.navigate(to: .networkingScreen)
+//                    networkClient.post(url: "networking/mylocation?code=9933") { result in
+//                        DispatchQueue.main.async {
+//                            switch result {
+//                                case .success(let response):
+//                                    print("да")
+//                                    //healthCheckResult = "Health Check Success: \(response)"
+//                                case .failure(let error):
+//                                    print(error.message)
+//                                        //healthCheckResult = "Health Check Failed: \(error.message)"
+//                                }
+//                            }
+//                    }
+//                    makeRequest(
+//                        path: "networking/mylocation?code=9933",
+//                        method: .post,
+//                        body: finalBody
+//                    ) { (result: Result<LocationModel, Error>) in
+//                        DispatchQueue.main.async {
+//                            switch result {
+//                            case .success(let cards):
+//                                makeRequest(
+//                                    path: "templates",
+//                                    method: .get
+//                                ) { (result: Result<[TemplateModel], Error>) in
+//                                    switch result {
+//                                    case .success(let templates):
+//                                        DispatchQueue.main.async {
+//                                            self.profileSettings.templates = templates
+//                                            navigationService.navigate(to: .networkingScreen)
+//                                        }
+//                                    case .failure(let error):
+//                                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+//                                        //                            self.pageType = .internetError
+//                                        //                        }
+//                                        //                        else {
+//                                        //                            self.pageType = .nothingHere
+//                                        //                        }
+//                                        print(error.localizedDescription)
+//                                    }
+//                                }
+//                                print("success")
+//                            case .failure(let error):
+//                                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
+//                                //                            self.pageType = .internetError
+//                                //                        }
+//                                //                        else {
+//                                //                            self.pageType = .nothingHere
+//                                //                        }
+//                                print(error.localizedDescription)
+//                            }
+//                        }
+//                    }
                 }
             }
             .onReceive(keyboardPublisher) {
@@ -254,9 +297,8 @@ struct smiraddApp: App, KeyboardReadable {
                         // Check if `user` exists; otherwise, do something with `error`
                       }
                     }
-            .environmentObject(router)
-            .environmentObject(cardSettings)
-            .environmentObject(profileSettings)
+            .environmentObject(navigationService)
+            .environmentObject(profileViewModel)
             .environmentObject(favoritesSettings)
             .environment(\.sizeCategory, .medium)
         }
