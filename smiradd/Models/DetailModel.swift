@@ -1,5 +1,6 @@
 import SwiftUI
 
 struct DetailModel: Codable {
-    let detail: String
+    let details: String
 }
+

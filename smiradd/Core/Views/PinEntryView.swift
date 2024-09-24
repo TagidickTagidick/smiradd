@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct PinEntryView: View {
-    
     var pinLimit: Int = 4
     var isError: Bool = false
     var canEdit: Bool = true
@@ -14,7 +13,11 @@ struct PinEntryView: View {
     var body: some View {
         ZStack {
             VStack {
-                PinCodeTextField(limit: pinLimit, canEdit: canEdit, text: $pinCode)
+                PinCodeTextField(
+                    limit: pinLimit,
+                    canEdit: canEdit,
+                    text: $pinCode
+                )
                     .border(Color.black, width: 1)
                     .frame(height: 60)
                     .padding()
@@ -51,39 +54,6 @@ struct PinEntryView: View {
     }
 }
 
-struct PinEntryView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            StatefulPreviewWrapper("") {
-                PinEntryView(pinCode: $0)
-            }
-            .previewLayout(.sizeThatFits)
-            StatefulPreviewWrapper("12") {
-                PinEntryView(pinCode: $0)
-            }
-            .previewLayout(.sizeThatFits)
-            
-            StatefulPreviewWrapper("1333") {
-                PinEntryView(isError: true, pinCode: $0)
-            }
-            .previewLayout(.sizeThatFits)
-            
-            StatefulPreviewWrapper("12") {
-                PinEntryView(pinLimit: 6, pinCode: $0)
-            }
-            .previewLayout(.sizeThatFits)
-            
-            StatefulPreviewWrapper("12") {
-                PinEntryView(pinLimit: 6, pinCode: $0)
-            }
-            .background(Color.black)
-            .previewLayout(.sizeThatFits)
-            .colorScheme(.dark)
-        }
-    }
-}
-
-/// A UITextField Representable that enables the PinField to become first responder.
 struct PinCodeTextField: UIViewRepresentable {
     
     class Coordinator: NSObject, UITextFieldDelegate {

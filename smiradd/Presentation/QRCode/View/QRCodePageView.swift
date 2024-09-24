@@ -45,7 +45,7 @@ struct QRCodePageView: View {
             VStack (alignment: .leading) {
                 Spacer()
                     .frame(height: safeAreaInsets.top)
-                BackButton()
+                BackButtonView()
                 Spacer()
                 VStack {
                     Spacer()

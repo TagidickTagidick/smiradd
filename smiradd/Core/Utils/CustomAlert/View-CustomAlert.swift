@@ -13,6 +13,7 @@ extension View {
         _ titleKey: LocalizedStringKey,
         isPresented: Binding<Bool>,
         actionText: LocalizedStringKey,
+        isRed: Bool = false,
         action: @escaping () -> (),
         @ViewBuilder message: @escaping () -> M
     ) -> some View where M: View {
@@ -37,20 +38,24 @@ extension View {
         }
     }
     
-    func forumCode<M>(
+    func networkingAlert<M>(
         _ titleKey: LocalizedStringKey,
         isPresented: Binding<Bool>,
-        pinCode: Binding<String>,
         actionText: LocalizedStringKey,
+        image: String,
+        title: String,
+        description: String,
         action: @escaping () -> (),
         @ViewBuilder message: @escaping () -> M
     ) -> some View where M: View {
         fullScreenCover(isPresented: isPresented) {
-            ForumCodeView(
+            NetworkingAlertView(
                 titleKey,
                 isPresented,
-                pinCode,
                 actionTextKey: actionText,
+                image: image,
+                title: title,
+                description: description,
                 action: action,
                 message: message
             )

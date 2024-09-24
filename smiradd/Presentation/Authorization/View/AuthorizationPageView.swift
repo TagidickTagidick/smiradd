@@ -11,20 +11,21 @@ struct AuthorizationPageView: View {
     init(
         isSignUp: Bool,
         repository: IAuthorizationRepository,
-        navigationService: NavigationService
+        navigationService: NavigationService,
+        commonViewModel: CommonViewModel,
+        locationManager: LocationManager,
+        commonRepository: ICommonRepository
     ) {
         _viewModel = StateObject(
             wrappedValue: AuthorizationViewModel(
                 repository: repository,
                 isSignUp: isSignUp,
-                navigationService: navigationService
+                navigationService: navigationService,
+                locationManager: locationManager,
+                commonViewModel: commonViewModel,
+                commonRepository: commonRepository
             )
         )
-    }
-    
-    func isValidEmail(_ email: String) -> Bool {
-        let emailRegex = #"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#
-        return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
     }
     
     var body: some View {
@@ -35,10 +36,14 @@ struct AuthorizationPageView: View {
             else {
                 VStack{
                     Spacer()
-                        .frame(height: screenHeight / 60) //20
+                        .frame(
+                            height: screenHeight / 60
+                        ) //20
                     Image("logo")
                     Spacer()
-                        .frame(height: screenHeight / 30) //36
+                        .frame(
+                            height: screenHeight / 30
+                        ) //36
                     Text(
                         self.viewModel.isSignUp
                         ? "Регистрация"
@@ -53,7 +58,9 @@ struct AuthorizationPageView: View {
                     )
                     .foregroundStyle(textDefault)
                     Spacer()
-                        .frame(height: screenHeight / 70) //16
+                        .frame(
+                            height: screenHeight / 70
+                        ) //16
                     Text(
                         self.viewModel.isSignUp
                         ? "Пожалуйста, укажите следующие детали для Вашей новой учетной записи"
@@ -69,46 +76,67 @@ struct AuthorizationPageView: View {
                     .foregroundStyle(textDefault)
                     Spacer()
                         .frame(height: screenHeight / 40) //32
-                    EmailField(
+                    EmailFieldView(
                         email: $viewModel.email,
                         emailIsError: $viewModel.emailIsError,
-                        emailIsFocused: _emailIsFocused,
-                        isSignUp: self.viewModel.isSignUp
+                        emailErrorText: $viewModel.emailErrorText,
+                        emailIsFocused: _emailIsFocused
                     )
                     Spacer()
-                        .frame(height: screenHeight / 70) //16
-                    PasswordField(
+                        .frame(
+                            height: screenHeight / 70
+                        ) //16
+                    PasswordFieldView(
                         password: $viewModel.password,
                         passwordIsError: $viewModel.passwordIsError,
+                        passwordErrorText: $viewModel.passwordErrorText,
                         passwordIsShown: $viewModel.passwordIsShown,
                         passwordIsFocused: _passwordIsFocused
                     )
                     Spacer()
-                        .frame(height: screenHeight / 40) //32
-                    CustomButton(
+                        .frame(
+                            height: screenHeight / 40
+                        ) //32
+                    CustomButtonView(
                         text: self.viewModel.isSignUp ? "Продолжить" : "Войти",
-                        color: self.viewModel.email.isEmpty || self.viewModel.password.isEmpty || !isValidEmail(self.viewModel.email)
+                        color: self.viewModel.email.isEmpty || self.viewModel.password.isEmpty || !self.viewModel.isValidEmail(self.viewModel.email)
                         ? textAdditional
                         : textDefault
                     )
                     .onTapGesture {
                         self.emailIsFocused = false
                         self.passwordIsFocused = false
-                        self.viewModel.signIn()
+                        
+                        if self.viewModel.isSignUp {
+                            self.viewModel.signUp()
+                        }
+                        else {
+                            self.viewModel.signIn()
+                        }
                     }
-                    PrivacyPolicy(
+                    PrivacyPolicyView(
                         isSignUp: self.viewModel.isSignUp,
                         screenHeight: screenHeight
                     )
                     Spacer()
-                        .frame(height: screenHeight / 50) //24
-                    AuthorizationDivider()
+                        .frame(
+                            height: screenHeight / 50
+                        ) //24
+                    AuthorizationDividerView()
                     Spacer()
-                        .frame(height: screenHeight / 50) //24
-                    GoogleSignInButton(isSignUp: self.viewModel.isSignUp)
+                        .frame(
+                            height: screenHeight / 50
+                        ) //24
+                    OtherServiceButtonView(
+                        isSignUp: self.viewModel.isSignUp
+                    )
                     Spacer()
-                        .frame(height: screenHeight / 20) //48
-                    ChangeAuthorizationButton(isSignUp: self.viewModel.isSignUp)
+                        .frame(
+                            height: screenHeight / 20
+                        ) //48
+                    ChangeAuthorizationButtonView(
+                        isSignUp: self.viewModel.isSignUp
+                    )
                     .onTapGesture {
                         self.viewModel.changeAuthorization()
                     }

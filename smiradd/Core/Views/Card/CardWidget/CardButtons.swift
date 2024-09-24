@@ -2,10 +2,12 @@ import SwiftUI
 
 struct CardButtons: View {
     var cardId: String
+    let onDislike: (() -> ())
+    let onLike: (() -> ())
     
     var body: some View {
         HStack {
-            Text("100 м отсюда")
+            Text("На мероприятии")
                 .font(
                     .custom(
                         "OpenSans-Regular",
@@ -29,21 +31,7 @@ struct CardButtons: View {
                     .foregroundColor(.white)
             }
             .onTapGesture {
-//                makeRequest(
-//                    path: "cards/\(cardModel.id)/favorites",
-//                    method: .delete
-//                ) { (result: Result<DetailsModel, Error>) in
-//                    DispatchQueue.main.async {
-//                        switch result {
-//                        case .success(_):
-//                            withAnimation {
-//                                cards.swipe(direction: .left, completion: nil)
-//                            }
-//                        case .failure(_):
-//                            print("failure")
-//                        }
-//                    }
-//                }
+                self.onDislike()
             }
             ZStack {
                 Circle()
@@ -60,15 +48,16 @@ struct CardButtons: View {
                     .foregroundColor(.white)
             }
             .onTapGesture {
+                self.onLike()
 //                makeRequest(
 //                    path: "cards/\(cardModel.id)/favorites",
-//                    method: .post
+//                    method: .delete
 //                ) { (result: Result<DetailsModel, Error>) in
 //                    DispatchQueue.main.async {
 //                        switch result {
 //                        case .success(_):
 //                            withAnimation {
-//                                cards.swipe(direction: .right, completion: nil)
+//                                cards.swipe(direction: .left, completion: nil)
 //                            }
 //                        case .failure(_):
 //                            print("failure")

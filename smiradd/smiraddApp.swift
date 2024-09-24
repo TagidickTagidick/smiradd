@@ -55,7 +55,9 @@ extension View {
 //}
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
+    @Published var url: URL?
+    func application(
+        _ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         
@@ -74,16 +76,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ app: UIApplication,
         open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]
     ) -> Bool {
-        var handled: Bool
+//        var handled: Bool
+//        
+//        handled = GIDSignIn.sharedInstance.handle(url)
+//        if handled {
+//            return true
+//        }
+        self.url = url
         
-        handled = GIDSignIn.sharedInstance.handle(url)
-        if handled {
-            return true
-        }
-        
-        // Handle other custom URL types.
-        
-        // If not handled by this app, return false.
         return false
     }
 }
@@ -96,25 +96,22 @@ struct smiraddApp: App, KeyboardReadable {
     
     @State private var scrollOffset: CGFloat = 0
     
-    @StateObject var profileViewModel: ProfileViewModel
+    @StateObject var commonViewModel = CommonViewModel(
+        repository: CommonRepository(
+        networkService: NetworkService()
+    )
+    )
     
-    @StateObject var favoritesSettings = FavoritesSettings()
+    @StateObject var locationManager = LocationManager()
     
     @State private var isEnabled: Bool = false
     @State private var isKeyboardVisible: Bool = false
     
-    @State private var isTutorial: Bool = !UserDefaults.standard.bool(forKey: "first_time")
+    @State private var isTutorial: Bool = !UserDefaults.standard.bool(
+        forKey: "first_time"
+    )
     
-    init() {
-        _profileViewModel = StateObject(
-            wrappedValue: ProfileViewModel(
-                    repository: ProfileRepository(
-                        networkService: NetworkService()
-                    ),
-                    navigationService: NavigationService()
-                )
-        )
-    }
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
     
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "smiradd" else {
@@ -129,7 +126,6 @@ struct smiraddApp: App, KeyboardReadable {
             print("Unknown URL, we can't handle this one!")
             return
         }
-        
         
         guard let recipeName = components.queryItems?.first(where: { $0.name == "id" })?.value else {
             print("Recipe name not found")
@@ -147,14 +143,26 @@ struct smiraddApp: App, KeyboardReadable {
                         ZStack (alignment: .bottom) {
                             switch i {
                             case .splashScreen:
-                                SplashScreen()
+                                SplashScreenView(
+                                    commonViewModel: self.commonViewModel,
+                                    navigationService: self.navigationService,
+                                    locationManager: self.locationManager,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
+                                )
                             case .signInScreen:
                                 AuthorizationPageView(
                                     isSignUp: false,
                                     repository: AuthorizationRepository(
                                         networkService: NetworkService()
                                     ),
-                                    navigationService: navigationService
+                                    navigationService: self.navigationService,
+                                    commonViewModel: self.commonViewModel,
+                                    locationManager: self.locationManager,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
                                 )
                             case .signUpScreen:
                                 AuthorizationPageView(
@@ -162,38 +170,95 @@ struct smiraddApp: App, KeyboardReadable {
                                     repository: AuthorizationRepository(
                                         networkService: NetworkService()
                                     ),
-                                    navigationService: navigationService
+                                    navigationService: navigationService,
+                                    commonViewModel: self.commonViewModel,
+                                    locationManager: self.locationManager,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
                                 )
                             case .networkingScreen:
                                 NetworkingPageView(
-                                    repository: MockNetworkRepository(),
-                                    navigationService: navigationService
+                                    repository: NetworkingRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: self.navigationService,
+                                    locationManager: self.locationManager,
+                                    commonViewModel: self.commonViewModel,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
                                 )
                             case .cardScreen(let cardId, let cardType):
                                 CardPageView(
                                     repository: CardRepository(
                                         networkService: NetworkService()
                                     ),
-                                    navigationService: navigationService,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: self.navigationService,
+                                    commonViewModel: self.commonViewModel,
                                     cardId: cardId,
                                     cardType: cardType
                                 )
-                            case .settingsScreen:
-                                SettingsPageView()
                             case .profileScreen:
-                                ProfilePageView()
+                                ProfilePageView(
+                                    repository: ProfileRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: self.navigationService,
+                                    commonViewModel: self.commonViewModel
+                                )
                             case .favoritesScreen:
-                                FavoritesScreen()
-                            case .filterScreen:
-                                FilterScreen()
-                            case .serviceScreen:
-                                ServicePageView()
+                                FavoritesPageView(
+                                    repository: FavoritesRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: navigationService,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
+                                )
+                            case .filterScreen(let isFavorites):
+                                FilterPageView(
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: navigationService,
+                                    commonSpecifities: isFavorites ? self.commonViewModel.favoritesSpecificities : self.commonViewModel.networkingSpecificities,
+                                    isFavorites: isFavorites
+                                )
                             case .qrCodeScreen:
                                 QRCodePageView()
-                            case .notificationsScreen:
-                                NotificationsPageView()
+                            case .teamScreen(
+                                let teamId,
+                                let teamType
+                            ):
+                                TeamPageView(
+                                    repository: TeamRepository(
+                                        networkService: NetworkService()
+                                ),
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: self.navigationService,
+                                    teamId: teamId,
+                                    teamType: teamType,
+                                    commonViewModel: self.commonViewModel
+                                )
                             default:
-                                SplashScreen()
+                                SplashScreenView(
+                                    commonViewModel: self.commonViewModel,
+                                    navigationService: self.navigationService,
+                                    locationManager: self.locationManager,
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    )
+                                )
                             }
                             if
                                 i != .splashScreen &&
@@ -201,87 +266,48 @@ struct smiraddApp: App, KeyboardReadable {
                                     i != .signUpScreen &&
                                     i != .qrCodeScreen &&
                                     !isKeyboardVisible {
-                                CustomBottomNavigationBar()
+                                CustomBottomNavigationBarView()
                             }
-                            if isTutorial && i == .networkingScreen {
-                                TutorialView(isTutorial: $isTutorial)
+                            if self.isTutorial && i == .networkingScreen && (!self.commonViewModel.isCardsEmpty || !self.commonViewModel.isTeamsEmpty) {
+                                TutorialView(isTutorial: self.$isTutorial)
                             }
+                            CustomNotificationView(
+                                text: "Запрос на вступление в команду успешно отправлен",
+                                isError: false
+                            )
+                                .onReceive(self.commonViewModel.timer) {
+                                    _ in
+                                    if self.commonViewModel.isAlert {
+                                        if self.commonViewModel.timeRemaining > 0 {
+                                            self.commonViewModel.timeRemaining -= 1
+                                                    }
+                                    }
+                                            }
+                                .onReceive(self.commonViewModel.timer) {
+                                    time in
+                                    if self.commonViewModel.isAlert {
+                                        if self.commonViewModel.timeRemaining == 0 {
+                                            self.commonViewModel.timer.connect().cancel()
+                                            self.commonViewModel.isAlert = false
+                                                    }
+                                    }
+                                            }
+
+                            .offset(
+                                y: self.commonViewModel.isAlert ? (-UIScreen.main.bounds.size.height + self.safeAreaInsets.top + 100) : -1000
+                            )
+                                .transition(.move(edge: .top))
                         }
                         .navigationBarBackButtonHidden(true)
+                        .frame(
+                            maxWidth: UIScreen.main.bounds.size.width,
+                            maxHeight: UIScreen.main.bounds.size.height
+                        )
                     }
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity
-                    )
                     .navigationBarBackButtonHidden(true)
             }
             .onAppear {
-                let accessToken = UserDefaults.standard.string(forKey: "access_token")
-                if accessToken == nil {
-                    navigationService.navigate(to: .signInScreen)
-                }
-                else {
-                    let body: [String: Double] = [
-                        "latitude": 0,
-                        "longitude": 0,
-                    ]
-                    let finalBody = try! JSONSerialization.data(withJSONObject: body)
-                    let networkService = NetworkService()
-                    
-                    navigationService.navigate(to: .networkingScreen)
-//                    networkClient.post(url: "networking/mylocation?code=9933") { result in
-//                        DispatchQueue.main.async {
-//                            switch result {
-//                                case .success(let response):
-//                                    print("да")
-//                                    //healthCheckResult = "Health Check Success: \(response)"
-//                                case .failure(let error):
-//                                    print(error.message)
-//                                        //healthCheckResult = "Health Check Failed: \(error.message)"
-//                                }
-//                            }
-//                    }
-//                    makeRequest(
-//                        path: "networking/mylocation?code=9933",
-//                        method: .post,
-//                        body: finalBody
-//                    ) { (result: Result<LocationModel, Error>) in
-//                        DispatchQueue.main.async {
-//                            switch result {
-//                            case .success(let cards):
-//                                makeRequest(
-//                                    path: "templates",
-//                                    method: .get
-//                                ) { (result: Result<[TemplateModel], Error>) in
-//                                    switch result {
-//                                    case .success(let templates):
-//                                        DispatchQueue.main.async {
-//                                            self.profileSettings.templates = templates
-//                                            navigationService.navigate(to: .networkingScreen)
-//                                        }
-//                                    case .failure(let error):
-//                                        //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-//                                        //                            self.pageType = .internetError
-//                                        //                        }
-//                                        //                        else {
-//                                        //                            self.pageType = .nothingHere
-//                                        //                        }
-//                                        print(error.localizedDescription)
-//                                    }
-//                                }
-//                                print("success")
-//                            case .failure(let error):
-//                                //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-//                                //                            self.pageType = .internetError
-//                                //                        }
-//                                //                        else {
-//                                //                            self.pageType = .nothingHere
-//                                //                        }
-//                                print(error.localizedDescription)
-//                            }
-//                        }
-//                    }
-                }
+                print("рвфрвфырфвррвы \(delegate.url)")
             }
             .onReceive(keyboardPublisher) {
                 newIsKeyboardVisible in
@@ -293,13 +319,16 @@ struct smiraddApp: App, KeyboardReadable {
                 handleIncomingURL(url)
             }
             .onAppear {
-                      GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-                        // Check if `user` exists; otherwise, do something with `error`
-                      }
-                    }
+                print(UserDefaults.standard.string(forKey: "access_token"))
+                if UserDefaults.standard.string(forKey: "access_token") == nil {
+                    self.navigationService.navigate(to: .signInScreen)
+                }
+                else {
+                    self.navigationService.navigate(to: .splashScreen)
+                }
+            }
             .environmentObject(navigationService)
-            .environmentObject(profileViewModel)
-            .environmentObject(favoritesSettings)
+            .environmentObject(commonViewModel)
             .environment(\.sizeCategory, .medium)
         }
     }

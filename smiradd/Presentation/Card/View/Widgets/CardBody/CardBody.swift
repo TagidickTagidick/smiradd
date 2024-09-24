@@ -2,130 +2,45 @@ import SwiftUI
 import PhotosUI
 import Combine
 
-struct CardBody: View {
+struct CardBodyView: View {
     @EnvironmentObject var router: NavigationService
     
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     
-    @EnvironmentObject var cardSettings: CardViewModel
+    @EnvironmentObject var viewModel: CardViewModel
     
     @State private var isAlert: Bool = false
+    
+    @State private var imageMock: UIImage?
+    
+    @State private var imageUrl: String = ""
     
     var body: some View {
         ZStack (alignment: .bottomTrailing) {
             ScrollView {
                 VStack (alignment: .leading) {
-                    ZStack {
-                        if cardSettings.cardModel.avatar_url == nil {
-                            Image("avatar")
-                                .resizable()
-                                .frame(
-                                    width: UIScreen.main.bounds.width,
-                                    height: 360
-                                    )
+                    CardImageView(
+                        image: self.$imageMock,
+                        imageUrl: self.$imageUrl,
+                        showTrailing: true,
+                        editButton: self.viewModel.cardType == .myCard ? true : nil,
+                        onTapEditButton: {
+                            self.viewModel.cardType = .editCard
                         }
-                        else {
-                            AsyncImage(
-                                url: URL(
-                                    string: cardSettings.cardModel.avatar_url!
-                                )
-                            ) { image in
-                                image
-                                    .resizable()
-                                    .frame(
-                                        width: UIScreen.main.bounds.width,
-                                        height: 360
-                                        )
-                            } placeholder: {
-                                ProgressView()
-                            }
-                            .frame(height: 228)
-                        }
-                        VStack {
-                            Spacer()
-                                .frame(height: safeAreaInsets.top)
-                            HStack {
-                                BackButton()
-                                Spacer()
-                                ZStack {
-                                    Circle()
-                                        .fill(.white.opacity(0.4))
-                                        .frame(
-                                            width: 48,
-                                            height: 48
-                                        )
-                                    if cardSettings.cardType == .favoriteCard {
-                                        Image(systemName: "heart.fill")
-                                            .foregroundColor(textDefault)
-                                            .onTapGesture {
-                                                isAlert = true
-                                            }
-                                            .customAlert(
-                                                            "Удалить из избранного?",
-                                                            isPresented: $isAlert,
-                                                            actionText: "Удалить"
-                                                        ) {
-//                                                            makeRequest(
-//                                                                path: "cards/\(cardSettings.cardId)/favorites",
-//                                                                method: .delete
-//                                                            ) { (result: Result<DetailsModel, Error>) in
-//                                                                DispatchQueue.main.async {
-//                                                                    switch result {
-//                                                                    case .success(_):
-//                                                                        router.navigateBack()
-//                                                                    case .failure(_):
-//                                                                        router.navigateBack()
-//                                                                    }
-//                                                                }
-//                                                            }
-                                                        } message: {
-                                                            Text("Визитка будет удалена, если у вас нет контактов ее владельца, то вернуть ее можно будет только при личной встрече. Удалить визитку из избранного?")
-                                                        }
-                                    }
-                                }
-                            }
-                            Spacer()
-                            if cardSettings.cardType == .myCard {
-                                ZStack {
-                                    HStack {
-                                        Image("edit")
-                                        Spacer()
-                                            .frame(width: 10)
-                                        Text("Редактировать")
-                                            .font(
-                                                .custom(
-                                                    "OpenSans-SemiBold",
-                                                    size: 16
-                                                )
-                                            )
-                                            .foregroundStyle(textDefault)
-                                    }
-                                    .frame(
-                                        minWidth: UIScreen.main.bounds.width - 40,
-                                        minHeight: 48
-                                    )
-                                    .background(.white.opacity(0.4))
-                                    .cornerRadius(28)
-                                }
-                                .onTapGesture {
-                                    self.cardSettings.cardType = .editCard
-                                }
-                            }
-                        }
-                        .padding(
-                            [.vertical, .horizontal],
-                            20
-                        )
+                    )
+                    .onAppear {
+                        self.imageUrl = self.viewModel.avatarUrl
                     }
-                    .frame(height: 360)
                     VStack (alignment: .leading) {
                         Spacer()
                             .frame(height: 16)
-                        CardLogo(cardModel: cardSettings.cardModel)
-                        if cardSettings.cardModel.phone != nil {
+                        CardLogo(cardModel: self.viewModel.cardModel)
+                        if self.viewModel.cardModel.phone != nil {
                             CardTile(
                                 icon: "phone",
-                                text: CustomFormatter.formatPhoneNumber(cardSettings.cardModel.phone!),
+                                text: CustomFormatter.formatPhoneNumber(
+                                    self.viewModel.cardModel.phone!
+                                ),
                                 isUrl: false
                             )
                             Spacer()
@@ -133,24 +48,15 @@ struct CardBody: View {
                         }
                         CardTile(
                             icon: "email",
-                            text: cardSettings.cardModel.email,
+                            text: self.viewModel.cardModel.email,
                             isUrl: false
                         )
                         Spacer()
                             .frame(height: 8)
-                        if cardSettings.cardModel.seek != nil {
-                            CardTile(
-                                icon: "site",
-                                text: cardSettings.cardModel.seek!,
-                                isUrl: true
-                            )
-                            Spacer()
-                                .frame(height: 8)
-                        }
-                        if cardSettings.cardModel.address != nil {
+                        if self.viewModel.cardModel.address != nil {
                             CardTile(
                                 icon: "address",
-                                text: cardSettings.cardModel.address!,
+                                text: self.viewModel.cardModel.address!,
                                 isUrl: false
                             )
                             Spacer()
@@ -159,87 +65,115 @@ struct CardBody: View {
                         Spacer()
                             .frame(width: 8)
                         HStack {
-                            if cardSettings.cardModel.tg_url != nil {
-                                Link(destination: URL(string: cardSettings.cardModel.tg_url!)!) {
-                                    CustomIcon(
+                            if self.viewModel.cardModel.tg_url != nil {
+                                Link(
+                                    destination: URL(
+                                        string: self.viewModel.cardModel.tg_url!
+                                    )!
+                                ) {
+                                    CustomIconView(
                                         icon: "telegram",
-                                        black: true
+                                        black: false
                                     )
                                 }
                                 Spacer()
                                     .frame(width: 16)
                             }
-                            if cardSettings.cardModel.vk_url != nil {
-                                Link(destination: URL(string: cardSettings.cardModel.vk_url!)!) {
-                                    CustomIcon(
+                            if self.viewModel.cardModel.vk_url != nil {
+                                Link(
+                                    destination: URL(
+                                        string: self.viewModel.cardModel.vk_url!
+                                    )!
+                                ) {
+                                    CustomIconView(
                                         icon: "vk",
-                                        black: true
+                                        black: false
                                     )
                                 }
                                 Spacer()
                                     .frame(width: 16)
                             }
-                            if cardSettings.cardModel.fb_url != nil {
-                                Link(destination: URL(string: cardSettings.cardModel.fb_url!)!) {
-                                    CustomIcon(
+                            if self.viewModel.cardModel.fb_url != nil {
+                                Link(
+                                    destination: URL(
+                                        string: self.viewModel.cardModel.fb_url!
+                                    )!
+                                ) {
+                                    CustomIconView(
                                         icon: "facebook",
-                                        black: true
+                                        black: false
                                     )
                                 }
                                 Spacer()
                                     .frame(width: 16)
                             }
-                            if cardSettings.cardModel.phone != nil {
-                                Link(destination: URL(string: "tel:79969267921")!) {
-                                    CustomIcon(
+                            if self.viewModel.cardModel.phone != nil {
+                                Link(
+                                    destination: URL(
+                                        string: "tel:79969267921"
+                                    )!
+                                ) {
+                                    CustomIconView(
                                         icon: "phone_icon",
-                                        black: true
+                                        black: false
                                     )
                                 }
                             }
                         }
                         Spacer()
                             .frame(height: 16)
-                        if cardSettings.cardModel.bio != nil {
-                            CardBio(bio: cardSettings.cardModel.bio!)
+                        if self.viewModel.cardModel.bio != nil {
+                            CardBio(
+                                title: "О команде",
+                                bio: self.viewModel.cardModel.bio!
+                            )
                             Spacer()
                                 .frame(height: 16)
                         }
-                        if cardSettings.cardModel.cv_url != nil {
-                            CustomText(text: "Резюме")
+                        if self.viewModel.cardModel.cv_url != nil {
+                            CustomTextView(text: "Доп. материалы")
                             Spacer()
                                 .frame(height: 8)
                             CardTile(
                                 icon: "cv",
-                                text: cardSettings.cardModel.cv_url!,
+                                text: self.viewModel.cardModel.cv_url!,
                                 isUrl: true
                             )
                             Spacer()
                                 .frame(height: 16)
                         }
-                        if cardSettings.cardModel.services != nil && !cardSettings.cardModel.services!.isEmpty {
-                            CustomText(text: "Услуги")
+                        if self.viewModel.cardModel.services != nil && !self.viewModel.cardModel.services!.isEmpty {
+                            CustomTextView(text: "Услуги")
                             Spacer()
                                 .frame(height: 12)
                         }
                     }
                     .padding([.horizontal], 20)
-                    if cardSettings.cardModel.services != nil && !cardSettings.cardModel.services!.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
+                    if self.viewModel.cardModel.services != nil && !self.viewModel.cardModel.services!.isEmpty {
+                        ScrollView(
+                            .horizontal,
+                            showsIndicators: false
+                        ) {
                             HStack {
                                 Spacer()
                                     .frame(width: 20)
-                                ForEach(Array(cardSettings.cardModel.services!.enumerated()), id: \.offset) { index, service in
-                                    //CardServiceView(service: service)
+                                ForEach(
+                                    Array(
+                                        self.viewModel.cardModel.services!.enumerated()
+                                    ),
+                                    id: \.offset
+                                ) {
+                                    index, service in
+                                    CardServiceView(service: service)
                                 }
                             }
                         }
                         Spacer()
                             .frame(height: 16)
                     }
-                    if cardSettings.cardModel.achievements != nil && !cardSettings.cardModel.achievements!.isEmpty {
+                    if self.viewModel.cardModel.achievements != nil && !self.viewModel.cardModel.achievements!.isEmpty {
                         VStack (alignment: .leading) {
-                            CustomText(text: "Достижения")
+                            CustomTextView(text: "Достижения")
                             Spacer()
                                 .frame(height: 12)
                         }
@@ -248,18 +182,40 @@ struct CardBody: View {
                             HStack {
                                 Spacer()
                                     .frame(width: 20)
-                                ForEach(Array(cardSettings.cardModel.achievements!.enumerated()), id: \.offset) {
+                                ForEach(
+                                    Array(
+                                        self.viewModel.cardModel.achievements!.enumerated()
+                                    ),
+                                    id: \.offset
+                                ) {
                                     index, achievement in
-                                    CardAchievementView(achievement: achievement)
+                                    if achievement.url == nil {
+                                        CardAchievementView(
+                                            achievement: achievement
+                                        )
+                                    }
+                                    else {
+                                        Link (
+                                            destination: URL(
+                                                string: achievement.url!
+                                            )!
+                                        ) {
+                                            CardAchievementView(
+                                                achievement: achievement
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                     Spacer()
-                        .frame(height: 78)
+                        .frame(
+                            height: 78 + self.safeAreaInsets.bottom
+                        )
                 }
             }
-            if cardSettings.cardType == .userCard {
+            if self.viewModel.cardType == .userCard {
                 HStack {
                     ZStack {
                         Circle()
@@ -276,19 +232,7 @@ struct CardBody: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
-                        makeRequest(
-                            path: "cards/\(cardSettings.cardModel.id)/favorites",
-                            method: .delete
-                        ) { (result: Result<DetailsModel, Error>) in
-                            DispatchQueue.main.async {
-                                switch result {
-                                case .success(_):
-                                    router.navigateBack()
-                                case .failure(_):
-                                    print("failure")
-                                }
-                            }
-                        }
+                        self.viewModel.dislike()
                     }
                     Spacer()
                         .frame(width: 16)
@@ -307,26 +251,38 @@ struct CardBody: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
-                        makeRequest(
-                            path: "cards/\(cardSettings.cardModel.id)/favorites",
-                            method: .post
-                        ) { (result: Result<DetailsModel, Error>) in
-                            DispatchQueue.main.async {
-                                switch result {
-                                case .success(_):
-                                    router.navigateBack()
-                                case .failure(_):
-                                    print("failure")
-                                }
-                            }
-                        }
+                        self.viewModel.like()
                     }
                 }
                 .offset(
                     x: -20,
-                    y: -78
+                    y: -78 - self.safeAreaInsets.bottom
                 )
             }
         }
+        .networkingAlert(
+            "Удалить визитку?",
+            isPresented: $viewModel.noCardsSheet,
+            actionText: "Удалить",
+            image: "no_cards",
+            title: "У вас ещё нет визитки",
+            description: "Чтобы начать сохранять чужие визитки, вам нужно создать собственную",
+            action: {
+                self.viewModel.noCardsSheet = false
+            },
+            message: {
+                CustomButtonView(
+                    text: "Создать визитку",
+                    color: textDefault,
+                    width: UIScreen.main.bounds.size.width - 80
+                )
+                .frame(
+                    width: UIScreen.main.bounds.size.width - 160
+                )
+                .onTapGesture {
+                    self.viewModel.createCard()
+                }
+            }
+        )
     }
 }

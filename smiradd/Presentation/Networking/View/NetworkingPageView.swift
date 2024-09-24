@@ -4,161 +4,143 @@ import CardStack
 struct NetworkingPageView: View {
     @StateObject private var viewModel: NetworkingViewModel
     
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     @FocusState private var emailIsFocused: Bool
     @FocusState private var passwordIsFocused: Bool
+    
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
     
     private let screenHeight = UIScreen.main.bounds.height
     
     init(
         repository: INetworkingRepository,
-        navigationService: NavigationService
+        navigationService: NavigationService,
+        locationManager: LocationManager,
+        commonViewModel: CommonViewModel,
+        commonRepository: CommonRepository
     ) {
         _viewModel = StateObject(
             wrappedValue: NetworkingViewModel(
                 repository: repository,
-                navigationService: navigationService
+                navigationService: navigationService,
+                locationManager: locationManager,
+                commonViewModel: commonViewModel,
+                commonRepository: commonRepository
             )
         )
     }
     
     var body: some View {
-        ZStack {
-            VStack (alignment: .leading) {
-                HStack {
-                    Image("exit_networking")
-                        .resizable()
-                        .frame(
-                            width: 36,
-                            height: 36
+        ZStack (
+            alignment: .top
+        ) {
+            VStack {
+                NetworkingAppBarView(
+                    onTapExit: {
+                        self.viewModel.openExitNetworkingSheet()
+                    },
+                    onTapFilter: {
+                        self.viewModel.openFilterSheet()
+                    }
+                )
+                .sheet(
+                    isPresented: $viewModel.isFilterSheet,
+                    onDismiss: {
+                        self.viewModel.closeFilterSheet()
+                    }) {
+                        FilterSheetView(
+                            isFilter: $viewModel.isFilterSheet
                         )
-                        .onTapGesture {
-                            self.viewModel.openExitNetworkingSheet()
-                        }
-                    Spacer()
-                    Text("Нетворкинг")
-                        .font(
-                            .custom(
-                                "OpenSans-SemiBold",
-                                size: 24
-                            )
-                        )
-                        .foregroundStyle(textDefault)
-                    Spacer()
-                    Image("filter_networking")
-                        .resizable()
-                        .frame(
-                            width: 36,
-                            height: 36
-                        )
-                }
+                        .environmentObject(self.viewModel)
+                    }
                 Spacer()
-                    .frame(height: 20)
-                ZStack {
-                    CustomWidget(
-                        pageType: $viewModel.pageType,
-                        onTap: {
+                    .frame(
+                        height: 16
+                    )
+                CustomWidget(
+                    pageType: $viewModel.pageType,
+                    onTap: {
+                        if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
                             if self.viewModel.pageType == .matchNotFound {
-                                self.viewModel.isSheet = true
+                                self.viewModel.openForumCodeSheet()
                             }
                             else {
-                                self.viewModel.pageType = .loading
-                                makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
-                                    switch result {
-                                    case .success(let cards):
-                                        self.viewModel.cards.appendElements(cards)
-                                        self.viewModel.pageType = .matchNotFound
-                                    case .failure(let error):
-                                        if error.localizedDescription == "The Internet connection appears to be offline." {
-                                            self.viewModel.pageType = .noResultsFound
-                                        }
-                                        print(error.localizedDescription)
-                                    }
-                                }
+                                self.viewModel.startAgain()
                             }
                         }
-                    )
-                    CardStack(
-                        model: self.viewModel.cards,
-                        onSwipe: { card, direction in
-                            print("Swiped \(card.name) to \(direction)")
-                        },
-                        content: { card, _ in
-                            CardWidget(
-                                cardModel: card,
-                                cards: $viewModel.cards
-                            )
-                            .onTapGesture {
-                                withAnimation {
-                                    self.viewModel.cards.swipe(direction: .right, completion: nil)
-                                }
-                            }
-                        }
-                    )
-                    //                    CardStack(
-                    //                      data: cards,
-                    //                      onSwipe: { card, direction in // Closure to be called when a card is swiped.
-                    //                        print("Swiped \(card) to \(direction)")
-                    //                      },
-                    //                      content: { card, direction, isOnTop in // View builder function
-                    //                          CardWidget(cardModel: card)
-                    //                              .onTapGesture {
-                    //                                  cards.append(CardModel(id: "ыррыры", job_title: "ыррыры", specificity: "ыррыры", phone: "ыррыры", email: "ыррыры", address: "ыррыры", name: "ыррыры", useful: "ыррыры", seek: "ыррыры", tg_url: "ыррыры", vk_url: "ыррыры", fb_url: "ыррыры", cv_url: "ыррыры", company_logo: "ыррыры", bio: "ыррыры", bc_template_type: "ыррыры", services: nil, achievements: nil, avatar_url: "ыррыры"))
-                    //                              }
-                    //                      }
-                    //                    )
+                    }
+                )
+                .onChange(
+                    of: self.viewModel.pinCode,
+                    {
+                        self.viewModel.setForumCode()
                 }
-                Spacer()
-                    .frame(height: 78)
+                )
+                .frame(
+                    width: UIScreen.main.bounds.size.width - 40,
+                    height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+                )
             }
-            .padding(
-                [.horizontal],
-                20
-            )
+            if self.commonViewModel.isTeamStorage {
+                CardSwiperView(
+                    cards: $commonViewModel.teamViews,
+                    onCardSwiped: {
+                        swipeDirection, index in
+                                switch swipeDirection {
+                                case .left:
+                                    self.viewModel.setSeen(
+                                        id: self.commonViewModel.teamViews[index].teamModel.id!
+                                    )
+                                case .right:
+                                    self.viewModel.setSeen(
+                                        id: commonViewModel.teamViews[index].teamModel.id!
+                                    )
+                                }
+                            },
+                    onCardDragged: {
+                        swipeDirection, index, offset in
+                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+                            }
+                )
+                .frame(
+                    width: UIScreen.main.bounds.size.width,
+                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom
+                )
+            }
+            else {
+                CardSwiperView(
+                    cards: $commonViewModel.cardViews,
+                    onCardSwiped: {
+                        swipeDirection, index in
+                                switch swipeDirection {
+                                case .left:
+                                    self.viewModel.setSeen(
+                                        id: self.commonViewModel.cardViews[index].cardModel.id
+                                    )
+                                case .right:
+                                    self.viewModel.setSeen(
+                                        id: self.commonViewModel.cardViews[index].cardModel.id
+                                    )
+                                }
+                            },
+                    onCardDragged: {
+                        swipeDirection, index, offset in
+                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+                            }
+                )
+                .frame(
+                    width: UIScreen.main.bounds.size.width,
+                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom
+                )
+            }
         }
+        .ignoresSafeArea()
+        .frame(
+            width: UIScreen.main.bounds.size.width,
+            height: UIScreen.main.bounds.size.height - 58// - self.safeAreaInsets.bottom
+        )
         .background(accent50)
-        .onAppear {
-            self.viewModel.onInit()
-//            makeRequest(
-//                path: "networkingv2/aroundme/10",
-//                method: .get
-//            ) { (result: Result<[CardModel], Error>) in
-//                DispatchQueue.main.async {
-//                    switch result {
-//                    case .success(let cards):
-//                        for card in cards {
-//                            if card.like != true {
-//                                self.cards.appendElement(card)
-//                            }
-//                        }
-//                        print("овыоов \(self.cards)")
-//                        self.pageType = .matchNotFound
-//                    case .failure(let error):
-//                        if error.localizedDescription == "The Internet connection appears to be offline." {
-//                            self.pageType = .noResultsFound
-//                        }
-//                        else {
-//                            self.pageType = .somethingWentWrong
-//                        }
-//                        print(error.localizedDescription)
-//                    }
-//                }
-//            }
-            
-            //            makeRequest(path: "cards", method: .get) { (result: Result<[CardModel], Error>) in
-            //                DispatchQueue.main.async {
-            //                    switch result {
-            //                    case .success(let cards):
-            //                        self.cards.appendElements(cards)
-            //                        self.pageType = .matchNotFound
-            //                    case .failure(let error):
-            //                        if error.localizedDescription == "The Internet connection appears to be offline." {
-            //                            self.pageType = .internetError
-            //                        }
-            //                        print(error.localizedDescription)
-            //                    }
-            //                }
-            //            }
-        }
         .customAlert(
                         "Покинуть нетворкинг?",
                         isPresented: $viewModel.isExitNetworkingSheet,
@@ -175,16 +157,174 @@ struct NetworkingPageView: View {
                             )
                             .foregroundStyle(textDefault)
                     }
-        .forumCode(
+                    .customAlert(
+                                    "У вас уже есть команда",
+                                    isPresented: $viewModel.isExitTeam,
+                                    actionText: "Покинуть"
+                                ) {
+                                    self.viewModel.leaveAndLike()
+                                } message: {
+                                    Text("Чтобы подавать заявку в эту команду вы должны покинуть текущую")
+                                        .font(
+                                            .custom(
+                                                "OpenSans-Regular",
+                                                size: 14
+                                            )
+                                        )
+                                        .foregroundStyle(textDefault)
+                                }
+                                .customAlert(
+                                                "Вы уже - лидер команды",
+                                                isPresented: $viewModel.isDeleteTeam,
+                                                actionText: "Удалить"
+                                            ) {
+                                                self.viewModel.deleteAndLike()
+                                            } message: {
+                                                Text("Чтобы подавать заявку в эту команду вы должны удалить свою")
+                                                    .font(
+                                                        .custom(
+                                                            "OpenSans-Regular",
+                                                            size: 14
+                                                        )
+                                                    )
+                                                    .foregroundStyle(textDefault)
+                                            }
+        .networkingAlert(
             "Удалить визитку?",
-            isPresented: $viewModel.isSheet,
-            pinCode: $viewModel.pinCode,
+            isPresented: $viewModel.isForumCodeSheet,
             actionText: "Удалить",
+            image: "no_event",
+            title: "Введите код форума",
+            description: "Начните знакомство с остальными участниками прямо сейчас!",
             action: {
-                self.viewModel.isSheet = false
+                self.viewModel.isForumCodeSheet = false
             },
             message: {
-                Text("Визитка и вся информация в ней будут удалены. Удалить визитку?")
+                PinEntryView(
+                    pinLimit: 4,
+                    pinCode: $viewModel.pinCode
+                )
+            }
+        )
+        .networkingAlert(
+            "Удалить визитку?",
+            isPresented: $viewModel.noCardsSheet,
+            actionText: "Удалить",
+            image: "no_cards",
+            title: "У вас ещё нет визитки",
+            description: "Чтобы начать сохранять чужие визитки, вам нужно создать собственную",
+            action: {
+                self.viewModel.noCardsSheet = false
+            },
+            message: {
+                CustomButtonView(
+                    text: "Создать визитку",
+                    color: textDefault,
+                    width: UIScreen.main.bounds.width - 80
+                )
+                .onTapGesture {
+                    self.viewModel.createCard()
+                }
+            }
+        )
+        .networkingAlert(
+            "Удалить визитку?",
+            isPresented: $viewModel.isQuestionForumSheet,
+            actionText: "Удалить",
+            image: "no_event",
+            title: "Вы сейчас на '\(self.commonViewModel.forumName)'?",
+            description: "Начните знакомство с остальными участниками прямо сейчас!",
+            action: {
+                self.viewModel.answerNoQuestionForumSheet()
+            },
+            message: {
+                HStack (alignment: .center) {
+                    ZStack {
+                        Text("Нет")
+                            .font(
+                                .custom(
+                                    "OpenSans-SemiBold",
+                                    size: 16
+                                )
+                            )
+                            .foregroundStyle(textDefault)
+                    }
+                    .frame(
+                        width: 120,
+                        height: 40
+                    )
+                    .background(
+                        Color(
+                            red: 0.949,
+                            green: 0.949,
+                            blue: 0.949
+                        )
+                    )
+                    .cornerRadius(20)
+                    .onTapGesture {
+                        self.viewModel.answerNoQuestionForumSheet()
+                    }
+                    Spacer()
+                        .frame(
+                            width: 16
+                        )
+                    ZStack {
+                        Text("Да")
+                            .font(
+                                .custom(
+                                    "OpenSans-SemiBold",
+                                    size: 16
+                                )
+                            )
+                            .foregroundStyle(.white)
+                    }
+                    .frame(
+                        width: 120,
+                        height: 40
+                    )
+                    .background(textDefault)
+                    .cornerRadius(20)
+                    .onTapGesture {
+                        self.viewModel.answerYesQuestionForumSheet()
+                    }
+                }
+            }
+        )
+        .networkingAlert(
+            "Удалить визитку?",
+            isPresented: $viewModel.isChooseStatusSheet,
+            actionText: "Удалить",
+            image: "no_results_found",
+            title: "Выберите статус",
+            description: "Чтобы продолжить, выберите статус",
+            action: {
+                self.viewModel.noCardsSheet = false
+            },
+            message: {
+                VStack {
+                    CustomButtonView(
+                        text: "Ищу команду",
+                        color: textDefault,
+                        width: UIScreen.main.bounds.width - 80
+                    )
+                    .frame(
+                        width: UIScreen.main.bounds.size.width - 160
+                    )
+                    .onTapGesture {
+                        self.viewModel.setIsSteam(isTeam: true)
+                    }
+                    CustomButtonView(
+                        text: "Ищу участников",
+                        color: textAccent,
+                        width: UIScreen.main.bounds.width - 80
+                    )
+                    .frame(
+                        width: UIScreen.main.bounds.size.width - 160
+                    )
+                    .onTapGesture {
+                        self.viewModel.setIsSteam(isTeam: false)
+                    }
+                }
             }
         )
     }

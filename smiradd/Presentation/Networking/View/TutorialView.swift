@@ -3,6 +3,8 @@ import SwiftUI
 struct TutorialView: View {
     @Binding var isTutorial: Bool
     
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
+    
     var body: some View {
         VStack {
             Spacer()
@@ -43,8 +45,8 @@ struct TutorialView: View {
         }
         .background(.black.opacity(0.6))
         .frame(
-            minWidth: UIScreen.main.bounds.width,
-            minHeight: UIScreen.main.bounds.height
+            width: UIScreen.main.bounds.size.width,
+            height: UIScreen.main.bounds.size.height - 58 - safeAreaInsets.bottom
         )
         .onTapGesture {
             UserDefaults.standard.set(

@@ -2,11 +2,15 @@ import os.log
 import Foundation
 import SwiftUI
 
-let isProd = true
+let isProd = false
 
 class NetworkService: INetworkService {
-    private let baseUrl = "http\(isProd ? "s" : "")://\(isProd ? "smiradd.ru" : "80.90.185.153:5002")/api/"
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
+    private let baseUrl = "http\(isProd ? "s" : "")://\(isProd ? "smiradd.ru" : "92.255.77.156:5000")/api/"
+    
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: "Network"
+    )
     
     private var accessToken: String? {
         return UserDefaults.standard.string(forKey: "access_token")
@@ -16,51 +20,127 @@ class NetworkService: INetworkService {
         return UserDefaults.standard.string(forKey: "refresh_token")
     }
     
-    func post(url: String, body: [String: Any], completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
-        request(method: "POST", url: url, body: body, completion: completion)
+    func post(
+        url: String,
+        body: [String: Any]? = nil,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
+        request(
+            method: "POST",
+            url: url,
+            body: body,
+            completion: completion
+        )
     }
     
-    func get(url: String, completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
-        request(method: "GET", url: url, body: nil, completion: completion)
+    func get(
+        url: String,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
+        request(
+            method: "GET",
+            url: url,
+            body: nil,
+            completion: completion
+        )
     }
     
-    func delete(url: String, completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
-        request(method: "DELETE", url: url, body: nil, completion: completion)
+    func delete(
+        url: String,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
+        request(
+            method: "DELETE",
+            url: url,
+            body: nil,
+            completion: completion
+        )
     }
     
-    func patch(url: String, body: [String: Any], completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
-        request(method: "PATCH", url: url, body: body, completion: completion)
+    func patch(
+        url: String,
+        body: [String: Any?]? = nil,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
+        request(
+            method: "PATCH",
+            url: url,
+            body: body,
+            completion: completion
+        )
     }
     
-    private func request(method: String, url: String, body: [String: Any]?, completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
+    func put(
+        url: String,
+        body: [String: Any]? = nil,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
+        request(
+            method: "PUT",
+            url: url,
+            body: body,
+            completion: completion
+        )
+    }
+    
+    private func request(
+        method: String,
+        url: String,
+        body: [String: Any?]?,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
         let accessToken = self.accessToken ?? ""
         
         let fullUrl = URL(string: "\(baseUrl)\(url)")!
         var request = URLRequest(url: fullUrl)
         request.httpMethod = method
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        var requestData: Data? = nil
+        request.addValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        request.addValue(
+            "Bearer \(accessToken)",
+            forHTTPHeaderField: "Authorization"
+        )
         if let body = body {
-            requestData = try! JSONSerialization.data(withJSONObject: body, options: [])
-            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+            request.httpBody = try? JSONSerialization.data(
+                withJSONObject: body,
+                options: []
+            )
         }
         
         self.logRequest(
             method: method,
             url: url,
-            data: requestData
+            data: request.httpBody
         )
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        let task = URLSession.shared.dataTask(
+            with: request
+        ) {
+            data, response, error in
+            
             if let error = error {
-                completion(.failure(ErrorModel(statusCode: 500, message: error.localizedDescription)))
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: error.localizedDescription
+                        )
+                    )
+                )
                 return
             }
             
             guard let httpResponse = response as? HTTPURLResponse else {
-                completion(.failure(ErrorModel(statusCode: 500, message: "Invalid response")))
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: "Invalid response"
+                        )
+                    )
+                )
                 return
             }
             
@@ -75,64 +155,206 @@ class NetworkService: INetworkService {
             case 200:
                 if let data = data {
                     do {
-                        let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+                        let jsonObject = try JSONSerialization.jsonObject(
+                            with: data,
+                            options: []
+                        )
+                        if let jsonDict = jsonObject as? [String: Any] {
+                            completion(.success(jsonDict))
+                        }
+                        else if let jsonArray = jsonObject as? [[String: Any]] {
+                            completion(.success(["payload": jsonArray]))
+                        } else {
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: 500,
+                                        message: "Invalid JSON response"
+                                    )
+                                )
+                            )
+                        }
+                    } catch {
+                        completion(.success(["success": true]))
+                    }
+                } else {
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "No data received"
+                            )
+                        )
+                    )
+                }
+            case 201:
+                if let data = data {
+                    do {
+                        if data.count == 4 {
+                            completion(.success(["name": ""]))
+                            return
+                        }
+                        let jsonObject = try JSONSerialization.jsonObject(
+                            with: data,
+                            options: []
+                        )
                         if let jsonDict = jsonObject as? [String: Any] {
                             completion(.success(jsonDict))
                         } else if let jsonArray = jsonObject as? [[String: Any]] {
-                            completion(.success(["payload": jsonArray]))
+                            completion(.success(["details": jsonArray]))
                         } else {
-                            completion(.failure(ErrorModel(statusCode: 500, message: "Invalid JSON response")))
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: 500,
+                                        message: "Invalid JSON response"
+                                    )
+                                )
+                            )
                         }
                     } catch {
-                        completion(.failure(ErrorModel(statusCode: 500, message: "JSON deserialization error: \(error.localizedDescription)")))
+                        completion(
+                            .failure(
+                                ErrorModel(
+                                    statusCode: 500,
+                                    message: "JSON deserialization error: \(error.localizedDescription)"
+                                )
+                            )
+                        )
                     }
                 } else {
-                    completion(.failure(ErrorModel(statusCode: 500, message: "No data received")))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "No data received"
+                            )
+                        )
+                    )
                 }
+            case 204:
+                completion(.success(["details": true]))
             case 401:
                 self.refresh { result in
                     switch result {
                     case .success:
-                        self.request(method: method, url: url, body: body, completion: completion)
+                        self.request(
+                            method: method,
+                            url: url,
+                            body: body,
+                            completion: completion
+                        )
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+            case 403:
+                self.refresh { result in
+                    switch result {
+                    case .success:
+                        self.request(
+                            method: method,
+                            url: url,
+                            body: body,
+                            completion: completion
+                        )
                     case .failure(let error):
                         completion(.failure(error))
                     }
                 }
             default:
-                let message = String(data: data ?? Data(), encoding: .utf8) ?? "Unknown error"
-                completion(.failure(ErrorModel(statusCode: httpResponse.statusCode, message: message)))
+                if let data = data {
+                    do {
+                        let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+                        if let jsonObject = jsonObject as? [String: Any] {
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: httpResponse.statusCode,
+                                        message: jsonObject["detail"] as! String
+                                    )
+                                )
+                            )
+                        } else {
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: 500,
+                                        message: "Invalid JSON response"
+                                    )
+                                )
+                            )
+                        }
+                    } catch {
+                        completion(
+                            .failure(
+                                ErrorModel(
+                                    statusCode: 500,
+                                    message: "JSON deserialization error: \(error.localizedDescription)"
+                                )
+                            )
+                        )
+                    }
+                } else {
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "No data received"
+                            )
+                        )
+                    )
+                }
             }
         }
         
         task.resume()
     }
     
-    func refresh(completion: @escaping (Result<Void, ErrorModel>) -> Void) {
+    func refresh(
+        completion: @escaping (Result<Void, ErrorModel>) -> Void
+    ) {
         guard let refreshToken = self.refreshToken else {
             completion(.failure(ErrorModel(statusCode: 401, message: "No refresh token")))
             return
         }
         
-        let fullUrl = URL(string: "\(baseUrl)refresh")!
+        let fullUrl = URL(string: "\(baseUrl)auth/refresh-token")!
         var request = URLRequest(url: fullUrl)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization")
         
+        print(request.url!.absoluteString)
+        
         self.logRequest(
             method: "POST",
-            url: "refresh",
+            url: "auth/refresh-token",
             data: nil
         )
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                completion(.failure(ErrorModel(statusCode: 500, message: error.localizedDescription)))
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: error.localizedDescription
+                        )
+                    )
+                )
                 return
             }
             
             guard let httpResponse = response as? HTTPURLResponse else {
-                completion(.failure(ErrorModel(statusCode: 500, message: "Invalid response")))
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: "Invalid response"
+                        )
+                    )
+                )
                 return
             }
             
@@ -140,32 +362,58 @@ class NetworkService: INetworkService {
                 statusCode: httpResponse.statusCode,
                 data: data,
                 method: "POST",
-                url: "refresh"
+                url: "auth/refresh-token"
             )
             
             if httpResponse.statusCode == 200 {
                 if let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let payload = json["payload"] as? [String: Any],
-                   let newAccessToken = payload["access_token"] as? String,
-                   let newRefreshToken = payload["refresh_token"] as? String {
-                    UserDefaults.standard.set(newAccessToken, forKey: "accessToken")
-                    UserDefaults.standard.set(newRefreshToken, forKey: "refreshToken")
+                   let newAccessToken = json["access_token"] as? String,
+                   let newRefreshToken = json["refresh_token"] as? String {
+                    UserDefaults.standard.set(
+                        newAccessToken,
+                        forKey: "access_token"
+                    )
+                    UserDefaults.standard.set(
+                        newRefreshToken,
+                        forKey: "refresh_token"
+                    )
+                    
                     completion(.success(()))
                 } else {
-                    completion(.failure(ErrorModel(statusCode: 500, message: "Invalid JSON response")))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "Invalid JSON response"
+                            )
+                        )
+                    )
                 }
             } else {
-                let message = String(data: data ?? Data(), encoding: .utf8) ?? "Unknown error"
-                completion(.failure(ErrorModel(statusCode: httpResponse.statusCode, message: message)))
+                let message = String(
+                    data: data ?? Data(),
+                    encoding: .utf8
+                ) ?? "Unknown error"
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: httpResponse.statusCode,
+                            message: message
+                        )
+                    )
+                )
             }
         }
         
         task.resume()
     }
     
-    func uploadImage(image: UIImage, completion: @escaping (Result<Void, ErrorModel>) -> Void) {
+    func uploadImage(
+        image: UIImage,
+        completion: @escaping (Result<String, ErrorModel>) -> Void
+    ) {
         if let imageData = image.jpegData(compressionQuality: 0.8) {
-            let url = URL(string: "https://vizme.pro/api/storage")!
+            let url = URL(string: "https://smiradd.ru/api/storage")!
             
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
@@ -185,19 +433,33 @@ class NetworkService: INetworkService {
             
             self.logRequest(
                 method: "POST",
-                url: "https://vizme.pro/api/storage",
+                url: "storage",
                 data: nil
             )
             
             let task = URLSession.shared.dataTask(with: request) {
                 data, response, error in
                 if let error = error {
-                    completion(.failure(ErrorModel(statusCode: 500, message: error.localizedDescription)))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: error.localizedDescription
+                            )
+                        )
+                    )
                     return
                 }
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    completion(.failure(ErrorModel(statusCode: 500, message: "Invalid response")))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "Invalid response"
+                            )
+                        )
+                    )
                     return
                 }
                 
@@ -208,18 +470,47 @@ class NetworkService: INetworkService {
                     url: "https://vizme.pro/api/storage"
                 )
                 
-                if httpResponse.statusCode == 200 {
-                    if let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                       let payload = json["payload"] as? [String: Any],
-                       let newAccessToken = payload["access_token"] as? String,
-                       let newRefreshToken = payload["refresh_token"] as? String {
-                        UserDefaults.standard.set(newAccessToken, forKey: "accessToken")
-                        UserDefaults.standard.set(newRefreshToken, forKey: "refreshToken")
-                        completion(.success(()))
+                switch httpResponse.statusCode {
+                case 201:
+                    if let data = data {
+                        do {
+                            let jsonObject = try JSONSerialization.jsonObject(
+                                with: data,
+                                options: []
+                            )
+                            if let jsonDict = jsonObject as? [String: String?] {
+                                completion(.success("https://s3.timeweb.cloud/29ad2e34-vizme/\((jsonDict["details"] ?? "")!)"))
+                            } else {
+                                completion(
+                                    .failure(
+                                        ErrorModel(
+                                            statusCode: 500,
+                                            message: "Invalid JSON response"
+                                        )
+                                    )
+                                )
+                            }
+                        } catch {
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: 500,
+                                        message: "JSON deserialization error: \(error.localizedDescription)"
+                                    )
+                                )
+                            )
+                        }
                     } else {
-                        completion(.failure(ErrorModel(statusCode: 500, message: "Invalid JSON response")))
+                        completion(
+                            .failure(
+                                ErrorModel(
+                                    statusCode: 500,
+                                    message: "No data received"
+                                )
+                            )
+                        )
                     }
-                } else {
+                default:
                     let message = String(data: data ?? Data(), encoding: .utf8) ?? "Unknown error"
                     completion(.failure(ErrorModel(statusCode: httpResponse.statusCode, message: message)))
                 }
@@ -231,8 +522,11 @@ class NetworkService: INetworkService {
         }
     }
     
-    private func logRequest(method: String, url: String, data: Data?) {
-        let requestBody = data.flatMap { String(data: $0, encoding: .utf8) } ?? "No body"
+    private func logRequest(
+        method: String,
+        url: String,
+        data: Data?
+    ) {
         logger.notice(
             """
             Request:
@@ -243,9 +537,13 @@ class NetworkService: INetworkService {
         )
     }
     
-    private func logResponse(statusCode: Int, data: Data?, method: String, url: String) {
-        let responseBody = data.flatMap { String(data: $0, encoding: .utf8) } ?? "No body"
-        if statusCode == 200 {
+    private func logResponse(
+        statusCode: Int,
+        data: Data?,
+        method: String,
+        url: String
+    ) {
+        if statusCode >= 200 && statusCode < 300 {
             logger.info(
                 """
                 Response:

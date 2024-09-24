@@ -1,28 +1,38 @@
 import SwiftUI
 
 struct AchievementPageView: View {
-    @EnvironmentObject var router: NavigationService
+    @EnvironmentObject var cardViewModel: CardViewModel
     
-    @EnvironmentObject var viewModel: CardViewModel
+    @StateObject var viewModel: AchievementViewModel
     
-    @State var name: String = ""
     @FocusState private var nameIsFocused: Bool
     
-    @State var description: String = ""
     @FocusState private var descriptionIsFocused: Bool
     
-    @State var url: String = ""
     @FocusState private var urlIsFocused: Bool
     
-    @State private var isAlert = false
+    init(
+        index: Int,
+        cardViewModel: CardViewModel
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: AchievementViewModel(
+                index: index,
+                cardViewModel: cardViewModel
+            )
+        )
+    }
     
     var body: some View {
         ScrollView {
             VStack (alignment: .leading) {
-                CustomAppBar(
-                    title: self.viewModel.achievementIndex == -1
-                    ? "Создание достижения"
-                    : "Изменение достижения"
+                CustomAppBarView(
+                    title: self.cardViewModel.achievementIndex == -1
+                    ? "Создание кейса"
+                    : "Изменение кейса",
+                    action: {
+                        self.cardViewModel.closeAchievement()
+                    }
                 )
                 .padding(
                     [.vertical],
@@ -30,43 +40,35 @@ struct AchievementPageView: View {
                 )
                 Spacer()
                     .frame(height: 20)
-                Text("Название*")
-                    .font(
-                        .custom(
-                            "OpenSans-Medium",
-                            size: 14
-                        )
-                    )
-                    .foregroundStyle(textAdditional)
+                CustomTextView(
+                    text: "Название",
+                    isRequired: true
+                )
                 Spacer()
                     .frame(height: 12)
-                CustomTextField(
-                    value: $name,
-                    hintText: "Введите название достижения",
-                    focused: $nameIsFocused
+                CustomTextFieldView(
+                    value: $viewModel.name,
+                    hintText: "Введите название кейса",
+                    focused: $nameIsFocused,
+                    limit: 30,
+                    showCount: true
                 )
                 .onTapGesture {
                     nameIsFocused = true
                 }
                 Spacer()
                     .frame(height: 20)
-                Text("Описание")
-                    .font(
-                        .custom(
-                            "OpenSans-Medium",
-                            size: 14
-                        )
-                    )
-                    .foregroundStyle(textAdditional)
+                CustomTextView(text: "Описание")
                 Spacer()
                     .frame(height: 12)
-                CustomTextField(
-                    value: $description,
-                    hintText: "Кратко опишите достижение",
+                CustomTextFieldView(
+                    value: $viewModel.description,
+                    hintText: "Кратко опишите кейс",
                     focused: $descriptionIsFocused,
                     height: 103,
-                    limit: 500,
-                    isLongText: true
+                    limit: 80,
+                    isLongText: true,
+                    showCount: true
                 )
                 .lineLimit(5)
                 .onTapGesture {
@@ -84,54 +86,52 @@ struct AchievementPageView: View {
                     .foregroundStyle(textAdditional)
                 Spacer()
                     .frame(height: 12)
-                CustomTextField(
-                    value: $url,
+                CustomTextFieldView(
+                    value: $viewModel.url,
                     hintText: "Вставьте ссылку",
                     focused: $urlIsFocused
                 )
                 .onTapGesture {
                     urlIsFocused = true
                 }
-                if self.viewModel.achievementIndex != -1 {
-                    DeleteWidget(text: "достижение")
+                if self.cardViewModel.achievementIndex != -1 {
+                    DeleteView(text: "кейс")
                         .onTapGesture {
-                            isAlert.toggle()
+                            self.viewModel.openDeleteAlert()
                         }
                         .customAlert(
-                                        "Удалить?",
-                                        isPresented: $isAlert,
-                                        actionText: "Удалить"
-                                    ) {
-                                        self.viewModel.achievements.remove(at: self.viewModel.achievementIndex)
-                                        router.navigateBack()
-                                    } message: {
-                                        Text("Достижение и вся информация в нем будут удалены. Удалить достижение?")
-                                    }
+                            "Удалить?",
+                            isPresented: $viewModel.isAlert,
+                            actionText: "Удалить"
+                        ) {
+                            self.cardViewModel.deleteAchievement()
+                        } message: {
+                            Text(
+                                "Кейс и вся информация в нем будут удалены. Удалить кейс?"
+                            )
+                        }
                 }
                 Spacer()
                     .frame(height: 32)
                 Spacer()
-                CustomButton(
+                CustomButtonView(
                     text: "Сохранить",
-                    color: !name.isEmpty ? Color(
-                    red: 0.408,
-                    green: 0.784,
-                    blue: 0.58
-                ) : Color(
-                    red: 0.867,
-                    green: 0.867,
-                    blue: 0.867
-                ))
-                    .onTapGesture {
-                        if !name.isEmpty {
-                            self.viewModel.achievements.append(AchievementModel(
-                                name: name,
-                                description: description,
-                                url: url
-                            ))
-                            router.navigateBack()
-                        }
-                    }
+                    color: !self.viewModel.name.isEmpty ? Color(
+                        red: 0.408,
+                        green: 0.784,
+                        blue: 0.58
+                    ) : Color(
+                        red: 0.867,
+                        green: 0.867,
+                        blue: 0.867
+                    ))
+                .onTapGesture {
+                    self.cardViewModel.saveAchievement(
+                        name: self.viewModel.name,
+                        description: self.viewModel.description,
+                        url: self.viewModel.url
+                    )
+                }
                 Spacer()
                     .frame(height: 74)
             }
@@ -140,12 +140,8 @@ struct AchievementPageView: View {
                 20
             )
         }
+        .navigationBarHidden(true)
         .background(.white)
-        .onAppear {
-            self.name = self.viewModel.achievementIndex == -1 ? "" : self.viewModel.achievements[self.viewModel.achievementIndex].name
-            self.description = self.viewModel.achievementIndex == -1 ? "" : self.viewModel.achievements[self.viewModel.achievementIndex].description
-            self.url = self.viewModel.achievementIndex == -1 ? "" : self.viewModel.achievements[self.viewModel.achievementIndex].url
-        }
         .onTapGesture {
             nameIsFocused = false
             descriptionIsFocused = false

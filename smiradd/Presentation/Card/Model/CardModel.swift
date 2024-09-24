@@ -18,10 +18,10 @@ struct CardModel: Codable, Identifiable {
     let cv_url: String?
     let company_logo: String?
     let bio: String?
-    let bc_template_type: String?
+    var bc_template_type: String?
     let services: [ServiceModel]?
     let achievements: [AchievementModel]?
-    let avatar_url: String?
+    var avatar_url: String?
     let like: Bool?
     
     static func makeMock(templateId: String) -> CardModel {
@@ -49,5 +49,28 @@ struct CardModel: Codable, Identifiable {
             )
         }
     
-    static let mock: [CardModel] = []
+    static let mocks: [CardModel] = []
+    
+    static let mock: CardModel = CardModel(
+        id: "",
+        job_title: "Арт-директор Ozon",
+        specificity: "",
+        phone: "7 (920) 121-50-44",
+        email: "elemochka@klmn.com",
+        address: nil,
+        name: "Елена Грибоедова",
+        useful: nil,
+        seek: nil,
+        tg_url: nil,
+        vk_url: nil,
+        fb_url: nil,
+        cv_url: nil,
+        company_logo: nil,
+        bio: nil,
+        bc_template_type: nil,
+        services: nil,
+        achievements: nil,
+        avatar_url: nil,
+        like: false
+    )
 }

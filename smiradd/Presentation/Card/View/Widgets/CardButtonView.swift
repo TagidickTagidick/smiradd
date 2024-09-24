@@ -18,6 +18,5 @@ struct CardButtonView: View {
                 )
                 .foregroundStyle(textDefault)
         }
-        .cornerRadius(24)
     }
 }

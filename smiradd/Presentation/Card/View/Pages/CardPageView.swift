@@ -5,14 +5,18 @@ struct CardPageView: View {
     
     init(
         repository: ICardRepository,
+        commonRepository: ICommonRepository,
         navigationService: NavigationService,
+        commonViewModel: CommonViewModel,
         cardId: String,
         cardType: CardType
     ) {
         _viewModel = StateObject(
             wrappedValue: CardViewModel(
                 repository: repository,
+                commonRepository: commonRepository,
                 navigationService: navigationService,
+                commonViewModel: commonViewModel,
                 cardId: cardId,
                 cardType: cardType
             )
@@ -22,18 +26,23 @@ struct CardPageView: View {
     var body: some View {
         ZStack {
             if self.viewModel.pageType == .loading {
-                ProgressView()
+                VStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
             }
             else {
                 if self.viewModel.cardType == .editCard || self.viewModel.cardType == .newCard {
-                    CardEditBody()
+                    CardEditView()
                 }
                 else {
-                    CardBody()
+                    CardBodyView()
                 }
             }
         }
         .background(.white)
         .environmentObject(self.viewModel)
+        .ignoresSafeArea()
     }
 }

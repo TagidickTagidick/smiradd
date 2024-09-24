@@ -15,6 +15,7 @@ enum PageType {
     case nothingHereProfile
     case nothingHereFavorites
     case nothingHereNotifications
+    case shareLocation
 }
 
 enum CardType {

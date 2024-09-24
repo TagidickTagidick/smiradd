@@ -22,6 +22,8 @@ struct CustomWidget: View {
                                 return "page_not_found"
                             case .somethingWentWrong:
                                 return "something_went_wrong"
+                            case .shareLocation:
+                                return "share_location"
                             default:
                                 return "nothing_here"
                             }
@@ -38,10 +40,13 @@ struct CustomWidget: View {
                             return "На этом форуме больше никого нет"
                         case .somethingWentWrong:
                             return "Упс! Что-то пошло не так..."
+                        case .shareLocation:
+                            return "Нет доступа к геоданным"
                         default:
                             return "Здесь пока пусто"
                         }
                     }())
+                    .multilineTextAlignment(.center)
                         .font(
                             .custom(
                                 "OpenSans-Medium",
@@ -65,6 +70,8 @@ struct CustomWidget: View {
                                 return "Посещайте больше форумов, чтобы знакомиться с новыми людьми"
                             case .somethingWentWrong:
                                 return "Попробуйте перезагрузить приложение"
+                            case .shareLocation:
+                                return "Для нормальной работы приложения необходимо включить доступ к геоданным"
                             default:
                                 return "Попробуйте перезагрузить приложение"
                             }
@@ -82,7 +89,7 @@ struct CustomWidget: View {
                             blue: 0.6
                         ))
                     
-                    if pageType == .matchNotFound {
+                    if self.pageType == .matchNotFound || self.pageType == .pageNotFound || self.pageType == .shareLocation {
                         VStack {
                             Spacer()
                                 .frame(height: 24)
@@ -94,7 +101,9 @@ struct CustomWidget: View {
                                     )
                                     .background(textDefault)
                                     .cornerRadius(28)
-                                Text("Войти по коду")
+                                Text(self.pageType == .matchNotFound || self.pageType == .shareLocation
+                                     ? "Войти по коду"
+                                     : "Начать сначала")
                                     .font(
                                         .custom(
                                             "OpenSans-SemiBold",
@@ -113,7 +122,9 @@ struct CustomWidget: View {
                         VStack {
                             Spacer()
                                 .frame(height: 36)
-                            CustomWhiteButton(text: pageType == .noResultsFound ? "Повторить" : "Войти по коду")
+                            CustomWhiteButtonView(
+                                text: pageType == .noResultsFound ? "Повторить" : "Войти по коду"
+                            )
                             .onTapGesture {
                                 self.onTap()
                             }
@@ -161,17 +172,27 @@ struct CustomWidget: View {
             maxWidth: .infinity,
             maxHeight: .infinity
         )
-        .background(pageType == .loading || pageType == .matchNotFound ? .white : accent50)
+        .background(
+            pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound
+            ? .white
+            : accent50
+        )
         .cornerRadius(16)
         .shadow(
-            color: pageType == .loading || pageType == .matchNotFound ? Color(
+            color: pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound
+            ? Color(
                 red: 0.125,
                 green: 0.173,
                 blue: 0.275,
                 opacity: 0.08
-            ) : accent50,
-            radius: pageType == .loading || pageType == .matchNotFound ? 16 : 0,
-            y: pageType == .loading || pageType == .matchNotFound ? 4 : 0
+            )
+            : accent50,
+            radius: pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound
+            ? 16
+            : 0,
+            y: pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound
+            ? 4
+            : 0
         )
     }
 }

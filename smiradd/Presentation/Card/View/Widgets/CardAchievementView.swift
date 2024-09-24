@@ -17,7 +17,7 @@ struct CardAchievementView: View {
                     .foregroundStyle(.white)
                 Spacer()
                     .frame(height: 8)
-                Text(achievement.description)
+                Text(achievement.description ?? "")
                     .font(
                         .custom(
                             "OpenSans-Regular",
@@ -27,26 +27,28 @@ struct CardAchievementView: View {
                     .foregroundStyle(.white)
                 Spacer()
                     .frame(height: 12)
-                if !achievement.url.isEmpty {
-                    HStack {
-                        Image("site")
-                            .renderingMode(.template)
-                            .frame(
-                                width: 24,
-                                height: 24
-                            )
-                            .foregroundColor(.white)
-                        Spacer()
-                            .frame(width: 8)
-                        Text(achievement.url)
-                            .font(
-                                .custom(
-                                    "OpenSans-Regular",
-                                    size: 14
+                if achievement.url != nil {
+                    if !achievement.url!.isEmpty {
+                        HStack {
+                            Image("site")
+                                .renderingMode(.template)
+                                .frame(
+                                    width: 24,
+                                    height: 24
                                 )
-                            )
-                            .foregroundStyle(.white)
-                            .frame(height: 20)
+                                .foregroundColor(.white)
+                            Spacer()
+                                .frame(width: 8)
+                            Text(achievement.url!)
+                                .font(
+                                    .custom(
+                                        "OpenSans-Regular",
+                                        size: 14
+                                    )
+                                )
+                                .foregroundStyle(.white)
+                                .frame(height: 20)
+                        }
                     }
                 }
             }

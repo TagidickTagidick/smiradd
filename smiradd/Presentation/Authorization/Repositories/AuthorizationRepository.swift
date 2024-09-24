@@ -7,7 +7,11 @@ class AuthorizationRepository: IAuthorizationRepository {
         self.networkService = networkService
     }
     
-    func signUpWithEmail(email: String, password: String, completion: @escaping (Result<AuthorizationModel, Error>) -> Void) {
+    func signUpWithEmail(
+        email: String,
+        password: String,
+        completion: @escaping (Result<AuthorizationModel, ErrorModel>) -> Void
+    ) {
         self.networkService.post(
             url: "auth/registration",
             body: [
@@ -18,20 +22,34 @@ class AuthorizationRepository: IAuthorizationRepository {
             switch result {
             case .success(let response):
                 do {
-                    let data = try JSONSerialization.data(withJSONObject: response, options: [])
-                    let authorizationModel = try JSONDecoder().decode(AuthorizationModel.self, from: data)
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    let authorizationModel = try JSONDecoder().decode(
+                        AuthorizationModel.self,
+                        from: data
+                    )
                     completion(.success(authorizationModel))
                 } catch {
-                    completion(.failure(error))
+                    completion(.failure(ErrorModel(
+                        statusCode: 500,
+                        message: "Failed to parse"
+                    )))
                 }
             case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
-                completion(.failure(errorModel))
+                completion(
+                    .failure(errorModel)
+                )
             }
         }
     }
     
-    func signInWithEmail(email: String, password: String, completion: @escaping (Result<AuthorizationModel, ErrorModel>) -> Void) {
+    func signInWithEmail(
+        email: String,
+        password: String,
+        completion: @escaping (Result<AuthorizationModel, ErrorModel>) -> Void
+    ) {
         networkService.post(
             url: "auth/login",
             body: [
@@ -42,11 +60,20 @@ class AuthorizationRepository: IAuthorizationRepository {
             switch result {
             case .success(let response):
                 do {
-                    let data = try JSONSerialization.data(withJSONObject: response, options: [])
-                    let authorizationModel = try JSONDecoder().decode(AuthorizationModel.self, from: data)
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    let authorizationModel = try JSONDecoder().decode(
+                        AuthorizationModel.self,
+                        from: data
+                    )
                     completion(.success(authorizationModel))
                 } catch {
-                    completion(.failure(ErrorModel(statusCode: 500, message: "Failed to parse")))
+                    completion(.failure(ErrorModel(
+                        statusCode: 500,
+                        message: "Failed to parse"
+                    )))
                 }
             case .failure(let errorModel):
                 print("Signup failed: \(errorModel.message)")

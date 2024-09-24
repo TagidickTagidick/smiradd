@@ -7,14 +7,21 @@ final class NavigationService: ObservableObject {
         case signUpScreen
         case homeScreen
         case networkingScreen
-        case cardScreen(cardId: String, cardType: CardType)
+        case cardScreen(
+            cardId: String,
+            cardType: CardType
+        )
         case profileScreen
         case favoritesScreen
-        case filterScreen
+        case filterScreen(isFavorites: Bool)
         case serviceScreen
         case settingsScreen
         case qrCodeScreen
         case notificationsScreen
+        case teamScreen(
+            teamId: String,
+            teamType: CardType
+        )
     }
     
     @Published var navPath = NavigationPath()

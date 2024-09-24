@@ -2,7 +2,15 @@ import Foundation
 import SwiftUI
 
 class MockNetworkService: INetworkService {
-    func uploadImage(image: UIImage, completion: @escaping (Result<Void, ErrorModel>) -> Void) {
+    
+    func put(url: String, body: [String : Any]?, completion: @escaping (Result<[String : Any], ErrorModel>) -> Void) {
+        
+    }
+    
+    func uploadImage(
+        image: UIImage,
+        completion: @escaping (Result<String, ErrorModel>) -> Void
+    ) {
         
     }
     
@@ -13,19 +21,33 @@ class MockNetworkService: INetworkService {
         self.mockResponse = mockResponse
     }
 
-    func post(url: String, body: [String: Any], completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
+    func post(
+        url: String,
+        body: [String: Any]?,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
         // Implement if needed
     }
 
-    func get(url: String, completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
+    func get(
+        url: String,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
         completion(.success(mockResponse))
     }
 
-    func delete(url: String, completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
+    func delete(
+        url: String,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
         // Implement if needed
     }
 
-    func patch(url: String, body: [String: Any], completion: @escaping (Result<[String: Any], ErrorModel>) -> Void) {
+    func patch(
+        url: String,
+        body: [String: Any?]?,
+        completion: @escaping (Result<[String: Any], ErrorModel>) -> Void
+    ) {
         // Implement if needed
     }
     

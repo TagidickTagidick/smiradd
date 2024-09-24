@@ -48,8 +48,8 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                         Text(titleKey)
                             .font(
                                 .custom(
-                                    "OpenSans-Medium",
-                                    size: 14
+                                    "OpenSans-SemiBold",
+                                    size: 18
                                 )
                             )
                             .foregroundStyle(textDefault)
@@ -153,11 +153,13 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                     width: 107,
                     height: 40
                 )
-                .background(Color(
+                .background(
+                    actionTextKey != "Да" ? Color(
                     red: 0.898,
                     green: 0.271,
                     blue: 0.267
-                ))
+                    ) : textDefault
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 30.0))
         }
     }
@@ -186,7 +188,7 @@ struct CustomAlertView<T: Hashable, M: View>: View {
     }
 }
 
-struct ForumCodeView<T: Hashable, M: View>: View {
+struct NetworkingAlertView<T: Hashable, M: View>: View {
 
     @Binding private var isPresented: Bool
     @State private var titleKey: LocalizedStringKey
@@ -202,27 +204,33 @@ struct ForumCodeView<T: Hashable, M: View>: View {
     @State private var isAnimating = false
     private let animationDuration = 0.5
     
-    @Binding private var pinCode: String
+    private var image: String
+    private var title: String
+    private var description: String
 
     init(
         _ titleKey: LocalizedStringKey,
         _ isPresented: Binding<Bool>,
-        _ pinCode: Binding<String>,
         presenting data: T?,
         actionTextKey: LocalizedStringKey,
+        image: String,
+        title: String,
+        description: String,
         action: @escaping (T) -> (),
         @ViewBuilder message: @escaping (T) -> M
     ) {
         _titleKey = State(wrappedValue: titleKey)
         _actionTextKey = State(wrappedValue: actionTextKey)
         _isPresented = isPresented
-        _pinCode = pinCode
 
         self.data = data
         self.action = nil
         self.message = nil
         self.actionWithValue = action
         self.messageWithValue = message
+        self.image = image
+        self.title = title
+        self.description = description
     }
 
     var body: some View {
@@ -235,10 +243,10 @@ struct ForumCodeView<T: Hashable, M: View>: View {
             if isAnimating {
                 VStack {
                     VStack (alignment: .center) {
-                        Image("no_event")
+                        Image(image)
                         Spacer()
                             .frame(height: 16)
-                        Text("Введите код форума")
+                        Text(title)
                             .font(
                                 .custom(
                                     "OpenSans-SemiBold",
@@ -248,7 +256,8 @@ struct ForumCodeView<T: Hashable, M: View>: View {
                             .foregroundStyle(textDefault)
                         Spacer()
                             .frame(height: 12)
-                        Text("Начните знакомство с остальными участниками прямо сейчас!")
+                        Text(description)
+                            .multilineTextAlignment(.center)
                             .font(
                                 .custom(
                                     "OpenSans-Regular",
@@ -256,12 +265,13 @@ struct ForumCodeView<T: Hashable, M: View>: View {
                                 )
                             )
                             .foregroundStyle(textSecondary)
-                        PinEntryView(pinLimit: 4, pinCode: $pinCode)
-                            .onChange(of: pinCode, {
-                                if (pinCode.count == 4) {
-                                    isPresented = false
+                        Group {
+                                if let data, let messageWithValue {
+                                    messageWithValue(data)
+                                } else if let message {
+                                    message()
                                 }
-                            })
+                            }
                     }
                     .padding([.vertical, .horizontal], 20)
                     .padding([.top], 16)
@@ -269,7 +279,7 @@ struct ForumCodeView<T: Hashable, M: View>: View {
                     .background(.background)
                     .cornerRadius(16)
                 }
-                .padding()
+                .padding([.vertical, .horizontal], 20)
                 .transition(.moveAndFadeFromBottom)
                 .zIndex(2)
                 .onTapGesture {}
@@ -330,26 +340,30 @@ extension CustomAlertView where T == Never {
     }
 }
 
-extension ForumCodeView where T == Never {
+extension NetworkingAlertView where T == Never {
 
     init(
         _ titleKey: LocalizedStringKey,
         _ isPresented: Binding<Bool>,
-        _ pinCode: Binding<String>,
         actionTextKey: LocalizedStringKey,
+        image: String,
+        title: String,
+        description: String,
         action: @escaping () -> (),
         @ViewBuilder message: @escaping () -> M
     ) where T == Never {
         _titleKey = State(wrappedValue: titleKey)
         _actionTextKey = State(wrappedValue: actionTextKey)
         _isPresented = isPresented
-        _pinCode = pinCode
 
         self.data = nil
         self.action = action
         self.message = message
         self.actionWithValue = nil
         self.messageWithValue = nil
+        self.image = image
+        self.title = title
+        self.description = description
     }
 }
 

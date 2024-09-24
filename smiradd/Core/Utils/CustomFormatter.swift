@@ -46,4 +46,16 @@ class CustomFormatter {
             return "Invalid date format"
         }
     }
+    
+    static func formatMembers(members: Int) -> String {
+        if members % 10 == 0 || members % 10 > 4 || (members % 100 > 10 && members % 100 < 15) {
+            return "\(members) участников"
+        }
+        else if members % 10 == 1 {
+            return "\(members) участник"
+        }
+        else {
+            return "\(members) участника"
+        }
+    }
 }
