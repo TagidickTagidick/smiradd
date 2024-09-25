@@ -453,7 +453,7 @@ class NetworkingViewModel: ObservableObject {
                 case .success(_):
                     break
                 case .failure(let error):
-                    self.commonViewModel.teamViews.removeLast()
+                    //self.commonViewModel.teamViews.removeLast()
                     break
                 }
             }

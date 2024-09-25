@@ -48,7 +48,6 @@ public struct CardSwiperView<Content: View>: View {
                     initialRotationAngle: initialRotationAngle,
                     zIndex: Double(cards.count - index)
                 )
-                .offset(y: CGFloat(self.cards.count - index * 8))
                 .id(UUID())
             }
         }

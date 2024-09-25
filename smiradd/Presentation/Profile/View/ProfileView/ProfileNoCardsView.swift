@@ -9,6 +9,7 @@ struct ProfileNoCardsView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(
+                    textDefault,
                     style: StrokeStyle(
                         lineWidth: 4,
                         dash: [10]

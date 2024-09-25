@@ -74,10 +74,10 @@ struct SwipeCardView: View {
                 16
             )
         }
-//        .frame(
-//            width: UIScreen.main.bounds.width - 40,
-//            height: UIScreen.main.bounds.height - 152 - safeAreaInsets.top - safeAreaInsets.bottom
-//        )
+        .frame(
+            width: UIScreen.main.bounds.width - 40,
+            height: UIScreen.main.bounds.height - 152 - safeAreaInsets.top - safeAreaInsets.bottom
+        )
         .background(.white)
         .cornerRadius(16)
         .onTapGesture {
