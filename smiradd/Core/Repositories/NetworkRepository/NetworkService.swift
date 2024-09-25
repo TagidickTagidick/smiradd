@@ -2,7 +2,7 @@ import os.log
 import Foundation
 import SwiftUI
 
-let isProd = false
+let isProd = true
 
 class NetworkService: INetworkService {
     private let baseUrl = "http\(isProd ? "s" : "")://\(isProd ? "smiradd.ru" : "92.255.77.156:5000")/api/"
@@ -271,7 +271,7 @@ class NetworkService: INetworkService {
                                 .failure(
                                     ErrorModel(
                                         statusCode: httpResponse.statusCode,
-                                        message: jsonObject["detail"] as! String
+                                        message: jsonObject["message"] == nil ? jsonObject["detail"] as! String : jsonObject["message"] as! String
                                     )
                                 )
                             )
