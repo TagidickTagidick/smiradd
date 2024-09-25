@@ -266,18 +266,20 @@ struct NetworkingAlertView<T: Hashable, M: View>: View {
                             )
                             .foregroundStyle(textSecondary)
                         Group {
-                                if let data, let messageWithValue {
-                                    messageWithValue(data)
-                                } else if let message {
-                                    message()
-                                }
+                            if let data, let messageWithValue {
+                                messageWithValue(data)
+                            } else if let message {
+                                message()
                             }
+                        }
+                        //Spacer().frame(height: 100)
                     }
                     .padding([.vertical, .horizontal], 20)
                     .padding([.top], 16)
                     .frame(maxWidth: .infinity)
-                    .background(.background)
+                    .background(.white)
                     .cornerRadius(16)
+                    .offset(y: -100)
                 }
                 .padding([.vertical, .horizontal], 20)
                 .transition(.moveAndFadeFromBottom)

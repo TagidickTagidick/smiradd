@@ -11,6 +11,10 @@ struct MyCardView: View {
     
     @State var template: TemplateModel?
     
+    @State private var phone: String = ""
+    
+    @EnvironmentObject private var navigationService: NavigationService
+    
     var body: some View {
         ZStack {
             if self.template != nil {
@@ -49,12 +53,12 @@ struct MyCardView: View {
                         ) { image in
                                 image
                                 .resizable()
-                                .scaledToFill()
-                                .clipped()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(
                                     width: 52,
                                     height: 52
                                 )
+                                .clipped()
                                 .clipShape(Circle())
                             } placeholder: {
                                     Rectangle().foregroundColor(.gray)
@@ -180,8 +184,12 @@ struct MyCardView: View {
                             : self.template!.theme == "black"
                         )
                         .onTapGesture {
-    //                        cardSettings.cardModel = cardModel
-    //                        router.navigate(to: .qrCodeScreen)
+                            self.commonViewModel.openQRCode()
+                        }
+                        .navigationDestination(
+                            isPresented: $commonViewModel.isQRCode
+                        ) {
+                            QRCodePageView(cardModel: self.cardModel)
                         }
                         Spacer()
                         CustomIconView(
@@ -230,7 +238,7 @@ struct MyCardView: View {
                         if self.cardModel.phone != nil && self.cardModel.phone != "" {
                             Link (
                                 destination: URL(
-                                    string: self.cardModel.phone!
+                                    string: "tel:\(self.phone)"
                                 )!
                             ) {
                                 CustomIconView(
@@ -269,14 +277,21 @@ struct MyCardView: View {
         .background(textDefault)
         .cornerRadius(20)
         .onAppear {
-            if self.template != nil {
-                return
+            if self.template == nil {
+                if self.cardModel.bc_template_type != nil {
+                    self.template = self.commonViewModel.templates.first(
+                        where: { $0.id == self.cardModel.bc_template_type }
+                    ) ?? nil
+                }
             }
             
-            if self.cardModel.bc_template_type != nil {
-                self.template = self.commonViewModel.templates.first(
-                    where: { $0.id == self.cardModel.bc_template_type }
-                ) ?? nil
+            if self.cardModel.phone != nil && !self.cardModel.phone!.isEmpty {
+                self.phone = self.cardModel.phone!.replacingOccurrences(
+                    of: "+",
+                    with: "",
+                    options: .literal,
+                    range: nil
+                )
             }
         }
     }

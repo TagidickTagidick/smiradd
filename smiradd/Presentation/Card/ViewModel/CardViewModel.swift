@@ -465,6 +465,26 @@ class CardViewModel: ObservableObject {
                 switch result {
                 case .success(_):
                     self.navigationService.navigateBack()
+                    
+                    if self.commonViewModel.isTeamStorage {
+                        self.commonViewModel.teamsCount -= 1
+                        
+                        self.commonViewModel.teamViews.removeFirst()
+                        
+//                        if self.commonViewModel.teamsCount == 1 {
+//                            self.getAroundMe()
+//                        }
+                    }
+                    else {
+                        self.commonViewModel.cardsCount -= 1
+                        
+                        self.commonViewModel.cardViews.removeFirst()
+                        
+//                        if self.commonViewModel.cardsCount == 1 {
+//                            self.getAroundMe()
+//                        }
+                    }
+                    
                     break
                 case .failure(let error):
                     break
@@ -474,14 +494,33 @@ class CardViewModel: ObservableObject {
     }
     
     func dislike() {
-        self.commonRepository.deleteFavorites(
-            cardId: self.cardId
+        self.commonRepository.patchAroundme(
+            id: self.cardId
         ) {
             [self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
                     self.navigationService.navigateBack()
+                    
+                    if self.commonViewModel.isTeamStorage {
+                        self.commonViewModel.teamsCount -= 1
+                        
+                        self.commonViewModel.teamViews.removeFirst()
+                        
+//                        if self.commonViewModel.teamsCount == 1 {
+//                            self.getAroundMe()
+//                        }
+                    }
+                    else {
+                        self.commonViewModel.cardsCount -= 1
+                        
+                        self.commonViewModel.cardViews.removeFirst()
+                        
+//                        if self.commonViewModel.cardsCount == 1 {
+//                            self.getAroundMe()
+//                        }
+                    }
                     break
                 case .failure(let error):
                     break

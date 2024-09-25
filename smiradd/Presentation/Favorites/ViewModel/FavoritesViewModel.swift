@@ -9,6 +9,7 @@ class FavoritesViewModel: ObservableObject {
     @Published var favoritesModel: FavoritesModel?
     
     @Published var isAlert: Bool = false
+    private var cardId: String = ""
     
     private let repository: IFavoritesRepository
     private let navigationService: NavigationService
@@ -89,22 +90,23 @@ class FavoritesViewModel: ObservableObject {
         )
     }
     
-    func openAlert() {
+    func openAlert(id: String) {
+        self.cardId = id
         self.isAlert = true
     }
     
-    func dislike(id: String) {
+    func dislike() {
         self.isAlert = false
         
         self.commonRepository.deleteFavorites(
-            cardId: id
+            cardId: self.cardId
         ) {
             [self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
                     self.favoritesModel!.items.removeAll(
-                        where: { $0.id == id }
+                        where: { $0.id == self.cardId }
                     )
                     break
                 case .failure(let error):

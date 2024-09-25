@@ -15,6 +15,8 @@ struct CardBodyView: View {
     
     @State private var imageUrl: String = ""
     
+    @State private var phone = ""
+    
     var body: some View {
         ZStack (alignment: .bottomTrailing) {
             ScrollView {
@@ -65,33 +67,37 @@ struct CardBodyView: View {
                         Spacer()
                             .frame(width: 8)
                         HStack {
-                            if self.viewModel.cardModel.tg_url != nil {
-                                Link(
-                                    destination: URL(
-                                        string: self.viewModel.cardModel.tg_url!
-                                    )!
-                                ) {
-                                    CustomIconView(
-                                        icon: "telegram",
-                                        black: false
-                                    )
+                            if self.viewModel.cardModel.tg_url != nil && !self.viewModel.cardModel.tg_url!.isEmpty {
+                                if !self.viewModel.cardModel.tg_url!.isEmpty {
+                                    Link(
+                                        destination: URL(
+                                            string: self.viewModel.cardModel.tg_url!
+                                        )!
+                                    ) {
+                                        CustomIconView(
+                                            icon: "telegram",
+                                            black: false
+                                        )
+                                    }
+                                    Spacer()
+                                        .frame(width: 16)
                                 }
-                                Spacer()
-                                    .frame(width: 16)
                             }
-                            if self.viewModel.cardModel.vk_url != nil {
-                                Link(
-                                    destination: URL(
-                                        string: self.viewModel.cardModel.vk_url!
-                                    )!
-                                ) {
-                                    CustomIconView(
-                                        icon: "vk",
-                                        black: false
-                                    )
+                            if self.viewModel.cardModel.vk_url != nil && !self.viewModel.cardModel.vk_url!.isEmpty {
+                                if !self.viewModel.cardModel.vk_url!.isEmpty {
+                                    Link(
+                                        destination: URL(
+                                            string: self.viewModel.cardModel.vk_url!
+                                        )!
+                                    ) {
+                                        CustomIconView(
+                                            icon: "vk",
+                                            black: false
+                                        )
+                                    }
+                                    Spacer()
+                                        .frame(width: 16)
                                 }
-                                Spacer()
-                                    .frame(width: 16)
                             }
                             if self.viewModel.cardModel.fb_url != nil {
                                 Link(
@@ -107,116 +113,137 @@ struct CardBodyView: View {
                                 Spacer()
                                     .frame(width: 16)
                             }
-                            if self.viewModel.cardModel.phone != nil {
-                                Link(
-                                    destination: URL(
-                                        string: "tel:79969267921"
-                                    )!
-                                ) {
-                                    CustomIconView(
-                                        icon: "phone_icon",
-                                        black: false
-                                    )
+                            if self.viewModel.cardModel.phone != nil && !self.viewModel.cardModel.phone!.isEmpty {
+                                if !self.viewModel.cardModel.phone!.isEmpty {
+                                    Link(
+                                        destination: URL(
+                                            string: "tel:\(self.phone)"
+                                        )!
+                                    ) {
+                                        CustomIconView(
+                                            icon: "phone_icon",
+                                            black: false
+                                        )
+                                    }
                                 }
                             }
                         }
                         Spacer()
                             .frame(height: 16)
                         if self.viewModel.cardModel.bio != nil {
-                            CardBio(
-                                title: "О команде",
-                                bio: self.viewModel.cardModel.bio!
-                            )
-                            Spacer()
-                                .frame(height: 16)
+                            if !self.viewModel.cardModel.bio!.isEmpty {
+                                CardBio(
+                                    title: "О команде",
+                                    bio: self.viewModel.cardModel.bio!
+                                )
+                                Spacer()
+                                    .frame(height: 16)
+                            }
                         }
                         if self.viewModel.cardModel.cv_url != nil {
-                            CustomTextView(text: "Доп. материалы")
-                            Spacer()
-                                .frame(height: 8)
-                            CardTile(
-                                icon: "cv",
-                                text: self.viewModel.cardModel.cv_url!,
-                                isUrl: true
-                            )
-                            Spacer()
-                                .frame(height: 16)
-                        }
-                        if self.viewModel.cardModel.services != nil && !self.viewModel.cardModel.services!.isEmpty {
-                            CustomTextView(text: "Услуги")
-                            Spacer()
-                                .frame(height: 12)
+                            if !self.viewModel.cardModel.cv_url!.isEmpty {
+                                CustomTextView(text: "Доп. материалы")
+                                Spacer()
+                                    .frame(height: 8)
+                                CardTile(
+                                    icon: "cv",
+                                    text: self.viewModel.cardModel.cv_url!,
+                                    isUrl: true
+                                )
+                                Spacer()
+                                    .frame(height: 16)
+                            }
                         }
                     }
                     .padding([.horizontal], 20)
                     if self.viewModel.cardModel.services != nil && !self.viewModel.cardModel.services!.isEmpty {
-                        ScrollView(
-                            .horizontal,
-                            showsIndicators: false
-                        ) {
-                            HStack {
+                        if !self.viewModel.cardModel.services!.isEmpty {
+                            VStack (alignment: .leading) {
+                                CustomTextView(text: "Услуги")
                                 Spacer()
-                                    .frame(width: 20)
-                                ForEach(
-                                    Array(
-                                        self.viewModel.cardModel.services!.enumerated()
-                                    ),
-                                    id: \.offset
-                                ) {
-                                    index, service in
-                                    CardServiceView(service: service)
-                                }
+                                    .frame(height: 12)
                             }
-                        }
-                        Spacer()
-                            .frame(height: 16)
-                    }
-                    if self.viewModel.cardModel.achievements != nil && !self.viewModel.cardModel.achievements!.isEmpty {
-                        VStack (alignment: .leading) {
-                            CustomTextView(text: "Достижения")
+                            .padding([.horizontal], 20)
                             Spacer()
                                 .frame(height: 12)
-                        }
-                        .padding([.horizontal], 20)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                Spacer()
-                                    .frame(width: 20)
-                                ForEach(
-                                    Array(
-                                        self.viewModel.cardModel.achievements!.enumerated()
-                                    ),
-                                    id: \.offset
-                                ) {
-                                    index, achievement in
-                                    if achievement.url == nil {
-                                        CardAchievementView(
-                                            achievement: achievement
-                                        )
+                            ScrollView(
+                                .horizontal,
+                                showsIndicators: false
+                            ) {
+                                HStack {
+                                    Spacer()
+                                        .frame(width: 20)
+                                    ForEach(
+                                        Array(
+                                            self.viewModel.cardModel.services!.enumerated()
+                                        ),
+                                        id: \.offset
+                                    ) {
+                                        index, service in
+                                        CardServiceView(service: service)
                                     }
-                                    else {
-                                        Link (
-                                            destination: URL(
-                                                string: achievement.url!
-                                            )!
-                                        ) {
+                                }
+                            }
+                            Spacer()
+                                .frame(height: 16)
+                        }
+                    }
+                    if self.viewModel.cardModel.achievements != nil {
+                        if !self.viewModel.cardModel.achievements!.isEmpty {
+                            VStack (alignment: .leading) {
+                                CustomTextView(text: "Достижения")
+                                Spacer()
+                                    .frame(height: 12)
+                            }
+                            .padding([.horizontal], 20)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    Spacer()
+                                        .frame(width: 20)
+                                    ForEach(
+                                        Array(
+                                            self.viewModel.cardModel.achievements!.enumerated()
+                                        ),
+                                        id: \.offset
+                                    ) {
+                                        index, achievement in
+                                        if achievement.url == nil {
                                             CardAchievementView(
                                                 achievement: achievement
                                             )
+                                        }
+                                        else {
+                                            if achievement.url!.isEmpty {
+                                                CardAchievementView(
+                                                    achievement: achievement
+                                                )
+                                            }
+                                            else {
+                                                Link (
+                                                    destination: URL(
+                                                        string: achievement.url!
+                                                    )!
+                                                ) {
+                                                    CardAchievementView(
+                                                        achievement: achievement
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        Spacer()
+                            .frame(
+                                height: 78 + self.safeAreaInsets.bottom
+                            )
                     }
-                    Spacer()
-                        .frame(
-                            height: 78 + self.safeAreaInsets.bottom
-                        )
                 }
             }
             if self.viewModel.cardType == .userCard {
                 HStack {
+                    Spacer()
                     ZStack {
                         Circle()
                             .fill(Color(
@@ -257,6 +284,16 @@ struct CardBodyView: View {
                 .offset(
                     x: -20,
                     y: -78 - self.safeAreaInsets.bottom
+                )
+            }
+        }
+        .onAppear {
+            if self.viewModel.cardModel.phone != nil && !self.viewModel.cardModel.phone!.isEmpty {
+                self.phone = self.viewModel.cardModel.phone!.replacingOccurrences(
+                    of: "+",
+                    with: "",
+                    options: .literal,
+                    range: nil
                 )
             }
         }

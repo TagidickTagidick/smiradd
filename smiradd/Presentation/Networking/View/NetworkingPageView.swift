@@ -32,60 +32,34 @@ struct NetworkingPageView: View {
     }
     
     var body: some View {
-        ZStack (
-            alignment: .top
-        ) {
-            VStack {
-                NetworkingAppBarView(
-                    onTapExit: {
-                        self.viewModel.openExitNetworkingSheet()
-                    },
-                    onTapFilter: {
-                        self.viewModel.openFilterSheet()
-                    }
-                )
-                .sheet(
-                    isPresented: $viewModel.isFilterSheet,
-                    onDismiss: {
-                        self.viewModel.closeFilterSheet()
-                    }) {
-                        FilterSheetView(
-                            isFilter: $viewModel.isFilterSheet
-                        )
-                        .environmentObject(self.viewModel)
-                    }
-                Spacer()
-                    .frame(
-                        height: 16
-                    )
-                CustomWidget(
-                    pageType: $viewModel.pageType,
-                    onTap: {
-                        if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
-                            if self.viewModel.pageType == .matchNotFound {
-                                self.viewModel.openForumCodeSheet()
-                            }
-                            else {
-                                self.viewModel.startAgain()
-                            }
+        ZStack (alignment: .top) {
+            CustomWidget(
+                pageType: $viewModel.pageType,
+                onTap: {
+                    if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
+                        if self.viewModel.pageType == .matchNotFound {
+                            self.viewModel.openForumCodeSheet()
+                        }
+                        else {
+                            self.viewModel.startAgain()
                         }
                     }
-                )
-                .onChange(
-                    of: self.viewModel.pinCode,
-                    {
-                        self.viewModel.setForumCode()
                 }
-                )
-                .frame(
-                    width: UIScreen.main.bounds.size.width - 40,
-                    height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
-                )
-            }
-            .frame(
-                width: UIScreen.main.bounds.size.width - 40,
-                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
             )
+            .padding([.horizontal], 20)
+            .padding([.top], 16)
+            .padding([.bottom], 52)
+            .onChange(
+                of: self.viewModel.pinCode,
+                {
+                    self.viewModel.setForumCode()
+                }
+            )
+//            .frame(
+//                width: UIScreen.main.bounds.size.width - 40,
+//                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+//            )
+            .offset(y: 52)
             if self.commonViewModel.isTeamStorage {
                 CardSwiperView(
                     cards: $commonViewModel.teamViews,
@@ -107,10 +81,11 @@ struct NetworkingPageView: View {
                                 print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
                             }
                 )
-                .frame(
-                    width: UIScreen.main.bounds.size.width,
-                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-                )
+                .offset(y: 52)
+//                .frame(
+//                    width: UIScreen.main.bounds.size.width,
+//                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
+//                )
             }
             else {
                 CardSwiperView(
@@ -133,13 +108,146 @@ struct NetworkingPageView: View {
                                 print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
                             }
                 )
-                .frame(
-                    width: UIScreen.main.bounds.size.width,
-                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-                )
+                .offset(y: 52)
+////                .frame(
+////                    width: UIScreen.main.bounds.size.width,
+////                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
+////                )
             }
+            NetworkingAppBarView(
+                onTapExit: {
+                    self.viewModel.openExitNetworkingSheet()
+                },
+                onTapFilter: {
+                    self.viewModel.openFilterSheet()
+                }
+            )
+            .background(accent50)
+            .sheet(
+                isPresented: $viewModel.isFilterSheet,
+                onDismiss: {
+                    self.viewModel.closeFilterSheet()
+                }) {
+                    FilterSheetView(
+                        isFilter: $viewModel.isFilterSheet
+                    )
+                    .environmentObject(self.viewModel)
+                }
         }
-        .ignoresSafeArea()
+//        .frame(
+//            width: UIScreen.main.bounds.size.width - 40,
+//            height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+//        )
+//        ZStack (
+//            alignment: .top
+//        ) {
+//            VStack {
+//                NetworkingAppBarView(
+//                    onTapExit: {
+//                        self.viewModel.openExitNetworkingSheet()
+//                    },
+//                    onTapFilter: {
+//                        self.viewModel.openFilterSheet()
+//                    }
+//                )
+//                .sheet(
+//                    isPresented: $viewModel.isFilterSheet,
+//                    onDismiss: {
+//                        self.viewModel.closeFilterSheet()
+//                    }) {
+//                        FilterSheetView(
+//                            isFilter: $viewModel.isFilterSheet
+//                        )
+//                        .environmentObject(self.viewModel)
+//                    }
+//                Spacer()
+//                    .frame(
+//                        height: 16
+//                    )
+//                ZStack {
+//                    CustomWidget(
+//                        pageType: $viewModel.pageType,
+//                        onTap: {
+//                            if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
+//                                if self.viewModel.pageType == .matchNotFound {
+//                                    self.viewModel.openForumCodeSheet()
+//                                }
+//                                else {
+//                                    self.viewModel.startAgain()
+//                                }
+//                            }
+//                        }
+//                    )
+//                    .onChange(
+//                        of: self.viewModel.pinCode,
+//                        {
+//                            self.viewModel.setForumCode()
+//                    }
+//                    )
+//                    .frame(
+//                        width: UIScreen.main.bounds.size.width - 40,
+//                        height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+//                    )
+//                    if self.commonViewModel.isTeamStorage {
+//                        CardSwiperView(
+//                            cards: $commonViewModel.teamViews,
+//                            onCardSwiped: {
+//                                swipeDirection, index in
+//                                        switch swipeDirection {
+//                                        case .left:
+//                                            self.viewModel.setSeen(
+//                                                id: self.commonViewModel.teamViews[index].teamModel.id!
+//                                            )
+//                                        case .right:
+//                                            self.viewModel.setSeen(
+//                                                id: commonViewModel.teamViews[index].teamModel.id!
+//                                            )
+//                                        }
+//                                    },
+//                            onCardDragged: {
+//                                swipeDirection, index, offset in
+//                                        print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+//                                    }
+//                        )
+//        //                .frame(
+//        //                    width: UIScreen.main.bounds.size.width,
+//        //                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
+//        //                )
+//                    }
+//                    else {
+//                        CardSwiperView(
+//                            cards: $commonViewModel.cardViews,
+//                            onCardSwiped: {
+//                                swipeDirection, index in
+//                                        switch swipeDirection {
+//                                        case .left:
+//                                            self.viewModel.setSeen(
+//                                                id: self.commonViewModel.cardViews[index].cardModel.id
+//                                            )
+//                                        case .right:
+//                                            self.viewModel.setSeen(
+//                                                id: self.commonViewModel.cardViews[index].cardModel.id
+//                                            )
+//                                        }
+//                                    },
+//                            onCardDragged: {
+//                                swipeDirection, index, offset in
+//                                        print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+//                                    }
+//                        )
+//        //                .frame(
+//        //                    width: UIScreen.main.bounds.size.width,
+//        //                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
+//        //                )
+//                    }
+//                }
+//            }
+//            .frame(
+//                width: UIScreen.main.bounds.size.width - 40,
+//                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+//            )
+//        }
+        //.ignoresSafeArea()
         .frame(
             width: UIScreen.main.bounds.size.width,
             height: UIScreen.main.bounds.size.height - self.safeAreaInsets.bottom - self.safeAreaInsets.top
@@ -150,6 +258,7 @@ struct NetworkingPageView: View {
                         isPresented: $viewModel.isExitNetworkingSheet,
                         actionText: "Покинуть"
                     ) {
+                        print("ииыи")
                         self.viewModel.closeExitNetworkingSheet()
                     } message: {
                         Text("Вы действительно хотите выйти из нетворкинга?")

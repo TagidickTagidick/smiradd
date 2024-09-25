@@ -42,6 +42,9 @@ struct TeamPageView: View {
             }
         }
         .ignoresSafeArea()
+        .frame(
+            width: UIScreen.main.bounds.width
+        )
         .background(.white)
         .environmentObject(self.viewModel)
         .customAlert(

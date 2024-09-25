@@ -23,7 +23,7 @@ class NetworkingRepository: INetworkingRepository {
         }
         
         self.networkService.get(
-            url: "networkingv2/aroundme/100\(code.isEmpty ? "" : "?code=\(code)\(specificityString.isEmpty ? "" : "\(code.isEmpty ? "?" : "&")specificity=\(specificityString)")")"
+            url: "networkingv2/aroundme/10\(code.isEmpty ? "" : "?code=\(code)\(specificityString.isEmpty ? "" : "\(code.isEmpty ? "?" : "&")specificity=\(specificityString)")")"
         ) { result in
             switch result {
             case .success(let response):
@@ -82,24 +82,6 @@ class NetworkingRepository: INetworkingRepository {
                     print("рвыфрвыфр \(error)")
                     completion(.failure(error))
                 }
-            case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
-                completion(.failure(errorModel))
-            }
-        }
-    }
-    
-    func patchAroundme(
-        id: String,
-        completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        self.networkService.patch(
-            url: "networkingv2/aroundme",
-            body: ["cards": [id]]
-        ) { result in
-            switch result {
-            case .success(let response):
-                completion(.success(()))
             case .failure(let errorModel):
                 print("Signup failed: \(errorModel.message)")
                 completion(.failure(errorModel))

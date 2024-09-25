@@ -1,4 +1,6 @@
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct MyTeamCardView: View {
     let teamMainModel: TeamMainModel
@@ -109,26 +111,28 @@ struct MyTeamCardView: View {
                         id: \.self
                     ) {
                         index in
-                        AsyncImage(
+                        WebImage(
                             url: URL(
                                 string: self.avatars[index]
                             )
                         ) { image in
-                            image
+                                image
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(
                                     width: 52,
                                     height: 52
                                 )
+                                .clipped()
                                 .clipShape(Circle())
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(
-                            width: 52,
-                            height: 52
-                        )
-                        .clipShape(Circle())
+                            } placeholder: {
+                                    Rectangle().foregroundColor(.gray)
+                            }
+                            .frame(
+                                width: 52,
+                                height: 52
+                            )
+                            .clipShape(Circle())
                     }
                     Spacer()
                 }

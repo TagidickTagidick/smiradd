@@ -32,7 +32,7 @@ struct PinEntryView: View {
                                 Text(pins[item])
                                     .font(.title)
                                     .bold()
-                                    .foregroundColor(isError ? .red : .primary)
+                                    .foregroundColor(isError ? .red : textDefault)
                                 
                             } else {
                                 Circle()

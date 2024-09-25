@@ -8,18 +8,11 @@ struct NotificationsPageView: View {
     @State private var nothingHere = PageType.nothingHereNotifications
     
     var body: some View {
-        ZStack {
+        ZStack (alignment: .top) {
             if self.viewModel.notificationsModel!.items.isEmpty {
                 VStack {
-                    CustomAppBarView(
-                        title: "Уведомления",
-                        action: {
-                            self.presentationMode.wrappedValue.dismiss()
-                            self.viewModel.closeNotifications()
-                        }
-                    )
                     Spacer()
-                        .frame(height: 12)
+                        .frame(height: 60)
                     CustomWidget(
                         pageType: self.$nothingHere,
                         onTap: {}
@@ -30,15 +23,8 @@ struct NotificationsPageView: View {
             else {
                 ScrollView {
                     VStack (alignment: .leading) {
-                        CustomAppBarView(
-                            title: "Уведомления",
-                            action: {
-                                self.presentationMode.wrappedValue.dismiss()
-                                self.viewModel.closeNotifications()
-                            }
-                        )
                         Spacer()
-                            .frame(height: 12)
+                            .frame(height: 60)
                         ForEach(self.viewModel.notificationsModel!.items) {
                             notificationModel in
                             NotificationsTileView(
@@ -49,6 +35,14 @@ struct NotificationsPageView: View {
                 }
                 .background(.white)
             }
+            CustomAppBarView(
+                title: "Уведомления",
+                action: {
+                    self.presentationMode.wrappedValue.dismiss()
+                    self.viewModel.closeNotifications()
+                }
+            )
+            .background(self.viewModel.notificationsModel!.items.isEmpty ? accent50 : .white)
         }
         .padding(
             [.horizontal],

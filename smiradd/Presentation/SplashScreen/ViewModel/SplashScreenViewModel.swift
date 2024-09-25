@@ -41,6 +41,7 @@ class SplashScreenViewModel: ObservableObject {
             .compactMap { $0 }
             .sink {
                 [weak self] location in
+                print(location)
                 self?.setLocation(location)
             }
             .store(in: &cancellables)
@@ -56,6 +57,7 @@ class SplashScreenViewModel: ObservableObject {
     }
     
     private func handleAuthorizationStatus(_ status: CLAuthorizationStatus) {
+        print("рфврырфвы \(status)")
         switch status {
             case .notDetermined:
                 self.locationManager.requestLocationWhenInUseAuthorization()

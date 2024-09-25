@@ -33,13 +33,15 @@ struct SwipeTeamView: View {
                             string: self.teamModel.team_logo!
                         )
                     ) { image in
-                            image
-                            .resizable()
-                            .frame(
-                                height: (UIScreen.main.bounds.size.height - 153 - self.safeAreaInsets.top - self.safeAreaInsets.bottom) / 2
-                            )
+                        image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(
+                            height: (UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom) / 2
+                        )
+                        .clipped()
                         } placeholder: {
-                                Rectangle().foregroundColor(.gray)
+                            ProgressView()
                         }
                         .frame(
                             height: (UIScreen.main.bounds.size.height - 153 - self.safeAreaInsets.top - self.safeAreaInsets.bottom) / 2

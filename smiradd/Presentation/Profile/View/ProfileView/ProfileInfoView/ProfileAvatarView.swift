@@ -1,4 +1,6 @@
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct ProfileAvatarView: View {
     let pictureUrl: String
@@ -14,21 +16,28 @@ struct ProfileAvatarView: View {
                 .clipShape(Circle())
         }
         else {
-            AsyncImage(
+            WebImage(
                 url: URL(
                     string: self.pictureUrl
                 )
             ) { image in
-                image
+                    image
                     .resizable()
+                    .aspectRatio(contentMode: .fill)
                     .frame(
                         width: 64,
                         height: 64
                     )
+                    .clipped()
                     .clipShape(Circle())
-            } placeholder: {
-                ProgressView()
-            }
+                } placeholder: {
+                        Rectangle().foregroundColor(.gray)
+                }
+                .frame(
+                    width: 52,
+                    height: 52
+                )
+                .clipShape(Circle())
         }
     }
 }

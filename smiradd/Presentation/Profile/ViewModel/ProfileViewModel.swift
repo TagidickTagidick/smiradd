@@ -300,4 +300,13 @@ class ProfileViewModel: ObservableObject {
             }
         }
     }
+    
+    func openUserCard(id: String) {
+        self.navigationService.navigate(
+            to: .cardScreen(
+                cardId: id,
+                cardType: .userCard
+            )
+        )
+    }
 }

@@ -326,4 +326,22 @@ class CommonRepository: ICommonRepository {
             }
         }
     }
+    
+    func patchAroundme(
+        id: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        self.networkService.patch(
+            url: "networkingv2/aroundme",
+            body: ["cards": [id]]
+        ) { result in
+            switch result {
+            case .success(let response):
+                completion(.success(()))
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
 }

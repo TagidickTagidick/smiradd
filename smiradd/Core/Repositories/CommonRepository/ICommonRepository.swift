@@ -61,4 +61,9 @@ protocol ICommonRepository {
     func deleteLeaveTeam(
         completion: @escaping (Result<Void, Error>) -> Void
     )
+    
+    func patchAroundme(
+        id: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
 }

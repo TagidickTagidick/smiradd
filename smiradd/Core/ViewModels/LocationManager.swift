@@ -43,8 +43,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         _ manager: CLLocationManager,
         didFailWithError error: Error
     ) {
-            print("Failed to get user's location: \(error.localizedDescription)")
-        }
-    
-    
+        self.location = CLLocationCoordinate2D(latitude: 0, longitude: 0)
+    }
 }

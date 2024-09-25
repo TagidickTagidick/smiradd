@@ -3,6 +3,9 @@ import FirebaseCore
 import Firebase
 import FirebaseMessaging
 import GoogleSignIn
+import SDWebImage
+import SDWebImageSwiftUI
+
 
 extension View {
     func getRootViewController() -> UIViewController {
@@ -68,6 +71,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 // Show the app's signed-in state.
             }
         }
+        
+                         
+                         
+                         // Add multiple caches
+                         let cache = SDImageCache(namespace: "tiny")
+                         cache.config.maxMemoryCost = 100 * 1024 * 1024 // 100MB memory
+                         cache.config.maxDiskSize = 50 * 1024 * 1024 // 50MB disk
+                         SDImageCachesManager.shared.addCache(cache)
+                         SDWebImageManager.defaultImageCache = SDImageCachesManager.shared
         
         return true
     }
@@ -232,8 +244,6 @@ struct smiraddApp: App, KeyboardReadable {
                                     commonSpecifities: isFavorites ? self.commonViewModel.favoritesSpecificities : self.commonViewModel.networkingSpecificities,
                                     isFavorites: isFavorites
                                 )
-                            case .qrCodeScreen:
-                                QRCodePageView()
                             case .teamScreen(
                                 let teamId,
                                 let teamType

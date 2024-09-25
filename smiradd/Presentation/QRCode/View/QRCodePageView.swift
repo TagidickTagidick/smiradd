@@ -2,12 +2,13 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct QRCodePageView: View {
-    @EnvironmentObject private var viewModel: ProfileViewModel
-    @EnvironmentObject private var cardSettings: CardViewModel
+    @EnvironmentObject private var commonViewModel: CommonViewModel
     
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     
     @State private var template: TemplateModel?
+    
+    let cardModel: CardModel
     
     let context = CIContext()
     let filter = CIFilter.qrCodeGenerator()
@@ -26,10 +27,10 @@ struct QRCodePageView: View {
     
     var body: some View {
         ZStack {
-            if template != nil {
+            if self.template != nil {
                 AsyncImage(
                     url: URL(
-                        string: template!.picture_url!.replacingOccurrences(of: "\\", with: "")
+                        string: self.template!.picture_url!.replacingOccurrences(of: "\\", with: "")
                     )
                 ) { image in
                     image
@@ -44,15 +45,27 @@ struct QRCodePageView: View {
             }
             VStack (alignment: .leading) {
                 Spacer()
-                    .frame(height: safeAreaInsets.top)
-                BackButtonView()
+                    .frame(height: self.safeAreaInsets.top)
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.4))
+                        .frame(
+                            width: 48,
+                            height: 48
+                        )
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(textDefault)
+                }
+                .onTapGesture {
+                    self.commonViewModel.closeQRCode()
+                }
                 Spacer()
                 VStack {
                     Spacer()
                         .frame(height: 12)
                     Image(
                         uiImage: generateQRCode(
-                            from: "smiradd://vizme.pro?id=\(cardSettings.cardModel.id)"
+                            from: "smiradd://vizme.pro?id=\(self.cardModel.id)"
                         )
                     )
                         .interpolation(.none)
@@ -64,7 +77,7 @@ struct QRCodePageView: View {
                         )
                     Spacer()
                         .frame(height: 4)
-                    Text(cardSettings.cardModel.job_title)
+                    Text(self.cardModel.job_title)
                         .font(
                             .custom(
                                 "OpenSans-Bold",
@@ -88,15 +101,16 @@ struct QRCodePageView: View {
                 20
             )
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .frame(
             minWidth: UIScreen.main.bounds.size.width,
             minHeight: UIScreen.main.bounds.size.height
         )
         .onAppear {
-            if cardSettings.cardModel.bc_template_type != nil {
-                template = self.viewModel.templates.first(
-                    where: { $0.id == cardSettings.cardModel.bc_template_type }
+            if self.cardModel.bc_template_type != nil {
+                template = self.commonViewModel.templates.first(
+                    where: { $0.id == self.cardModel.bc_template_type }
                 ) ?? nil
             }
         }

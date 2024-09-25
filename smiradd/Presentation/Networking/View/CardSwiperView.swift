@@ -52,88 +52,105 @@ public struct CardSwiperView<Content: View>: View {
             }
         }
     }
+}
+
+struct CardView<Content: View>: View {
+    var index: Int
+    var onCardSwiped: ((SwipeDirection) -> Void)?
+    var onCardDragged: ((SwipeDirection, Int, CGSize) -> Void)? // New callback
+    var content: () -> Content
+    var initialOffsetY: CGFloat
+    var initialRotationAngle: Double
+    var zIndex: Double
     
-    private struct CardView<Content: View>: View {
-        var index: Int
-        var onCardSwiped: ((SwipeDirection) -> Void)?
-        var onCardDragged: ((SwipeDirection, Int, CGSize) -> Void)? // New callback
-        var content: () -> Content
-        var initialOffsetY: CGFloat
-        var initialRotationAngle: Double
-        var zIndex: Double
-        
-        @State private var offset = CGSize.zero
-        @State private var overlayColor: Color = .clear
-        @State private var isRemoved = false
-        @State private var activeCardIndex: Int?
-        
-        var body: some View {
-            ZStack {
-                content()
-                    .frame(width: 320, height: 420)
-                    .offset(x: offset.width * 1, y: offset.height * 0.4)
-                    .rotationEffect(.degrees(Double(offset.width / 40)))
-                    .zIndex(zIndex)
-                
-                Rectangle()
-                    .foregroundColor(overlayColor)
-                    .opacity(isRemoved ? 0 : (activeCardIndex == index ? 1 : 0))
-                    .frame(width: 320, height: 420)
-                    .cornerRadius(10)
-                    .blendMode(.overlay)
-            }
-            .gesture(
-                DragGesture()
-                    .onChanged { gesture in
-                        offset = gesture.translation
-                        activeCardIndex = index
-                        print(index)
-                        withAnimation {
-                            handleCardDragging(offset) // Handle card dragging
-                        }
+    @State private var offset = CGSize.zero
+    @State private var overlayColor: Color = .clear
+    @State private var isRemoved = false
+    @State private var activeCardIndex: Int?
+    
+    var body: some View {
+        content()
+            //.frame(width: 320, height: 420)
+            .offset(x: offset.width * 1, y: offset.height * 0.4)
+            .rotationEffect(.degrees(Double(offset.width / 40)))
+            .zIndex(zIndex)
+//            ZStack {
+//                content()
+//                    //.frame(width: 320, height: 420)
+//                    .offset(x: offset.width * 1, y: offset.height * 0.4)
+//                    .rotationEffect(.degrees(Double(offset.width / 40)))
+//                    .zIndex(zIndex)
+//
+////                Rectangle()
+////                    .foregroundColor(overlayColor)
+////                    .opacity(isRemoved ? 0 : (activeCardIndex == index ? 1 : 0))
+////                    //.frame(width: 320, height: 420)
+////                    .cornerRadius(10)
+////                    .blendMode(.overlay)
+//            }
+        .gesture(
+            DragGesture()
+                .onChanged { gesture in
+                    offset = gesture.translation
+                    activeCardIndex = index
+                    print(index)
+                    withAnimation {
+                        handleCardDragging(offset) // Handle card dragging
                     }
-                    .onEnded { gesture in
-                        withAnimation {
-                            handleSwipe(offsetWidth: offset.width, offsetHeight: offset.height)
-                        }
+                }
+                .onEnded { gesture in
+                    withAnimation {
+                        handleSwipe(offsetWidth: offset.width, offsetHeight: offset.height)
                     }
-            )
-            .opacity(isRemoved ? 0 : 1)
+                }
+        )
+        .opacity(isRemoved ? 0 : 1)
+        .padding(
+            [.horizontal],
+            20
+        )
+        .padding(
+            [.top],
+            16
+        )
+        .padding(
+            [.bottom],
+            52
+        )
+    }
+    
+    func handleCardDragging(_ offset: CGSize) {
+        var swipeDirection: SwipeDirection = .left
+        
+        switch (offset.width, offset.height) {
+        case (-500...(-150), _):
+            swipeDirection = .left
+        case (150...500, _):
+            swipeDirection = .right
+        default:
+            break
         }
         
-        func handleCardDragging(_ offset: CGSize) {
-            var swipeDirection: SwipeDirection = .left
-            
-            switch (offset.width, offset.height) {
-            case (-500...(-150), _):
-                swipeDirection = .left
-            case (150...500, _):
-                swipeDirection = .right
-            default:
-                break
-            }
-            
-            onCardDragged?(swipeDirection, index, offset) // Trigger the new callback
-        }
+        onCardDragged?(swipeDirection, index, offset) // Trigger the new callback
+    }
+    
+    public func handleSwipe(offsetWidth: CGFloat, offsetHeight: CGFloat) {
+        var swipeDirection: SwipeDirection = .left
         
-        func handleSwipe(offsetWidth: CGFloat, offsetHeight: CGFloat) {
-            var swipeDirection: SwipeDirection = .left
-            
-            switch (offsetWidth, offsetHeight) {
-            case (-500...(-150), _):
-                swipeDirection = .left
-                offset = CGSize(width: -500, height: 0)
-                isRemoved = true
-                onCardSwiped?(swipeDirection)
-            case (150...500, _):
-                swipeDirection = .right
-                offset = CGSize(width: 500, height: 0)
-                isRemoved = true
-                onCardSwiped?(swipeDirection)
-            default:
-                offset = .zero
-                overlayColor = .clear // If not completely removed, change overlay color to clear
-            }
+        switch (offsetWidth, offsetHeight) {
+        case (-500...(-150), _):
+            swipeDirection = .left
+            offset = CGSize(width: -500, height: 0)
+            isRemoved = true
+            onCardSwiped?(swipeDirection)
+        case (150...500, _):
+            swipeDirection = .right
+            offset = CGSize(width: 500, height: 0)
+            isRemoved = true
+            onCardSwiped?(swipeDirection)
+        default:
+            offset = .zero
+            overlayColor = .clear // If not completely removed, change overlay color to clear
         }
     }
 }

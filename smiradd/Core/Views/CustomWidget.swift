@@ -5,6 +5,8 @@ struct CustomWidget: View {
     
     var onTap: () -> Void
     
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
+    
     var body: some View {
         ZStack {
             if pageType == .loading {
@@ -169,8 +171,8 @@ struct CustomWidget: View {
             }
         }
         .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity
+            width: UIScreen.main.bounds.width - 40,
+            height: UIScreen.main.bounds.height - 152// - safeAreaInsets.top - safeAreaInsets.bottom
         )
         .background(
             pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound

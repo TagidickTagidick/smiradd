@@ -34,10 +34,12 @@ struct CardImageView: View {
                     ) { image in
                             image
                             .resizable()
+                            .aspectRatio(contentMode: .fill)
                             .frame(
                                 width: UIScreen.main.bounds.width,
                                 height: 360
                             )
+                            .clipped()
                         } placeholder: {
                                 Rectangle().foregroundColor(.gray)
                         }

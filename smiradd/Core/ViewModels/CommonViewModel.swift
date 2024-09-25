@@ -21,6 +21,12 @@ class CommonViewModel: ObservableObject {
     @Published var forumName: String = ""
     
     @Published var isAlert: Bool = false
+    
+    @Published var isQRCode: Bool = false
+    
+    var cardsCount: Int = 0
+    var teamsCount: Int = 0
+    
     var timeRemaining = 5
     var timer = Timer.publish(
         every: 1,
@@ -70,5 +76,13 @@ class CommonViewModel: ObservableObject {
         
         self.timer = Timer.publish(every: 1, on: .main, in: .common)
         self.timer.connect()
+    }
+    
+    func openQRCode() {
+        self.isQRCode = true
+    }
+    
+    func closeQRCode() {
+        self.isQRCode = false
     }
 }

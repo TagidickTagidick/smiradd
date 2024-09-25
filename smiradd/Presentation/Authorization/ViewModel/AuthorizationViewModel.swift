@@ -87,7 +87,6 @@ class AuthorizationViewModel: ObservableObject {
         ) {
             [self] result in
             DispatchQueue.main.async {
-                self.isLoading = false
                 switch result {
                 case .success(let authorizationModel):
                     UserDefaults.standard.set(
@@ -138,7 +137,6 @@ class AuthorizationViewModel: ObservableObject {
         ) {
             [self] result in
             DispatchQueue.main.async {
-                self.isLoading = false
                 switch result {
                 case .success(let authorizationModel):
                     UserDefaults.standard.set(
@@ -152,6 +150,7 @@ class AuthorizationViewModel: ObservableObject {
                     self.initUserSettings()
                     break
                 case .failure(let errorModel):
+                    self.isLoading = false
                     if (errorModel.statusCode == 404) {
                         self.emailErrorText = "Не существует аккаунта с такой эл. почтой"
                         self.emailIsError = true
@@ -264,12 +263,11 @@ class AuthorizationViewModel: ObservableObject {
                     if locationModel.name != nil {
                         self.commonViewModel.forumName = locationModel.name!
                     }
-                    self.getCards()
                     break
                 case .failure(let error):
-                    // Handle error
                     break
                 }
+                self.getCards()
             }
         }
     }
@@ -283,7 +281,9 @@ class AuthorizationViewModel: ObservableObject {
                     self.commonViewModel.cards = cardModels
                     self.getTeam()
                 case .failure(let error):
-                    print(error)
+                    self.isLoading = false
+                    self.emailIsError = true
+                    self.emailErrorText = "Не удалось получить все данные"
                     break
                 }
             }
@@ -312,6 +312,7 @@ class AuthorizationViewModel: ObservableObject {
                 switch result {
                 case .success(let templateModels):
                     self.commonViewModel.templates = templateModels
+                    self.isLoading = false
                     self.navigationService.navigate(
                         to: .networkingScreen
                     )

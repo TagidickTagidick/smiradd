@@ -89,10 +89,13 @@ class NetworkingViewModel: ObservableObject {
     }
     
     private func getAroundMe() {
-        self.pageType = .loading
+        //self.pageType = .loading
         
         self.commonViewModel.cardViews = []
         self.commonViewModel.teamViews = []
+        
+        self.commonViewModel.cardsCount = 0
+        self.commonViewModel.teamsCount = 0
         
         if self.commonViewModel.isTeamStorage {
             self.repository.getAroundMeTeams(
@@ -109,7 +112,7 @@ class NetworkingViewModel: ObservableObject {
                                     SwipeTeamView(
                                         teamModel: team,
                                         onDislike: {
-                                            self.dislike(id: team.id!)
+                                            self.setSeen(id: team.id!)
                                         },
                                         onLike: {
                                             self.like(id: team.id!)
@@ -124,6 +127,8 @@ class NetworkingViewModel: ObservableObject {
                                         }
                                     )
                                 )
+                                
+                                self.commonViewModel.teamsCount += 1
                             }
                         }
                         
@@ -157,7 +162,7 @@ class NetworkingViewModel: ObservableObject {
                                         SwipeCardView(
                                             cardModel: card,
                                             onDislike: {
-                                                self.dislike(id: card.id)
+                                                self.setSeen(id: card.id)
                                             },
                                             onLike: {
                                                 self.like(id: card.id)
@@ -172,6 +177,8 @@ class NetworkingViewModel: ObservableObject {
                                             }
                                         )
                                     )
+                                    
+                                    self.commonViewModel.cardsCount += 1
                                 }
                         }
                         
@@ -193,13 +200,31 @@ class NetworkingViewModel: ObservableObject {
     }
     
     func setSeen(id: String) {
-        self.repository.patchAroundme(
+        self.commonRepository.patchAroundme(
             id: id
         ) {
             [self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
+                    if self.commonViewModel.isTeamStorage {
+                        self.commonViewModel.teamsCount -= 1
+                        
+                        self.commonViewModel.teamViews.removeFirst()
+                        
+                        if self.commonViewModel.teamsCount == 1 {
+                            self.getAroundMe()
+                        }
+                    }
+                    else {
+                        self.commonViewModel.cardsCount -= 1
+                        
+                        self.commonViewModel.cardViews.removeFirst()
+                        
+                        if self.commonViewModel.cardsCount == 1 {
+                            self.getAroundMe()
+                        }
+                    }
                     break
                 case .failure(let error):
                     break
@@ -245,6 +270,9 @@ class NetworkingViewModel: ObservableObject {
     func startAgain() {
         self.commonViewModel.cardViews = []
         self.commonViewModel.teamViews = []
+        
+        self.commonViewModel.cardsCount = 0
+        self.commonViewModel.teamsCount = 0
         
         self.repository.postClear(
             isTeam: self.isTeam
@@ -326,7 +354,7 @@ class NetworkingViewModel: ObservableObject {
                         switch result {
                         case .success(_):
                             self.commonViewModel.showAlert()
-                            self.commonViewModel.teamViews.removeLast()
+                            self.commonViewModel.teamViews.removeFirst()
                             break
                         case .failure(_):
                             break
@@ -358,7 +386,7 @@ class NetworkingViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         switch result {
                         case .success(_):
-                            self.commonViewModel.cardViews.removeLast()
+                            self.commonViewModel.cardViews.removeFirst()
                             break
                         case .failure(let error):
                             break
@@ -379,7 +407,7 @@ class NetworkingViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             switch result {
                             case .success(_):
-                                self.commonViewModel.cardViews.removeLast()
+                                self.commonViewModel.cardViews.removeFirst()
                                 break
                             case .failure(let error):
                                 break
@@ -395,7 +423,7 @@ class NetworkingViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             switch result {
                             case .success(_):
-                                self.commonViewModel.cardViews.removeLast()
+                                self.commonViewModel.cardViews.removeFirst()
                                 break
                             case .failure(let error):
                                 break
@@ -439,23 +467,6 @@ class NetworkingViewModel: ObservableObject {
                 }
                 
                 self.pageType = .matchNotFound
-            }
-        }
-    }
-    
-    func dislike(id: String) {
-        self.commonRepository.deleteFavorites(
-            cardId: id
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    break
-                case .failure(let error):
-                    //self.commonViewModel.teamViews.removeLast()
-                    break
-                }
             }
         }
     }

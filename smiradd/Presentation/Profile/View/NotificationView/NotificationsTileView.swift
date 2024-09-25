@@ -1,4 +1,6 @@
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct NotificationsTileView: View {
     let notificationModel: NotificationModel
@@ -21,21 +23,23 @@ struct NotificationsTileView: View {
                             .clipShape(Circle())
                     }
                     else {
-                        AsyncImage(
+                        WebImage(
                             url: URL(
                                 string: self.notificationModel.data.avatar_url!
                             )
                         ) { image in
-                            image
+                                image
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(
                                     width: 52,
                                     height: 52
                                 )
-                                .clipShape(Circle())
-                        } placeholder: {
-                            ProgressView()
-                        }
+                                .clipped()
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .clipShape(Circle())
                     }
                     ZStack {
                         Circle()
@@ -149,6 +153,9 @@ struct NotificationsTileView: View {
                     }
                 }
             }
+        }
+        .onTapGesture {
+            self.viewModel.openUserCard(id: self.notificationModel.data.uuid_sender)
         }
     }
 }
