@@ -82,6 +82,10 @@ struct NetworkingPageView: View {
                     height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
                 )
             }
+            .frame(
+                width: UIScreen.main.bounds.size.width - 40,
+                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
+            )
             if self.commonViewModel.isTeamStorage {
                 CardSwiperView(
                     cards: $commonViewModel.teamViews,
@@ -105,7 +109,7 @@ struct NetworkingPageView: View {
                 )
                 .frame(
                     width: UIScreen.main.bounds.size.width,
-                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom
+                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
                 )
             }
             else {
@@ -131,14 +135,14 @@ struct NetworkingPageView: View {
                 )
                 .frame(
                     width: UIScreen.main.bounds.size.width,
-                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom
+                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
                 )
             }
         }
         .ignoresSafeArea()
         .frame(
             width: UIScreen.main.bounds.size.width,
-            height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom
+            height: UIScreen.main.bounds.size.height - self.safeAreaInsets.bottom - self.safeAreaInsets.top
         )
         .background(accent50)
         .customAlert(
