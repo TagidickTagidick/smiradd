@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct CustomWidget: View {
-    @Binding var pageType: PageType
+struct PageInfoView: View {
+    var pageType: PageType
     
     var onTap: () -> Void
     
@@ -172,7 +172,7 @@ struct CustomWidget: View {
         }
         .frame(
             width: UIScreen.main.bounds.width - 40,
-            height: UIScreen.main.bounds.height - 152// - safeAreaInsets.top - safeAreaInsets.bottom
+            height: UIScreen.main.bounds.height - 134// - safeAreaInsets.top - safeAreaInsets.bottom
         )
         .background(
             pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound

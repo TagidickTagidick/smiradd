@@ -1,6 +1,7 @@
 import SwiftUI
 import SDWebImage
 import SDWebImageSwiftUI
+import NukeUI
 
 struct MyCardView: View {
     let cardModel: CardModel
@@ -18,21 +19,38 @@ struct MyCardView: View {
     var body: some View {
         ZStack {
             if self.template != nil {
-                AsyncImage(
+                LazyImage(
                     url: URL(
                         string: self.template!.picture_url!.replacingOccurrences(
                             of: "\\",
                             with: ""
                         )
                     )
-                ) { image in
-                    image
-                        .resizable()
-                        .frame(height: 228)
-                } placeholder: {
-                    ProgressView()
+                ) { state in
+                    if let image = state.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        Color.gray.opacity(0.2)
+                    }
                 }
                 .frame(height: 228)
+//                AsyncImage(
+//                    url: URL(
+//                        string: self.template!.picture_url!.replacingOccurrences(
+//                            of: "\\",
+//                            with: ""
+//                        )
+//                    )
+//                ) { image in
+//                    image
+//                        .resizable()
+//                        .frame(height: 228)
+//                } placeholder: {
+//                    ProgressView()
+//                }
+//                .frame(height: 228)
             }
             VStack (alignment: .leading) {
                 HStack {
@@ -143,20 +161,28 @@ struct MyCardView: View {
                     Spacer()
                         .frame(width: 20)
                     if self.cardModel.company_logo != nil {
-                        AsyncImage(
+                        WebImage(
                             url: URL(
                                 string: self.cardModel.company_logo!
                             )
                         ) { image in
-                            image.resizable()
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(
-                            width: 48,
-                            height: 48
-                        )
-                        .cornerRadius(12)
+                                image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(
+                                    width: 48,
+                                    height: 48
+                                )
+                                .clipped()
+                                .cornerRadius(12)
+                            } placeholder: {
+                                    ProgressView()
+                            }
+                            .frame(
+                                width: 48,
+                                height: 48
+                            )
+                            .cornerRadius(12)
                     }
                 }
                 Spacer()
@@ -165,7 +191,7 @@ struct MyCardView: View {
                     HStack {
                         ShareLink(
                             item: URL(
-                                string: "https://vizme.pro/cards/\(cardModel.id)"
+                                string: "https://smiradd.ru/cards/\(self.cardModel.id)"
                             )!
                         ) {
                             CustomIconView(

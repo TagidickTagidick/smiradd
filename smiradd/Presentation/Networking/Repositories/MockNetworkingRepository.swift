@@ -3,7 +3,9 @@ class MockNetworkRepository: INetworkingRepository {
         
     }
     
-    func getAroundMeCards(specificity: [String], code: String, completion: @escaping (Result<[CardModel], any Error>) -> Void) {
+    func getAroundMeCards(
+        specificity: [String],
+        code: String, completion: @escaping (Result<[CardModel], any Error>) -> Void) {
         
     }
     
@@ -12,7 +14,7 @@ class MockNetworkRepository: INetworkingRepository {
     }
     
     func postClear(
-        isTeam: Bool, completion: @escaping (Result<DetailModel, any Error>) -> Void) {
+        isTeam: Bool, completion: @escaping (Result<DetailsModel, any Error>) -> Void) {
         
     }
     
@@ -53,14 +55,14 @@ class MockNetworkRepository: INetworkingRepository {
     
     func postFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         
     }
     
     func deleteFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         
     }

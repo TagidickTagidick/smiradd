@@ -5,6 +5,9 @@ struct MyTeamView: View {
     let createTeam: (() -> ())
     let openTeam: (() -> ())
     
+    @Binding var isSheet: Bool
+    let openNewCard: (() -> ())
+    
     @EnvironmentObject private var navigationService: NavigationService
     
     @EnvironmentObject private var commonViewModel: CommonViewModel
@@ -33,6 +36,23 @@ struct MyTeamView: View {
                         self.createTeam()
                     }
                 )
+                .customAlert(
+                    "Создайте визитку",
+                    isPresented: self.$isSheet,
+                    actionText: "Да",
+                    isRed: false
+                ) {
+                    self.openNewCard()
+                } message: {
+                    Text("Вы должны создать свою визитку, чтобы открыть возможность создавать команду. Хотите сделать это сейчас?")
+                        .font(
+                            .custom(
+                                "OpenSans-Regular",
+                                size: 14
+                            )
+                        )
+                        .foregroundStyle(textDefault)
+                }
             }
             else {
                 MyTeamCardView(teamMainModel: self.commonViewModel.teamMainModel!)

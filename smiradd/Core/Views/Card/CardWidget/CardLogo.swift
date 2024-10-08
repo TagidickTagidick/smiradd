@@ -1,4 +1,6 @@
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct CardLogo: View {
     var cardModel: CardModel
@@ -29,22 +31,23 @@ struct CardLogo: View {
             if cardModel.company_logo != nil {
                 Spacer()
                     .frame(width: 8)
-                AsyncImage(
+                WebImage(
                     url: URL(
-                        string: cardModel.company_logo!
+                        string: self.cardModel.avatar_url!
                     )
                 ) { image in
-                    image
+                        image
                         .resizable()
+                        .aspectRatio(contentMode: .fill)
                         .frame(
                             width: 56,
                             height: 56
                         )
+                        .clipped()
                         .cornerRadius(8)
-                } placeholder: {
-                    
-                }
-                .frame(height: 56)
+                    } placeholder: {
+                            Rectangle().foregroundColor(.gray)
+                    }
             }
         }
     }

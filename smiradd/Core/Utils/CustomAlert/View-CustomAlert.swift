@@ -27,14 +27,9 @@ extension View {
             )
             .presentationBackground(.clear)
         }
-        .transaction { transaction in
-            if isPresented.wrappedValue {
-                // disable the default FullScreenCover animation
-                transaction.disablesAnimations = true
-
-                // add custom animation for presenting and dismissing the FullScreenCover
-                transaction.animation = .linear(duration: 0.1)
-            }
+        .transaction {
+            transaction in
+            transaction.disablesAnimations = true
         }
     }
     
@@ -61,14 +56,9 @@ extension View {
             )
             .presentationBackground(.clear)
         }
-        .transaction { transaction in
-            if isPresented.wrappedValue {
-                // disable the default FullScreenCover animation
-                transaction.disablesAnimations = true
-
-                // add custom animation for presenting and dismissing the FullScreenCover
-                transaction.animation = .linear(duration: 0.1)
-            }
+        .transaction {
+            transaction in
+            transaction.disablesAnimations = true
         }
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 import SDWebImage
 import SDWebImageSwiftUI
+import NukeUI
 
 struct MyTeamCardView: View {
     let teamMainModel: TeamMainModel
@@ -24,19 +25,21 @@ struct MyTeamCardView: View {
     var body: some View {
         ZStack (alignment: .topLeading) {
             if self.template != nil {
-                AsyncImage(
+                LazyImage(
                     url: URL(
                         string: self.template!.picture_url!.replacingOccurrences(
                             of: "\\",
                             with: ""
                         )
                     )
-                ) { image in
-                    image
-                        .resizable()
-                        .frame(height: 228)
-                } placeholder: {
-                    ProgressView()
+                ) { state in
+                    if let image = state.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        Color.gray.opacity(0.2)
+                    }
                 }
                 .frame(height: 228)
             }
@@ -93,7 +96,7 @@ struct MyTeamCardView: View {
                 HStack {
                     ShareLink(
                         item: URL(
-                            string: "https://vizme.pro/team/\(self.teamMainModel.team.id)")!
+                            string: "https://smiradd.ru/team/\(self.teamMainModel.team.id)")!
                     ) {
                         CustomIconView(
                             icon: "share",

@@ -26,11 +26,7 @@ struct CardPageView: View {
     var body: some View {
         ZStack {
             if self.viewModel.pageType == .loading {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
+                CardShimmerView()
             }
             else {
                 if self.viewModel.cardType == .editCard || self.viewModel.cardType == .newCard {

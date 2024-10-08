@@ -12,6 +12,7 @@ struct CardBodyView: View {
     @State private var isAlert: Bool = false
     
     @State private var imageMock: UIImage?
+    @State private var videoMock: URL?
     
     @State private var imageUrl: String = ""
     
@@ -19,15 +20,16 @@ struct CardBodyView: View {
     
     var body: some View {
         ZStack (alignment: .bottomTrailing) {
-            ScrollView {
+            ClampingScrollView {
                 VStack (alignment: .leading) {
                     CardImageView(
                         image: self.$imageMock,
+                        videoUrl: self.$videoMock,
                         imageUrl: self.$imageUrl,
                         showTrailing: true,
                         editButton: self.viewModel.cardType == .myCard ? true : nil,
                         onTapEditButton: {
-                            self.viewModel.cardType = .editCard
+                            self.viewModel.changeCardType()
                         }
                     )
                     .onAppear {
@@ -38,8 +40,8 @@ struct CardBodyView: View {
                             .frame(height: 16)
                         CardLogo(cardModel: self.viewModel.cardModel)
                         if self.viewModel.cardModel.phone != nil {
-                            CardTile(
-                                icon: "phone",
+                            CardTileView(
+                                icon: "phone_icon",
                                 text: CustomFormatter.formatPhoneNumber(
                                     self.viewModel.cardModel.phone!
                                 ),
@@ -48,7 +50,7 @@ struct CardBodyView: View {
                             Spacer()
                                 .frame(height: 8)
                         }
-                        CardTile(
+                        CardTileView(
                             icon: "email",
                             text: self.viewModel.cardModel.email,
                             isUrl: false
@@ -56,7 +58,7 @@ struct CardBodyView: View {
                         Spacer()
                             .frame(height: 8)
                         if self.viewModel.cardModel.address != nil {
-                            CardTile(
+                            CardTileView(
                                 icon: "address",
                                 text: self.viewModel.cardModel.address!,
                                 isUrl: false
@@ -121,7 +123,7 @@ struct CardBodyView: View {
                                         )!
                                     ) {
                                         CustomIconView(
-                                            icon: "phone_icon",
+                                            icon: "phone",
                                             black: false
                                         )
                                     }
@@ -145,7 +147,7 @@ struct CardBodyView: View {
                                 CustomTextView(text: "Доп. материалы")
                                 Spacer()
                                     .frame(height: 8)
-                                CardTile(
+                                CardTileView(
                                     icon: "cv",
                                     text: self.viewModel.cardModel.cv_url!,
                                     isUrl: true
@@ -240,6 +242,9 @@ struct CardBodyView: View {
                             )
                     }
                 }
+            }
+            .refreshable {
+                self.viewModel.getCard()
             }
             if self.viewModel.cardType == .userCard {
                 HStack {

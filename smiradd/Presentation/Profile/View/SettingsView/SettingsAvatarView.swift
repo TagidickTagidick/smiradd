@@ -1,22 +1,38 @@
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct SettingsAvatarView: View {
     @Binding var image: UIImage?
     @Binding var imageUrl: String
+    @Binding var videoUrl: URL?
     
-    @State private var showPicker: Bool = false
+    @State private var showImagePicker: Bool = false
+    @State private var showDocumentPicker: Bool = false
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
     var body: some View {
         Menu {
-            Button("Сделать снимок", action: {
-                self.showPicker = true
+            Button(
+                "Сделать снимок",
+                action: {
+                self.showImagePicker = true
                 self.sourceType = .camera
-            })
-            Button("Выбрать из галереи", action: {
-                self.showPicker = true
+            }
+            )
+            Button(
+                "Выбрать из галереи",
+                action: {
+                self.showImagePicker = true
                 self.sourceType = .photoLibrary
-            })
+            }
+            )
+            Button(
+                "Выбрать из файлов",
+                action: {
+                self.showDocumentPicker = true
+            }
+            )
                 } label: {
                     ZStack (alignment: .bottomTrailing) {
                         if self.image == nil {
@@ -30,20 +46,28 @@ struct SettingsAvatarView: View {
                                     .clipShape(Circle())
                             }
                             else {
-                                AsyncImage(
+                                WebImage(
                                     url: URL(
                                         string: self.imageUrl
                                     )
                                 ) { image in
-                                    image.resizable()
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                                .frame(
-                                    width: 128,
-                                    height: 128
-                                )
-                                .clipShape(Circle())
+                                        image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(
+                                            width: 128,
+                                            height: 128
+                                        )
+                                        .clipped()
+                                        .clipShape(Circle())
+                                    } placeholder: {
+                                            ProgressView()
+                                    }
+                                    .frame(
+                                        width: 128,
+                                        height: 128
+                                    )
+                                    .clipShape(Circle())
                             }
                         }
                         else {
@@ -71,8 +95,18 @@ struct SettingsAvatarView: View {
                         .clipShape(Circle())
                     }
                 }
-                .sheet(isPresented: $showPicker) {
-                    ImagePickerView(image: $image, sourceType: sourceType)
+                .sheet(isPresented: $showImagePicker) {
+                    ImagePickerView(
+                        image: $image,
+                        videoUrl: $imageUrl,
+                        sourceType: sourceType
+                    )
+                }
+                .sheet(isPresented: $showDocumentPicker) {
+                    DocumentPickerView(
+                        image: $image,
+                        imageUrl: $imageUrl
+                    )
                 }
     }
 }

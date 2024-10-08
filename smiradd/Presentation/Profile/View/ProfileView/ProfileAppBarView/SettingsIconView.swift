@@ -16,6 +16,7 @@ struct SettingsIconView: View {
                     repository: SettingsRepository(
                         networkService: NetworkService()
                     ),
+                    //navigationService: self.viewModel.navigationService,
                     firstName: self.viewModel.profileModel?.first_name ?? "",
                     lastName: self.viewModel.profileModel?.last_name ?? "",
                     avatarUrl: self.viewModel.profileModel?.picture_url ?? ""

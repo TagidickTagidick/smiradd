@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import SDWebImageSwiftUI
 
 struct CardLogoView: View {
     @Binding var image: UIImage?
@@ -44,22 +45,39 @@ struct CardLogoView: View {
                         .cornerRadius(16)
                     }
                     else {
-                        AsyncImage(
+                        WebImage(
                             url: URL(
-                                string: imageUrl
+                                string: self.imageUrl
                             )
                         ) { image in
-                            image
+                                image
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(
                                     width: 80,
                                     height: 80
                                 )
-                                .background(accent50)
+                                .clipped()
                                 .cornerRadius(16)
-                        } placeholder: {
-                            ProgressView()
-                        }
+                            } placeholder: {
+                                    Rectangle().foregroundColor(.gray)
+                            }
+//                        AsyncImage(
+//                            url: URL(
+//                                string: imageUrl
+//                            )
+//                        ) { image in
+//                            image
+//                                .resizable()
+//                                .frame(
+//                                    width: 80,
+//                                    height: 80
+//                                )
+//                                .background(accent50)
+//                                .cornerRadius(16)
+//                        } placeholder: {
+//                            ProgressView()
+//                        }
                     }
                 }
                 else {
@@ -71,9 +89,6 @@ struct CardLogoView: View {
                         )
                         .cornerRadius(16)
                 }
-            }
-            .sheet(isPresented: $showPicker) {
-                ImagePickerView(image: $image, sourceType: sourceType)
             }
             Spacer()
                 .frame(width: 16)

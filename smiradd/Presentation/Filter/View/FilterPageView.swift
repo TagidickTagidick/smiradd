@@ -11,14 +11,16 @@ struct FilterPageView: View {
     init(
         commonRepository: ICommonRepository,
         navigationService: NavigationService,
-        commonSpecifities: [String],
+        commonViewModel: CommonViewModel,
+        currentSpecificities: [String],
         isFavorites: Bool
     ) {
         _viewModel = StateObject(
             wrappedValue: FilterViewModel(
                 commonRepository: commonRepository,
                 navigationService: navigationService,
-                commonSpecifities: commonSpecifities,
+                commonViewModel: commonViewModel,
+                currentSpecificities: currentSpecificities,
                 isFavorites: isFavorites
             )
         )
@@ -29,7 +31,7 @@ struct FilterPageView: View {
             VStack (alignment: .leading) {
                 CustomAppBarView(
                     title: "Фильтр",
-                    onClear: {
+                    onClear: self.viewModel.find.isEmpty ? nil : {
                         self.viewModel.onClearFind()
                     }
                 )
@@ -45,63 +47,14 @@ struct FilterPageView: View {
                 }
                 ScrollView (showsIndicators: false) {
                     VStack (alignment: .leading) {
-                        ForEach(self.viewModel.currentSpecifities) {
+                        ForEach(self.viewModel.currentSpecificities) {
                             specificity in
-                            HStack {
-                                Text(specificity.name)
-                                    .font(
-                                        .custom(
-                                            self.viewModel.isFavorites ? self.viewModel.favoritesSpecificities.contains(specificity.name)
-                                            ? "OpenSans-SemiBold"
-                                            : "OpenSans-Regular" :  self.viewModel.networkingSpecificities.contains(specificity.name)
-                                            ? "OpenSans-SemiBold"
-                                            : "OpenSans-Regular",
-                                            size: 16
-                                        )
-                                    )
-                                    .foregroundStyle(textDefault)
-                                Spacer()
-                                ZStack {
-                                    if self.viewModel.favoritesSpecificities.contains(specificity.name) {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.white)
-                                            .frame(
-                                                width: 10,
-                                                height: 8
-                                            )
-                                    }
-                                }
-                                .frame(
-                                    width: 20,
-                                    height: 20
-                                )
-                                .background(
-                                    self.viewModel.isFavorites ? self.viewModel.favoritesSpecificities.contains(specificity.name)
-                                    ? Color(
-                                        red: 0.408,
-                                        green: 0.784,
-                                        blue: 0.58
-                                    )
-                                    : .white
-                                    : self.viewModel.networkingSpecificities.contains(specificity.name)
-                                    ? Color(
-                                        red: 0.408,
-                                        green: 0.784,
-                                        blue: 0.58
-                                    )
-                                    : .white
-                                )
-                                .cornerRadius(5)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .stroke(
-                                            accent100,
-                                            lineWidth: 1
-                                        )
-                                )
-                            }
-                            .padding([.vertical], 12)
-                            .background(.white)
+                            FilterTileView(
+                                isFavorite: self.viewModel.isFavorites
+                                           ? self.viewModel.favoritesSpecificities.contains(specificity.name)
+                                : self.viewModel.networkingSpecificities.contains(specificity.name),
+                                name: specificity.name
+                            )
                             .onTapGesture {
                                 self.viewModel.onTapSpecificity(name: specificity.name)
                             }

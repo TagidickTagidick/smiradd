@@ -4,6 +4,8 @@ struct NetworkingAppBarView: View {
     let onTapExit: (() -> ())
     let onTapFilter: (() -> ())
     
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     var body: some View {
         HStack {
             Spacer()
@@ -19,20 +21,37 @@ struct NetworkingAppBarView: View {
                     self.onTapExit()
                 }
             Spacer()
-            Text("Нетворкинг")
-            .font(
-                .custom(
-                    "OpenSans-SemiBold",
-                    size: 24
-                )
+            CustomTitleView(
+                text: "Нетворкинг"
             )
-            .foregroundStyle(textDefault)
             Spacer()
-            Image("filter_networking")
-                .frame(
-                    width: 36,
-                    height: 36
-                )
+            ZStack(alignment: .topTrailing) {
+                Image("filter_networking")
+                    .frame(
+                        width: 24,
+                        height: 24
+                    )
+                    .offset(
+                        x: -6,
+                        y: 6
+                    )
+                if !self.commonViewModel.networkingSpecificities.isEmpty {
+                    Circle()
+                        .frame(
+                            width: 12,
+                            height: 12
+                        )
+                        .foregroundColor(textAccent)
+                        .offset(
+                            x: -3,
+                            y: 3
+                        )
+                }
+            }
+            .frame(
+                width: 36,
+                height: 36
+            )
                 .onTapGesture {
                     self.onTapFilter()
                 }

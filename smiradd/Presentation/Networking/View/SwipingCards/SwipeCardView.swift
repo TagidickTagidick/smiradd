@@ -53,11 +53,13 @@ struct SwipeCardView: View {
                     Spacer()
                         .frame(height: 16)
                     CardLogo(cardModel: cardModel)
-                    if cardModel.bio != nil {
-                        CardBio(
-                            title: "О себе",
-                            bio: cardModel.bio!
-                        )
+                    if self.cardModel.bio != nil {
+                        if !self.cardModel.bio!.isEmpty {
+                            CardBio(
+                                title: "О себе",
+                                bio: cardModel.bio!
+                            )
+                        }
                     }
                     Spacer()
                     Spacer()

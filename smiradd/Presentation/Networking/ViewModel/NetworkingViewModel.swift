@@ -85,7 +85,23 @@ class NetworkingViewModel: ObservableObject {
     
     func answerYesQuestionForumSheet() {
         self.isQuestionForumSheet = false
-        self.isChooseStatusSheet = true
+        if self.commonViewModel.isTeamForum {
+            self.isChooseStatusSheet = true
+        }
+        else {
+            self.getAroundMe()
+        }
+    }
+    
+    func setIsSteam(isTeam: Bool) {
+        UserDefaults.standard.set(
+            isTeam,
+            forKey: "is_team"
+        )
+        
+        self.isChooseStatusSheet = false
+        
+        self.getAroundMe()
     }
     
     private func getAroundMe() {
@@ -259,7 +275,10 @@ class NetworkingViewModel: ObservableObject {
         
         self.isExitNetworkingSheet = false
         
-        self.onInit()
+        self.commonViewModel.cardViews = []
+        self.commonViewModel.teamViews = []
+        
+        self.pageType = .matchNotFound
     }
     
     func openForumCodeSheet() {
@@ -479,16 +498,5 @@ class NetworkingViewModel: ObservableObject {
                 cardType: .newCard
             )
         )
-    }
-    
-    func setIsSteam(isTeam: Bool) {
-        UserDefaults.standard.set(
-            isTeam,
-            forKey: "is_team"
-        )
-        
-        self.isChooseStatusSheet = false
-        
-        self.getAroundMe()
     }
 }

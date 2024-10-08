@@ -263,6 +263,9 @@ class AuthorizationViewModel: ObservableObject {
                     if locationModel.name != nil {
                         self.commonViewModel.forumName = locationModel.name!
                     }
+                    if locationModel.type != nil {
+                        self.commonViewModel.isTeamForum = locationModel.type == "TeamForum"
+                    }
                     break
                 case .failure(let error):
                     break
@@ -323,5 +326,11 @@ class AuthorizationViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    func navigateToRecoverPassword() {
+        self.navigationService.navigate(
+            to: .restrorePasswordScreen
+        )
     }
 }

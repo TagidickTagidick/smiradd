@@ -4,6 +4,14 @@ import SwiftUI
 
 let isProd = true
 
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case put = "PUT"
+    case delete = "DELETE"
+    case patch = "PATCH"
+}
+
 class NetworkService: INetworkService {
     private let baseUrl = "http\(isProd ? "s" : "")://\(isProd ? "smiradd.ru" : "92.255.77.156:5000")/api/"
     
@@ -92,8 +100,10 @@ class NetworkService: INetworkService {
         let accessToken = self.accessToken ?? ""
         
         let fullUrl = URL(string: "\(baseUrl)\(url)")!
+        
         var request = URLRequest(url: fullUrl)
         request.httpMethod = method
+        request.timeoutInterval = 5
         request.addValue(
             "application/json",
             forHTTPHeaderField: "Content-Type"
@@ -129,6 +139,7 @@ class NetworkService: INetworkService {
                         )
                     )
                 )
+                
                 return
             }
             
@@ -322,6 +333,7 @@ class NetworkService: INetworkService {
         let fullUrl = URL(string: "\(baseUrl)auth/refresh-token")!
         var request = URLRequest(url: fullUrl)
         request.httpMethod = "POST"
+        request.timeoutInterval = 30.0
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization")
         
@@ -333,7 +345,8 @@ class NetworkService: INetworkService {
             data: nil
         )
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        let task = URLSession.shared.dataTask(with: request) {
+            data, response, error in
             if let error = error {
                 completion(
                     .failure(
@@ -467,7 +480,7 @@ class NetworkService: INetworkService {
                     statusCode: httpResponse.statusCode,
                     data: data,
                     method: "POST",
-                    url: "https://vizme.pro/api/storage"
+                    url: "storage"
                 )
                 
                 switch httpResponse.statusCode {
@@ -520,6 +533,118 @@ class NetworkService: INetworkService {
         } else {
             print("Failed to convert UIImage to Data")
         }
+    }
+    
+    func uploadVideo(
+        data: Data,
+        completion: @escaping (Result<String, ErrorModel>) -> Void
+    ) {
+        let url = URL(string: "https://smiradd.ru/api/storage")!
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        let httpBody = NSMutableData()
+        httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
+        httpBody.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.gif\"\r\n".data(using: .utf8)!)
+        httpBody.append("Content-Type: image/gif\r\n\r\n".data(using: .utf8)!)
+        httpBody.append(data)
+        httpBody.append("\r\n".data(using: .utf8)!)
+        httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = httpBody as Data
+        
+        self.logRequest(
+            method: "POST",
+            url: "storage",
+            data: nil
+        )
+        
+        let task = URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            if let error = error {
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: error.localizedDescription
+                        )
+                    )
+                )
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(
+                    .failure(
+                        ErrorModel(
+                            statusCode: 500,
+                            message: "Invalid response"
+                        )
+                    )
+                )
+                return
+            }
+            
+            self.logResponse(
+                statusCode: httpResponse.statusCode,
+                data: data,
+                method: "POST",
+                url: "storage"
+            )
+            
+            switch httpResponse.statusCode {
+            case 201:
+                if let data = data {
+                    do {
+                        let jsonObject = try JSONSerialization.jsonObject(
+                            with: data,
+                            options: []
+                        )
+                        if let jsonDict = jsonObject as? [String: String?] {
+                            completion(
+                                .success("https://s3.timeweb.cloud/29ad2e34-vizme/\((jsonDict["details"] ?? "")!)")
+                            )
+                        } else {
+                            completion(
+                                .failure(
+                                    ErrorModel(
+                                        statusCode: 500,
+                                        message: "Invalid JSON response"
+                                    )
+                                )
+                            )
+                        }
+                    } catch {
+                        completion(
+                            .failure(
+                                ErrorModel(
+                                    statusCode: 500,
+                                    message: "JSON deserialization error: \(error.localizedDescription)"
+                                )
+                            )
+                        )
+                    }
+                } else {
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "No data received"
+                            )
+                        )
+                    )
+                }
+            default:
+                let message = String(data: data ?? Data(), encoding: .utf8) ?? "Unknown error"
+                completion(.failure(ErrorModel(statusCode: httpResponse.statusCode, message: message)))
+            }
+        }
+        
+        task.resume()
     }
     
     private func logRequest(

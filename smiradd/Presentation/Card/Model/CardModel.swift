@@ -5,7 +5,7 @@ struct CardModel: Codable, Identifiable {
 //    let like: Bool?
 //    let is_default: Bool
     let job_title: String
-    let specificity: String
+    var specificity: String
     let phone: String?
     let email: String
     let address: String?

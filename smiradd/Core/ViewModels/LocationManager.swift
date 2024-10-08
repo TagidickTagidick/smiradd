@@ -9,7 +9,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.desiredAccuracy = kCLLocationAccuracyKilometer
     }
 
     func requestLocation() {
@@ -29,7 +29,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         didUpdateLocations locations: [CLLocation]
     ) {
         location = locations.first?.coordinate
-        print(location)
     }
     
     func locationManager(

@@ -5,6 +5,8 @@ import Combine
 struct CardEditView: View {
     @EnvironmentObject var viewModel: CardViewModel
     
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     @Environment(\.safeAreaInsets) private var safeAreaInsets
 
     @FocusState var jobTitleIsFocused: Bool
@@ -44,11 +46,12 @@ struct CardEditView: View {
                 VStack {
                     CardImageView(
                         image: $viewModel.avatarImage,
+                        videoUrl: $viewModel.avatarVideoUrl,
                         imageUrl: $viewModel.avatarUrl,
                         showTrailing: false,
                         editButton: false,
                         onTapEditButton: {
-                            self.viewModel.cardType = .editCard
+                            self.viewModel.changeCardType()
                         }
                     )
                     .frame(height: 360)
@@ -77,7 +80,7 @@ struct CardEditView: View {
                                 isRequired: true
                             )
                             Menu {
-                                ForEach(self.viewModel.specificityList) {
+                                ForEach(self.commonViewModel.specificities) {
                                     specificityModel in
                                     Button(
                                         action: {

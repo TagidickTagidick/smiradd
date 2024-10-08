@@ -1,5 +1,5 @@
 protocol IFavoritesRepository {
     func getFavorites(
-        completion: @escaping (Result<FavoritesModel, Error>) -> Void
+        completion: @escaping (Result<FavoritesModel, ErrorModel>) -> Void
     )
 }

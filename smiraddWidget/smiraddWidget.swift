@@ -54,7 +54,7 @@ struct smiraddWidgetEntryView : View {
                 Spacer().frame(height: 4) // Adjusting spacing for a 2x2 widget
                 Image(
                     uiImage: generateQRCode(
-                        from: "smiradd://vizme.pro?id=1"
+                        from: "https://smiradd.ru/cards/"
                     )
                 )
                 .interpolation(.none)

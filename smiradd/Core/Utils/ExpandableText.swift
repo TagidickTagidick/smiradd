@@ -10,7 +10,13 @@ struct ExpandableText: View {
     let font: UIFont
     let lineLimit: Int
     
-    init(_ text: String, lineLimit: Int, font: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body)) {
+    init(
+        _ text: String,
+        lineLimit: Int,
+        font: UIFont = UIFont.preferredFont(
+            forTextStyle: UIFont.TextStyle.body
+        )
+    ) {
         self.text = text
         _shrinkText =  State(wrappedValue: text)
         self.lineLimit = lineLimit
@@ -36,13 +42,13 @@ struct ExpandableText: View {
             .background(
                 // Render the limited text and measure its size
                 Text(text)
-//                    .font(
-//                        .custom(
-//                            "OpenSans-Regular",
-//                                size: 14
-//                        )
-//                    )
-//                    .foregroundStyle(textDefault)
+                    .font(
+                        .custom(
+                            "OpenSans-Regular",
+                                size: 14
+                        )
+                    )
+                    .foregroundStyle(textDefault)
                     .lineLimit(lineLimit)
                     .background(GeometryReader { visibleTextGeometry in
                         Color.clear.onAppear() {

@@ -34,21 +34,37 @@ class ProfileRepository: IProfileRepository {
         }
     }
     
-    func getNotifications(completion: @escaping (Result<NotificationsModel, Error>) -> Void) {
+    func getNotifications(
+        completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
+    ) {
         self.networkService.get(
             url: "notifications"
         ) { result in
             switch result {
             case .success(let response):
                 do {
-                    let data = try JSONSerialization.data(withJSONObject: response, options: [])
-                    let notificationModels = try JSONDecoder().decode(NotificationsModel.self, from: data)
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    
+                    let notificationModels = try JSONDecoder().decode(
+                        NotificationsModel.self,
+                        from: data
+                    )
+                    
                     completion(.success(notificationModels))
                 } catch {
-                    completion(.failure(error))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "Invalid json"
+                            )
+                        )
+                    )
                 }
             case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
                 completion(.failure(errorModel))
             }
         }

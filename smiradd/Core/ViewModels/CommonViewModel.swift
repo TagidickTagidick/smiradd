@@ -5,6 +5,7 @@ class CommonViewModel: ObservableObject {
     
     @Published var teamViews: [SwipeTeamView] = []
     
+    @Published var specificities: [SpecificityModel] = []
     @Published var networkingSpecificities: [String] = []
     @Published var favoritesSpecificities: [String] = []
     
@@ -19,6 +20,7 @@ class CommonViewModel: ObservableObject {
     @Published var teamMainModel: TeamMainModel?
     
     @Published var forumName: String = ""
+    @Published var isTeamForum: Bool = false
     
     @Published var isAlert: Bool = false
     

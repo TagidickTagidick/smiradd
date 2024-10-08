@@ -2,11 +2,15 @@ import SwiftUI
 
 class SettingsViewModel: ObservableObject {
     @Published var avatarUrl: String = ""
+    @Published var avatarVideoUrl: URL?
     @Published var avatar: UIImage?
     
     @Published var firstName: String = ""
     
     @Published var lastName: String = ""
+    
+    @Published var password: String = ""
+    @Published var isChangePassword: Bool = false
     
     @Published var isHelp: Bool = false
     
@@ -16,16 +20,40 @@ class SettingsViewModel: ObservableObject {
     
     private let repository: ISettingsRepository
     
+    //private let navigationService: NavigationService
+    
     init(
         repository: ISettingsRepository,
+        //navigationService: NavigationService,
         firstName: String,
         lastName: String,
         avatarUrl: String
     ) {
         self.repository = repository
+        //self.navigationService = navigationService
         self.firstName = firstName
         self.lastName = lastName
         self.avatarUrl = avatarUrl
+    }
+    
+    func openChangePasswordSheet() {
+        self.isChangePassword = true
+    }
+    
+    func changePassword() {
+        self.repository.patchResetPassword(
+            password: self.password
+        ) {
+            result in
+            DispatchQueue.main.async {
+                self.password = ""
+                self.isChangePassword = false
+            }
+        }
+    }
+    
+    func closeChangePasswordSheet() {
+        self.isChangePassword = false
     }
     
     func openHelpAlert() {

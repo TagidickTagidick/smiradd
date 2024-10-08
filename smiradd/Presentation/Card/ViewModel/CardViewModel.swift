@@ -10,6 +10,7 @@ class CardViewModel: ObservableObject {
     @Published var achievements: [AchievementModel] = []
     
     @Published var avatarImage: UIImage?
+    @Published var avatarVideoUrl: URL?
     @Published var avatarUrl: String = ""
     
     @Published var jobTitle: String = ""
@@ -17,7 +18,6 @@ class CardViewModel: ObservableObject {
     
     @Published var specificity: String = ""
     @Published var specificityIsFocused: Bool = false
-    @Published var specificityList: [SpecificityModel] = []
     
     @Published var name: String = ""
     
@@ -42,6 +42,7 @@ class CardViewModel: ObservableObject {
     @Published var cv: String = ""
     
     @Published var logoImage: UIImage?
+    @Published var logoVideoUrl: URL?
     @Published var logoUrl: String = ""
     
     @Published var bio: String = ""
@@ -89,42 +90,51 @@ class CardViewModel: ObservableObject {
             self.getSpecifity()
         }
         else {
-            self.getCard(cardId: cardId)
+            self.getCard()
         }
     }
     
     private func getSpecifity() {
-        self.commonRepository.getSpecificities() {
-            [self] result in
-            DispatchQueue.main.async {
-                self.pageType = .matchNotFound
-                switch result {
-                case .success(let specificityModels):
-                    self.specificityList = specificityModels
-                    break
-                case .failure(let error):
-                    // Handle error
-                    break
+        if self.commonViewModel.specificities.isEmpty {
+            self.commonRepository.getSpecificities() {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let specificityModels):
+                        self.commonViewModel.specificities = specificityModels
+                        break
+                    case .failure(let error):
+                        // Handle error
+                        break
+                    }
+                    
+                    self.pageType = .matchNotFound
                 }
             }
         }
     }
     
-    private func getCard(cardId: String) {
-        self.repository.getCard(cardId: cardId) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let cardModel):
-                    self.cardModel = cardModel
-                    self.initFields()
-                    break
-                case .failure(let error):
-                    // Handle error
-                    break
+    func getCard() {
+        self.pageType = .loading
+        
+        Task {
+            try? await Task.sleep(nanoseconds: 1000000000)
+            
+            self.repository.getCard(cardId: self.cardId) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let cardModel):
+                        self.cardModel = cardModel
+                        self.initFields()
+                        break
+                    case .failure(let error):
+                        // Handle error
+                        break
+                    }
+                    
+                    self.pageType = .matchNotFound
                 }
-                
-                self.pageType = .matchNotFound
             }
         }
     }
@@ -317,10 +327,10 @@ class CardViewModel: ObservableObject {
         if self.achievementIndex == -1 {
             self.achievements.append(
                 AchievementModel(
-                name: name,
-                description: description,
-                url: url
-            )
+                    name: name,
+                    description: description,
+                    url: url
+                )
             )
         }
         else {
@@ -328,7 +338,7 @@ class CardViewModel: ObservableObject {
                 name: name,
                 description: description,
                 url: url
-                )
+            )
         }
         
         self.achievementsOpened = false
@@ -471,18 +481,18 @@ class CardViewModel: ObservableObject {
                         
                         self.commonViewModel.teamViews.removeFirst()
                         
-//                        if self.commonViewModel.teamsCount == 1 {
-//                            self.getAroundMe()
-//                        }
+                        //                        if self.commonViewModel.teamsCount == 1 {
+                        //                            self.getAroundMe()
+                        //                        }
                     }
                     else {
                         self.commonViewModel.cardsCount -= 1
                         
                         self.commonViewModel.cardViews.removeFirst()
                         
-//                        if self.commonViewModel.cardsCount == 1 {
-//                            self.getAroundMe()
-//                        }
+                        //                        if self.commonViewModel.cardsCount == 1 {
+                        //                            self.getAroundMe()
+                        //                        }
                     }
                     
                     break
@@ -508,18 +518,18 @@ class CardViewModel: ObservableObject {
                         
                         self.commonViewModel.teamViews.removeFirst()
                         
-//                        if self.commonViewModel.teamsCount == 1 {
-//                            self.getAroundMe()
-//                        }
+                        //                        if self.commonViewModel.teamsCount == 1 {
+                        //                            self.getAroundMe()
+                        //                        }
                     }
                     else {
                         self.commonViewModel.cardsCount -= 1
                         
                         self.commonViewModel.cardViews.removeFirst()
                         
-//                        if self.commonViewModel.cardsCount == 1 {
-//                            self.getAroundMe()
-//                        }
+                        //                        if self.commonViewModel.cardsCount == 1 {
+                        //                            self.getAroundMe()
+                        //                        }
                     }
                     break
                 case .failure(let error):
@@ -545,95 +555,100 @@ class CardViewModel: ObservableObject {
             )
         )
     }
-        
+    
     private func saveCard() {
-            if self.cardType == .editCard {
-                self.repository.patchCard(
-                    cardId: self.cardId,
-                    jobTitle: self.jobTitle,
-                    specificity: self.specificity,
-                    name: self.name,
-                    email: self.email,
-                    achievements: self.achievements,
-                    services: self.services,
-                    phone: self.phone,
-                    address: self.address,
-                    seek: self.seek,
-                    useful: self.useful,
-                    telegram: self.telegram,
-                    vk: self.vk,
-                    site: self.site,
-                    cv: self.cv,
-                    bio: self.bio,
-                    bcTemplateType: self.cardModel.bc_template_type ?? "",
-                    avatarUrl: self.avatarUrl,
-                    logoUrl: self.logoUrl
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(let cardModel):
-                            print("success")
-                            self.pageType = .matchNotFound
-                            
-                            let index = self.commonViewModel.cards.firstIndex(
-                                where: {
-                                    $0.id == cardModel.id
-                                }
-                            )
-                            
-                            if index != nil {
-                                self.commonViewModel.cards[index!] = cardModel
+        if self.cardType == .editCard {
+            self.repository.patchCard(
+                cardId: self.cardId,
+                jobTitle: self.jobTitle,
+                specificity: self.specificity,
+                name: self.name,
+                email: self.email,
+                achievements: self.achievements,
+                services: self.services,
+                phone: self.phone,
+                address: self.address,
+                seek: self.seek,
+                useful: self.useful,
+                telegram: self.telegram,
+                vk: self.vk,
+                site: self.site,
+                cv: self.cv,
+                bio: self.bio,
+                bcTemplateType: self.cardModel.bc_template_type ?? "",
+                avatarUrl: self.avatarUrl,
+                logoUrl: self.logoUrl
+            ) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let cardModel):
+                        print("success")
+                        self.pageType = .matchNotFound
+                        
+                        let index = self.commonViewModel.cards.firstIndex(
+                            where: {
+                                $0.id == cardModel.id
                             }
-                            
-                            self.navigationService.navigateBack()
-                            
-                            break
-                        case .failure(let error):
-                            print(error)
-                            break
+                        )
+                        
+                        if index != nil {
+                            self.commonViewModel.cards[index!] = cardModel
                         }
+                        
+                        self.navigationService.navigateBack()
+                        
+                        break
+                    case .failure(let error):
+                        print(error)
+                        break
                     }
                 }
             }
-            else {
-                self.repository.postCard(
-                    jobTitle: self.jobTitle,
-                    specificity: self.specificity,
-                    name: self.name,
-                    email: self.email,
-                    achievements: self.achievements,
-                    services: self.services,
-                    phone: self.phone,
-                    address: self.address,
-                    seek: self.seek,
-                    useful: self.useful,
-                    telegram: self.telegram,
-                    vk: self.vk,
-                    site: self.site,
-                    cv: self.cv,
-                    bio: self.bio,
-                    bcTemplateType: self.cardModel.bc_template_type ?? "",
-                    avatarUrl: self.avatarUrl,
-                    logoUrl: self.logoUrl
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(let cardModel):
-                            self.pageType = .matchNotFound
-                            
-                            self.commonViewModel.cards.append(cardModel)
-                            
-                            self.navigationService.navigateBack()
-                            
-                            break
-                        case .failure(let error):
-                            // Handle error
-                            break
-                        }
+        }
+        else {
+            self.repository.postCard(
+                jobTitle: self.jobTitle,
+                specificity: self.specificity,
+                name: self.name,
+                email: self.email,
+                achievements: self.achievements,
+                services: self.services,
+                phone: self.phone,
+                address: self.address,
+                seek: self.seek,
+                useful: self.useful,
+                telegram: self.telegram,
+                vk: self.vk,
+                site: self.site,
+                cv: self.cv,
+                bio: self.bio,
+                bcTemplateType: self.cardModel.bc_template_type ?? "",
+                avatarUrl: self.avatarUrl,
+                logoUrl: self.logoUrl
+            ) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let cardModel):
+                        self.pageType = .matchNotFound
+                        
+                        self.commonViewModel.cards.append(cardModel)
+                        
+                        self.navigationService.navigateBack()
+                        
+                        break
+                    case .failure(let error):
+                        // Handle error
+                        break
                     }
                 }
             }
         }
     }
+    
+    func changeCardType() {
+        self.cardType = .editCard
+        self.getSpecifity()
+    }
+}

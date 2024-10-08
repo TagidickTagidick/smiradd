@@ -27,17 +27,17 @@ protocol ICommonRepository {
     
     func postFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     )
     
     func invite(
         url: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     )
     
     func deleteFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     )
     
     func getTeam(

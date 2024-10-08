@@ -2,6 +2,7 @@ import SwiftUI
 
 class ServiceViewModel: ObservableObject {
     @Published var cover: UIImage?
+    @Published var coverVideoUrl: URL?
     @Published var coverUrl: String = ""
     
     @Published var name: String = ""

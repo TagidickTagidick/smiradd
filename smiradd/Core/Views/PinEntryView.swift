@@ -26,7 +26,7 @@ struct PinEntryView: View {
             
             VStack {
                 HStack(spacing: 32) {
-                    ForEach(0 ..< pinLimit) { item in
+                    ForEach(0 ..< self.pinLimit) { item in
                         ZStack {
                             if item < pinCode.count { // Make sure we do not get an out of range error
                                 Text(pins[item])
@@ -62,7 +62,11 @@ struct PinCodeTextField: UIViewRepresentable {
         var canEdit: Bool
         @Binding var text: String
         
-        init(limit: Int, canEdit: Bool, text: Binding<String>) {
+        init(
+            limit: Int,
+            canEdit: Bool,
+            text: Binding<String>
+        ) {
             self.limit = limit
             self.canEdit = canEdit
             self._text = text
@@ -74,7 +78,11 @@ struct PinCodeTextField: UIViewRepresentable {
             }
         }
         
-        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        func textField(
+            _ textField: UITextField,
+            shouldChangeCharactersIn range: NSRange,
+            replacementString string: String
+        ) -> Bool {
             if !canEdit {
                 return false
             }
@@ -93,7 +101,9 @@ struct PinCodeTextField: UIViewRepresentable {
     var canEdit: Bool
     @Binding var text: String
     
-    func makeUIView(context: UIViewRepresentableContext<PinCodeTextField>) -> UITextField {
+    func makeUIView(
+        context: UIViewRepresentableContext<PinCodeTextField>
+    ) -> UITextField {
         let textField = UITextField(frame: .zero)
         textField.delegate = context.coordinator
         textField.textAlignment = .center
@@ -109,27 +119,5 @@ struct PinCodeTextField: UIViewRepresentable {
         uiView.text = text
         context.coordinator.canEdit = canEdit
         uiView.becomeFirstResponder()
-    }
-}
-
-/// A Utility view to view previews with a single Binding
-struct StatefulPreviewWrapper<Value, Content: View>: View {
-    
-    // MARK: - Properties
-    
-    var content: (Binding<Value>) -> Content
-    @State private var value: Value
-    
-    // MARK: - Initializer
-    
-    init(_ value: Value, content: @escaping (Binding<Value>) -> Content) {
-        self._value = State(wrappedValue: value)
-        self.content = content
-    }
-    
-    // MARK: - Body
-    
-    var body: some View {
-        content($value)
     }
 }

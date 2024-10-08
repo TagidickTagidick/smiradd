@@ -33,8 +33,8 @@ struct NetworkingPageView: View {
     
     var body: some View {
         ZStack (alignment: .top) {
-            CustomWidget(
-                pageType: $viewModel.pageType,
+            PageInfoView(
+                pageType: self.viewModel.pageType,
                 onTap: {
                     if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
                         if self.viewModel.pageType == .matchNotFound {
@@ -258,7 +258,6 @@ struct NetworkingPageView: View {
                         isPresented: $viewModel.isExitNetworkingSheet,
                         actionText: "Покинуть"
                     ) {
-                        print("ииыи")
                         self.viewModel.closeExitNetworkingSheet()
                     } message: {
                         Text("Вы действительно хотите выйти из нетворкинга?")
@@ -314,7 +313,6 @@ struct NetworkingPageView: View {
             },
             message: {
                 PinEntryView(
-                    pinLimit: 4,
                     pinCode: $viewModel.pinCode
                 )
             }

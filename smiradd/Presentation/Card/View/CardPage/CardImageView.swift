@@ -2,15 +2,18 @@ import SwiftUI
 import PhotosUI
 import SDWebImage
 import SDWebImageSwiftUI
+import AVKit
 
 struct CardImageView: View {
     @Binding var image: UIImage?
+    @Binding var videoUrl: URL?
     @Binding var imageUrl: String
     let showTrailing: Bool
     let editButton: Bool?
     var onTapEditButton: (() -> ())? = nil
     
-    @State private var showPicker: Bool = false
+    @State private var showImagePicker: Bool = false
+    @State private var showDocumentPicker: Bool = false
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
     @Environment(\.safeAreaInsets) private var safeAreaInsets
@@ -25,6 +28,29 @@ struct CardImageView: View {
                             width: UIScreen.main.bounds.width,
                             height: 360
                         )
+                }
+                else if videoUrl != nil {
+//                    VideoPlayer(player: AVPlayer(url: videoUrl!))
+////                        .resizable()
+////                        .aspectRatio(contentMode: .fill)
+//                        .frame(
+//                            width: UIScreen.main.bounds.width,
+//                            height: 360
+//                        )
+                    WebImage(
+                        url: videoUrl
+                    ) { image in
+                            image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(
+                                width: UIScreen.main.bounds.width,
+                                height: 360
+                            )
+                            .clipped()
+                        } placeholder: {
+                                Rectangle().foregroundColor(.gray)
+                        }
                 }
                 else {
                     WebImage(
@@ -111,15 +137,21 @@ struct CardImageView: View {
                             Button(
                                 "Сделать снимок",
                                 action: {
-                                    self.showPicker = true
+                                    self.showImagePicker = true
                                     self.sourceType = .camera
                                 }
                             )
                             Button(
                                 "Выбрать из галереи",
                                 action: {
-                                    self.showPicker = true
+                                    self.showImagePicker = true
                                     self.sourceType = .photoLibrary
+                                }
+                            )
+                            Button(
+                                "Выбрать из файлов",
+                                action: {
+                                    self.showDocumentPicker = true
                                 }
                             )
                         } label: {
@@ -145,8 +177,18 @@ struct CardImageView: View {
                                 .cornerRadius(28)
                             }
                         }
-                        .sheet(isPresented: $showPicker) {
-                            ImagePickerView(image: $image, sourceType: sourceType)
+                        .sheet(isPresented: $showImagePicker) {
+                            ImagePickerView(
+                                image: $image,
+                                videoUrl: $imageUrl,
+                                sourceType: sourceType
+                            )
+                        }
+                        .sheet(isPresented: $showDocumentPicker) {
+                            DocumentPickerView(
+                                image: $image,
+                                imageUrl: $imageUrl
+                            )
                         }
                     }
                 }

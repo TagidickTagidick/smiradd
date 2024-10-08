@@ -1,4 +1,5 @@
 import SwiftUI
+import Shimmer
 
 struct ProfileAppBarView: View {
     let viewModel: ProfileViewModel
@@ -7,14 +8,9 @@ struct ProfileAppBarView: View {
     
     var body: some View {
         HStack (alignment: .center) {
-            Text("Профиль")
-                .font(
-                    .custom(
-                        "OpenSans-SemiBold",
-                        size: 24
-                    )
-                )
-                .foregroundStyle(textDefault)
+            CustomTitleView(
+                text: "Избранное"
+            )
             Spacer()
             NotificationIconView(
                 viewModel: self.viewModel,

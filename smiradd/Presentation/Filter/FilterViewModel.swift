@@ -4,8 +4,7 @@ class FilterViewModel: ObservableObject {
     @Published var isFavorites: Bool = false
     @Published var pageType: PageType = .loading
     
-    @Published var specificityList: [SpecificityModel] = []
-    @Published var currentSpecifities: [SpecificityModel] = []
+    @Published var currentSpecificities: [SpecificityModel] = []
     @Published var networkingSpecificities: [String] = []
     @Published var favoritesSpecificities: [String] = []
     
@@ -13,41 +12,56 @@ class FilterViewModel: ObservableObject {
     
     private let commonRepository: ICommonRepository
     private let navigationService: NavigationService
+    private let commonViewModel: CommonViewModel
     
     init(
         commonRepository: ICommonRepository,
         navigationService: NavigationService,
-        commonSpecifities: [String],
+        commonViewModel: CommonViewModel,
+        currentSpecificities: [String],
         isFavorites: Bool
     ) {
         self.commonRepository = commonRepository
         self.navigationService = navigationService
+        self.commonViewModel = commonViewModel
         self.isFavorites = isFavorites
-        self.getSpecificities(commonSpecifities: commonSpecifities)
+        self.getSpecificities(currentSpecificities: currentSpecificities)
     }
     
     private func getSpecificities(
-        commonSpecifities: [String]
+        currentSpecificities: [String]
     ) {
-        self.commonRepository.getSpecificities() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let specificityModels):
-                    self.currentSpecifities = specificityModels
-                    self.specificityList = specificityModels
-                    if self.isFavorites {
-                        self.favoritesSpecificities = commonSpecifities
+        if self.commonViewModel.specificities.isEmpty {
+            self.commonRepository.getSpecificities() {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let specificityModels):
+                        self.currentSpecificities = specificityModels
+                        self.commonViewModel.specificities = specificityModels
+                        if self.isFavorites {
+                            self.favoritesSpecificities = currentSpecificities
+                        }
+                        else {
+                            self.networkingSpecificities = currentSpecificities
+                        }
+                        self.pageType = .matchNotFound
+                        break
+                    case .failure(let error):
+                        break
                     }
-                    else {
-                        self.networkingSpecificities = commonSpecifities
-                    }
-                    self.pageType = .matchNotFound
-                    break
-                case .failure(let error):
-                    break
                 }
             }
+        }
+        else {
+            self.currentSpecificities = self.commonViewModel.specificities
+            if self.isFavorites {
+                self.favoritesSpecificities = currentSpecificities
+            }
+            else {
+                self.networkingSpecificities = currentSpecificities
+            }
+            self.pageType = .matchNotFound
         }
     }
     
@@ -61,13 +75,13 @@ class FilterViewModel: ObservableObject {
     
     func onChangeFind() {
         if self.find.isEmpty {
-            self.currentSpecifities = self.specificityList
+            self.currentSpecificities = self.commonViewModel.specificities
         }
         else {
-            self.currentSpecifities = []
-            for specificity in self.specificityList {
+            self.currentSpecificities = []
+            for specificity in self.commonViewModel.specificities {
                 if specificity.name.contains(find) {
-                    self.currentSpecifities.append(specificity)
+                    self.currentSpecificities.append(specificity)
                 }
             }
         }

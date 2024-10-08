@@ -13,7 +13,8 @@ class CommonRepository: ICommonRepository {
     ) {
         self.networkService.uploadImage(
             image: image
-        ) { result in
+        ) {
+            result in
             switch result {
             case .success(let response):
                 completion(.success(response))
@@ -140,7 +141,7 @@ class CommonRepository: ICommonRepository {
     
     func postFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         self.networkService.post(
             url: "cards/\(cardId)/favorites",
@@ -153,11 +154,11 @@ class CommonRepository: ICommonRepository {
                         withJSONObject: response,
                         options: []
                     )
-                    let detailModel = try JSONDecoder().decode(
-                        DetailModel.self,
+                    let detailsModel = try JSONDecoder().decode(
+                        DetailsModel.self,
                         from: data
                     )
-                    completion(.success(detailModel))
+                    completion(.success(detailsModel))
                 } catch {
                     print("рвыфрвыфр \(error)")
                     completion(.failure(error))
@@ -171,7 +172,7 @@ class CommonRepository: ICommonRepository {
     
     func invite(
         url: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         self.networkService.post(
             url: "team/invite/\(url)",
@@ -184,11 +185,11 @@ class CommonRepository: ICommonRepository {
                         withJSONObject: response,
                         options: []
                     )
-                    let detailModel = try JSONDecoder().decode(
-                        DetailModel.self,
+                    let detailsModel = try JSONDecoder().decode(
+                        DetailsModel.self,
                         from: data
                     )
-                    completion(.success(detailModel))
+                    completion(.success(detailsModel))
                 } catch {
                     print("рвыфрвыфр \(error)")
                     completion(.failure(error))
@@ -202,7 +203,7 @@ class CommonRepository: ICommonRepository {
     
     func deleteFavorites(
         cardId: String,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         self.networkService.delete(
             url: "cards/\(cardId)/favorites"
@@ -214,11 +215,11 @@ class CommonRepository: ICommonRepository {
                         withJSONObject: response,
                         options: []
                     )
-                    let detailModel = try JSONDecoder().decode(
-                        DetailModel.self,
+                    let detailsModel = try JSONDecoder().decode(
+                        DetailsModel.self,
                         from: data
                     )
-                    completion(.success(detailModel))
+                    completion(.success(detailsModel))
                 } catch {
                     print("рвыфрвыфр \(error)")
                     completion(.failure(error))

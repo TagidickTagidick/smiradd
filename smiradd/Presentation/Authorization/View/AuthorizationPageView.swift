@@ -37,12 +37,12 @@ struct AuthorizationPageView: View {
                 VStack{
                     Spacer()
                         .frame(
-                            height: screenHeight / 60
+                            height: self.screenHeight / 60
                         ) //20
                     Image("logo")
                     Spacer()
                         .frame(
-                            height: screenHeight / 30
+                            height: self.screenHeight / 30
                         ) //36
                     Text(
                         self.viewModel.isSignUp
@@ -59,7 +59,7 @@ struct AuthorizationPageView: View {
                     .foregroundStyle(textDefault)
                     Spacer()
                         .frame(
-                            height: screenHeight / 70
+                            height: self.screenHeight / 70
                         ) //16
                     Text(
                         self.viewModel.isSignUp
@@ -75,27 +75,33 @@ struct AuthorizationPageView: View {
                     )
                     .foregroundStyle(textDefault)
                     Spacer()
-                        .frame(height: screenHeight / 40) //32
+                        .frame(height: self.screenHeight / 40) //32
                     EmailFieldView(
-                        email: $viewModel.email,
-                        emailIsError: $viewModel.emailIsError,
-                        emailErrorText: $viewModel.emailErrorText,
+                        email: self.$viewModel.email,
+                        emailIsError: self.$viewModel.emailIsError,
+                        emailErrorText: self.$viewModel.emailErrorText,
                         emailIsFocused: _emailIsFocused
                     )
                     Spacer()
                         .frame(
-                            height: screenHeight / 70
+                            height: self.screenHeight / 70
                         ) //16
                     PasswordFieldView(
-                        password: $viewModel.password,
-                        passwordIsError: $viewModel.passwordIsError,
-                        passwordErrorText: $viewModel.passwordErrorText,
-                        passwordIsShown: $viewModel.passwordIsShown,
+                        password: self.$viewModel.password,
+                        passwordIsError: self.$viewModel.passwordIsError,
+                        passwordErrorText: self.$viewModel.passwordErrorText,
+                        passwordIsShown: self.$viewModel.passwordIsShown,
                         passwordIsFocused: _passwordIsFocused
                     )
+                    if !self.viewModel.isSignUp {
+                        RecoverPasswordButtonView()
+                            .onTapGesture {
+                                self.viewModel.navigateToRecoverPassword()
+                            }
+                    }
                     Spacer()
                         .frame(
-                            height: screenHeight / 40
+                            height: self.screenHeight / 40
                         ) //32
                     CustomButtonView(
                         text: self.viewModel.isSignUp ? "Продолжить" : "Войти",
@@ -116,23 +122,23 @@ struct AuthorizationPageView: View {
                     }
                     PrivacyPolicyView(
                         isSignUp: self.viewModel.isSignUp,
-                        screenHeight: screenHeight
+                        screenHeight: self.screenHeight
                     )
                     Spacer()
                         .frame(
-                            height: screenHeight / 50
+                            height: self.screenHeight / 50
                         ) //24
                     AuthorizationDividerView()
                     Spacer()
                         .frame(
-                            height: screenHeight / 50
+                            height: self.screenHeight / 50
                         ) //24
                     OtherServiceButtonView(
                         isSignUp: self.viewModel.isSignUp
                     )
                     Spacer()
                         .frame(
-                            height: screenHeight / 20
+                            height: self.screenHeight / 20
                         ) //48
                     ChangeAuthorizationButtonView(
                         isSignUp: self.viewModel.isSignUp
@@ -141,11 +147,11 @@ struct AuthorizationPageView: View {
                         self.viewModel.changeAuthorization()
                     }
                     Spacer()
-                        .frame(height: screenHeight / 21) //46.56
+                        .frame(height: self.screenHeight / 21) //46.56
                 }
                 .padding(
                     [.leading, .trailing],
-                    screenHeight / 20
+                    self.screenHeight / 20
                 )
             }
         }

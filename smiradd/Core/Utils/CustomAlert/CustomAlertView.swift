@@ -82,7 +82,7 @@ struct CustomAlertView<T: Hashable, M: View>: View {
                     }
                     .padding([.vertical, .horizontal], 20)
                     .frame(maxWidth: .infinity)
-                    .background(.background)
+                    .background(.white)
                     .cornerRadius(16)
                 }
                 .padding()
@@ -166,13 +166,21 @@ struct CustomAlertView<T: Hashable, M: View>: View {
 
     func dismiss() {
         if #available(iOS 17.0, *) {
-            withAnimation(.easeInOut(duration: animationDuration)) {
+            withAnimation(
+                .easeInOut(
+                    duration: animationDuration
+                )
+            ) {
                 isAnimating = false
             } completion: {
                 isPresented = false
             }
         } else {
-            withAnimation(.easeInOut(duration: animationDuration)) {
+            withAnimation(
+                .easeInOut(
+                    duration: animationDuration
+                )
+            ) {
                 isAnimating = false
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {

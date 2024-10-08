@@ -15,8 +15,9 @@ struct TeamEditView: View {
         ScrollView {
             VStack (alignment: .leading) {
                 CardImageView(
-                    image: $viewModel.logo,
-                    imageUrl: $viewModel.logoUrl,
+                    image: self.$viewModel.logo,
+                    videoUrl: self.$viewModel.logoVideoUrl,
+                    imageUrl: self.$viewModel.logoUrl,
                     showTrailing: false,
                     editButton: false
                 )

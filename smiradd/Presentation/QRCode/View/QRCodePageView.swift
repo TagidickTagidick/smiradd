@@ -65,7 +65,7 @@ struct QRCodePageView: View {
                         .frame(height: 12)
                     Image(
                         uiImage: generateQRCode(
-                            from: "smiradd://vizme.pro?id=\(self.cardModel.id)"
+                            from: "https://smiradd.ru/cards/\(self.cardModel.id)"
                         )
                     )
                         .interpolation(.none)

@@ -5,6 +5,7 @@ struct SettingsInfoView: View {
     
     @Binding var avatar: UIImage?
     @Binding var avatarUrl: String
+    @Binding var videoUrl: URL?
     
     var body: some View {
         HStack {
@@ -12,18 +13,12 @@ struct SettingsInfoView: View {
             VStack {
                 SettingsAvatarView(
                     image: $avatar,
-                    imageUrl: $avatarUrl
+                    imageUrl: $avatarUrl,
+                    videoUrl: $videoUrl
                 )
                 Spacer()
                     .frame(height: 16)
-                Text(self.viewModel.profileModel?.email ?? "")
-                    .font(
-                        .custom(
-                            "OpenSans-Regular",
-                            size: 14
-                        )
-                    )
-                    .foregroundStyle(textDefault)
+                CustomTextView(text: self.viewModel.profileModel?.email ?? "")
             }
             Spacer()
         }

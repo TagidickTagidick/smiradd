@@ -22,6 +22,7 @@ final class NavigationService: ObservableObject {
             teamId: String,
             teamType: CardType
         )
+        case restrorePasswordScreen
     }
     
     @Published var navPath = NavigationPath()

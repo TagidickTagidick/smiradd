@@ -35,6 +35,7 @@ struct ServicePageView: View {
                 )
                 ServiceImageView(
                     image: $viewModel.cover,
+                    videoUrl: $viewModel.coverVideoUrl,
                     imageUrl: $viewModel.coverUrl
                 )
                 Spacer()

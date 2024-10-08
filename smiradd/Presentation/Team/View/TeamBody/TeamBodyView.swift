@@ -12,6 +12,7 @@ struct TeamBodyView: View {
     @State private var isAlert: Bool = false
     
     @State var imageMock: UIImage? = nil
+    @State var videoMock: URL? = nil
     
     @State var teamLogo: String = ""
     
@@ -23,6 +24,7 @@ struct TeamBodyView: View {
                 VStack (alignment: .leading) {
                     CardImageView(
                         image: self.$imageMock,
+                        videoUrl: self.$videoMock,
                         imageUrl: self.$teamLogo,
                         showTrailing: false,
                         editButton: self.commonViewModel.cards.contains(

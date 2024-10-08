@@ -6,6 +6,7 @@ class TeamViewModel: ObservableObject {
     @Published var teamMainModel: TeamMainModel = TeamMainModel.mock
     
     @Published var logo: UIImage?
+    @Published var logoVideoUrl: URL?
     @Published var logoUrl: String = ""
     
     @Published var name: String = ""

@@ -1,23 +1,23 @@
 import SwiftUI
 
-struct CardTile: View {
-    var icon: String
-    var text: String
-    var isUrl: Bool
+struct CardTileView: View {
+    let icon: String
+    let text: String
+    let isUrl: Bool
     
     var body: some View {
         HStack {
-            Image(icon)
+            Image(self.icon)
                 .frame(
                     width: 24,
                     height: 24
                 )
             Spacer()
                 .frame(width: 8)
-            if isUrl {
+            if self.isUrl {
                 Link(
-                    text,
-                    destination: URL(string: text)!
+                    self.text,
+                    destination: URL(string: self.text)!
                 )
                 .font(
                     .custom(
@@ -29,7 +29,7 @@ struct CardTile: View {
                 .frame(height: 24)
             }
             else {
-                Text(text)
+                Text(self.text)
                     .font(
                         .custom(
                             "OpenSans-Regular",

@@ -83,6 +83,9 @@ class SplashScreenViewModel: ObservableObject {
                     if locationModel.name != nil {
                         self.commonViewModel.forumName = locationModel.name!
                     }
+                    if locationModel.type != nil {
+                        self.commonViewModel.isTeamForum = locationModel.type == "TeamForum"
+                    }
                     self.getCards()
                     break
                 case .failure(let error):

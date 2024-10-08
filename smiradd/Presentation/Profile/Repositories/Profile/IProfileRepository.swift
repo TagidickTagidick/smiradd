@@ -4,7 +4,7 @@ protocol IProfileRepository {
     )
     
     func getNotifications(
-        completion: @escaping (Result<NotificationsModel, Error>) -> Void
+        completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
     )
     
     func deleteProfile(

@@ -2,7 +2,6 @@ import SwiftUI
 import Shimmer
 
 struct ProfileInfoView: View {
-    let isProfileLoading: Bool
     let pictureUrl: String
     let firstName: String
     let lastName: String
@@ -35,11 +34,5 @@ struct ProfileInfoView: View {
             }
             Spacer()
         }
-        .redacted(
-            reason: self.isProfileLoading
-            ? .placeholder
-            : .invalidated
-        )
-        .shimmering(active: self.isProfileLoading)
     }
 }

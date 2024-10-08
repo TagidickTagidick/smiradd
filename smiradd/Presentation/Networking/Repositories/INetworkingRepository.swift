@@ -13,6 +13,6 @@ protocol INetworkingRepository {
     
     func postClear(
         isTeam: Bool,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     )
 }

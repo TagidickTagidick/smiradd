@@ -26,7 +26,6 @@ class PhoneAddressFormatter: Formatter {
                 result.append(ch)
             }
         }
-        print(result)
         return result
     }
 }

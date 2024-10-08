@@ -74,11 +74,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
                          
                          
-                         // Add multiple caches
-                         let cache = SDImageCache(namespace: "tiny")
-                         cache.config.maxMemoryCost = 100 * 1024 * 1024 // 100MB memory
-                         cache.config.maxDiskSize = 50 * 1024 * 1024 // 50MB disk
-                         SDImageCachesManager.shared.addCache(cache)
                          SDWebImageManager.defaultImageCache = SDImageCachesManager.shared
         
         return true
@@ -240,8 +235,9 @@ struct smiraddApp: App, KeyboardReadable {
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     ),
-                                    navigationService: navigationService,
-                                    commonSpecifities: isFavorites ? self.commonViewModel.favoritesSpecificities : self.commonViewModel.networkingSpecificities,
+                                    navigationService: self.navigationService,
+                                    commonViewModel: self.commonViewModel,
+                                    currentSpecificities: isFavorites ? self.commonViewModel.favoritesSpecificities : self.commonViewModel.networkingSpecificities,
                                     isFavorites: isFavorites
                                 )
                             case .teamScreen(
@@ -260,6 +256,13 @@ struct smiraddApp: App, KeyboardReadable {
                                     teamType: teamType,
                                     commonViewModel: self.commonViewModel
                                 )
+                            case .restrorePasswordScreen:
+                                RestorePasswordPageView(
+                                    repository: RestorePasswordRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    navigationService: self.navigationService
+                                )
                             default:
                                 SplashScreenView(
                                     commonViewModel: self.commonViewModel,
@@ -275,6 +278,7 @@ struct smiraddApp: App, KeyboardReadable {
                                     i != .signInScreen &&
                                     i != .signUpScreen &&
                                     i != .qrCodeScreen &&
+                                    i != .restrorePasswordScreen &&
                                     !isKeyboardVisible {
                                 CustomBottomNavigationBarView()
                             }
@@ -307,6 +311,7 @@ struct smiraddApp: App, KeyboardReadable {
                                 y: self.commonViewModel.isAlert ? (-UIScreen.main.bounds.size.height + self.safeAreaInsets.top + 100) : -1000
                             )
                                 .transition(.move(edge: .top))
+                            
                         }
                         .navigationBarBackButtonHidden(true)
                         .frame(
@@ -342,23 +347,4 @@ struct smiraddApp: App, KeyboardReadable {
             .environment(\.sizeCategory, .medium)
         }
     }
-}
-
-struct ContentView: View {
-    @StateObject var notificationManager = NotificationManager()
-    var body: some View{
-        VStack{
-            Button("Request Notification"){
-                Task{
-                    await notificationManager.request()
-                }
-            }
-            .buttonStyle(.bordered)
-            .disabled(notificationManager.hasPermission)
-            .task {
-                await notificationManager.getAuthStatus()
-            }
-        }
-    }
-    
 }

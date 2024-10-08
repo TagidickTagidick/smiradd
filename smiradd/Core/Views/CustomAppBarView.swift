@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CustomAppBarView: View {
-    @EnvironmentObject var router: NavigationService
+    @EnvironmentObject var navigationService: NavigationService
     
     let title: String
     var action: (() -> ())? = nil
@@ -13,15 +13,15 @@ struct CustomAppBarView: View {
                 .foregroundColor(buttonClick)
                 .onTapGesture {
                     if (action == nil) {
-                        router.navigateBack()
+                        self.navigationService.navigateBack()
                     }
                     else {
-                        action!()
+                        self.action!()
                     }
                 }
             Spacer()
                 .frame(width: 24)
-            Text(title)
+            Text(self.title)
                 .font(
                     .custom(
                         "OpenSans-SemiBold",

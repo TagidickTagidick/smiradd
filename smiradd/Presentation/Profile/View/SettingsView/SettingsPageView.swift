@@ -4,7 +4,7 @@ import PhotosUI
 struct SettingsPageView: View {
     @EnvironmentObject private var navigationService: NavigationService
     @EnvironmentObject private var profileViewModel: ProfileViewModel
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    //@Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     @StateObject private var viewModel: SettingsViewModel
     
@@ -14,10 +14,13 @@ struct SettingsPageView: View {
     
     @FocusState private var lastNameIsFocused: Bool
     
+    @FocusState private var passwordIsFocused: Bool
+    
     @State private var offset: CGFloat = 0
     
     init(
         repository: ISettingsRepository,
+        //navigationService: NavigationService,
         firstName: String,
         lastName: String,
         avatarUrl: String
@@ -25,6 +28,7 @@ struct SettingsPageView: View {
         _viewModel = StateObject(
             wrappedValue: SettingsViewModel(
                 repository: repository,
+                //navigationService: navigationService,
                 firstName: firstName,
                 lastName: lastName,
                 avatarUrl: avatarUrl
@@ -39,7 +43,7 @@ struct SettingsPageView: View {
                     CustomAppBarView(
                         title: "Настройки",
                         action: {
-                            self.presentationMode.wrappedValue.dismiss()
+                            //self.presentationMode.wrappedValue.dismiss()
                             self.profileViewModel.closeSettings()
                         }
                     )
@@ -58,7 +62,7 @@ struct SettingsPageView: View {
                         CustomAppBarView(
                             title: "Настройки",
                             action: {
-                                self.presentationMode.wrappedValue.dismiss()
+                                //self.presentationMode.wrappedValue.dismiss()
                                 self.profileViewModel.closeSettings()
                             }
                         )
@@ -66,7 +70,8 @@ struct SettingsPageView: View {
                             .frame(height: 20)
                         SettingsInfoView(
                             avatar: $viewModel.avatar,
-                            avatarUrl: $viewModel.avatarUrl
+                            avatarUrl: $viewModel.avatarUrl,
+                            videoUrl: $viewModel.avatarVideoUrl
                         )
                         Spacer()
                             .frame(height: 16)
@@ -110,6 +115,34 @@ struct SettingsPageView: View {
                             }
                         }
                         SettingsTileView(
+                            image: "change_pattern",
+                            text: "Смена пароля"
+                        )
+                        .onTapGesture {
+                            self.viewModel.openChangePasswordSheet()
+                        }
+                        .customAlert(
+                            "Смена пароля",
+                            isPresented: self.$viewModel.isChangePassword,
+                            actionText: "Сменить",
+                            isRed: true
+                        ) {
+                            self.viewModel.changePassword()
+                        } message: {
+                            VStack (alignment: .leading) {
+                                CustomTextView(text: "Новый пароль")
+                                Spacer()
+                                    .frame(height: 10)
+                                CustomTextFieldView(
+                                    value: self.$viewModel.password,
+                                    hintText: "",
+                                    focused: self.$passwordIsFocused
+                                )
+                            }
+                        }
+                        Spacer()
+                            .frame(height: 16)
+                        SettingsTileView(
                             image: "help",
                             text: "Помощь"
                         )
@@ -144,12 +177,14 @@ struct SettingsPageView: View {
                             UserDefaults.standard.removeObject(
                                 forKey: "is_team"
                             )
-                            
                             UserDefaults.standard.removeObject(
                                 forKey: "access_token"
                             )
                             UserDefaults.standard.removeObject(
                                 forKey: "refresh_token"
+                            )
+                            UserDefaults.standard.removeObject(
+                                forKey: "first_time_forum"
                             )
                             self.commonViewModel.removeAll()
                             self.navigationService.index = 0

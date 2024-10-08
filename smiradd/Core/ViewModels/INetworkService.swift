@@ -37,4 +37,9 @@ protocol INetworkService {
         image: UIImage,
         completion: @escaping (Result<String, ErrorModel>) -> Void
     )
+    
+    func uploadVideo(
+        data: Data,
+        completion: @escaping (Result<String, ErrorModel>) -> Void
+    )
 }

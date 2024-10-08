@@ -91,7 +91,7 @@ class NetworkingRepository: INetworkingRepository {
     
     func postClear(
         isTeam: Bool,
-        completion: @escaping (Result<DetailModel, Error>) -> Void
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     ) {
         self.networkService.post(
             url: "networkingv2/clear\(isTeam ? "?team_seek=team" : "")",
@@ -104,11 +104,11 @@ class NetworkingRepository: INetworkingRepository {
                         withJSONObject: response,
                         options: []
                     )
-                    let detailModel = try JSONDecoder().decode(
-                        DetailModel.self,
+                    let detailsModel = try JSONDecoder().decode(
+                        DetailsModel.self,
                         from: data
                     )
-                    completion(.success(detailModel))
+                    completion(.success(detailsModel))
                 } catch {
                     completion(.failure(error))
                 }

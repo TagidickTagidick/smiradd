@@ -1,7 +1,9 @@
 import SwiftUI
 
 class ProfileViewModel: ObservableObject {
-    @Published var isProfileLoading: Bool = true
+    @Published var pageType: PageType = .loading
+    @Published var notificationsPageType: PageType = .loading
+    
     @Published var profileModel: ProfileModel?
     
     @Published var isTeamLoding: Bool = true
@@ -19,7 +21,7 @@ class ProfileViewModel: ObservableObject {
     
     private let repository: IProfileRepository
     private let commonRepository: ICommonRepository
-    private let navigationService: NavigationService
+    let navigationService: NavigationService
     private let commonViewModel: CommonViewModel
     
     init(
@@ -36,13 +38,14 @@ class ProfileViewModel: ObservableObject {
     }
     
     func getProfile() {
+        self.pageType = .loading
+        
         self.repository.getProfile {
             [self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let profileModel):
                     self.profileModel = profileModel
-                    self.isProfileLoading = false
                 case .failure(let error):
                     print(error)
                     break
@@ -79,22 +82,41 @@ class ProfileViewModel: ObservableObject {
                     print(error)
                     break
                 }
+                self.pageType = .matchNotFound
                 self.getNotifications()
             }
         }
     }
     
-    private func getNotifications() {
-        self.repository.getNotifications {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let notificationModel):
-                    self.notificationsModel = notificationModel
-                    break
-                case .failure(let error):
-                    // Handle error
-                    break
+    func getNotifications() {
+        self.notificationsPageType = .loading
+        
+        Task {
+            try? await Task.sleep(nanoseconds: 1000000000)
+            
+            self.repository.getNotifications {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let notificationsModel):
+                        self.notificationsModel = notificationsModel
+                        
+                        if self.notificationsModel!.items.isEmpty {
+                            self.notificationsPageType = .nothingHereNotifications
+                        }
+                        else {
+                            self.notificationsPageType = .matchNotFound
+                        }
+                        break
+                    case .failure(let error):
+                        if error.message == "Превышен лимит времени на запрос." || error.message == "Вероятно, соединение с интернетом прервано." {
+                            self.notificationsPageType = .noResultsFound
+                        }
+                        else {
+                            self.notificationsPageType = .somethingWentWrong
+                        }
+                        break
+                    }
                 }
             }
         }

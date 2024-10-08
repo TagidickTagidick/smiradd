@@ -34,15 +34,22 @@ struct ProfilePageView: View {
                                 isNotifications: $viewModel.isNotifications,
                                 isSettings: $viewModel.isSettings
                             )
+                            .redacted(
+                                reason: self.viewModel.pageType == .loading ? .placeholder : .invalidated
+                            )
+                            .shimmering(active: self.viewModel.pageType == .loading)
                             Spacer()
                                 .frame(height: 16)
                             ProfileInfoView(
-                                isProfileLoading: self.viewModel.isProfileLoading,
                                 pictureUrl: self.viewModel.profileModel?.picture_url ?? "",
                                 firstName: self.viewModel.profileModel?.first_name ?? "",
                                 lastName: self.viewModel.profileModel?.last_name ?? "",
                                 email: self.viewModel.profileModel?.email ?? ""
                             )
+                            .redacted(
+                                reason: self.viewModel.pageType == .loading ? .placeholder : .invalidated
+                            )
+                            .shimmering(active: self.viewModel.pageType == .loading)
                             Spacer()
                                 .frame(height: 28)
                         }
@@ -59,6 +66,10 @@ struct ProfilePageView: View {
                                 self.viewModel.openExistingCard(id: id)
                             }
                         )
+                        .redacted(
+                            reason: self.viewModel.pageType == .loading ? .placeholder : .invalidated
+                        )
+                        .shimmering(active: self.viewModel.pageType == .loading)
                         Spacer()
                             .frame(height: 24)
                         MyTeamView(
@@ -69,30 +80,24 @@ struct ProfilePageView: View {
                                 self.viewModel.openExistingTeam(
                                     id: self.commonViewModel.teamMainModel!.team.id!
                                 )
+                            },
+                            isSheet: self.$viewModel.isSheet,
+                            openNewCard: {
+                                self.viewModel.openNewCard()
                             }
                         )
+                        .redacted(
+                            reason: self.viewModel.pageType == .loading ? .placeholder : .invalidated
+                        )
+                        .shimmering(active: self.viewModel.pageType == .loading)
                         Spacer()
                             .frame(height: 78)
                     }
                 }
+                .refreshable {
+                    self.viewModel.getProfile()
+                }
         }
         .background(accent50)
-        .customAlert(
-            "Создайте визитку",
-            isPresented: $viewModel.isSheet,
-            actionText: "Да",
-            isRed: false
-        ) {
-            self.viewModel.openNewCard()
-        } message: {
-            Text("Вы должны создать свою визитку, чтобы открыть возможность создавать команду. Хотите сделать это сейчас?")
-                .font(
-                    .custom(
-                        "OpenSans-Regular",
-                        size: 14
-                    )
-                )
-                .foregroundStyle(textDefault)
-        }
     }
 }

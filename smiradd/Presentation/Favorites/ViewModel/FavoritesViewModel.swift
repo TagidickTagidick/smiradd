@@ -4,9 +4,9 @@ import CodeScanner
 class FavoritesViewModel: ObservableObject {
     @Published var pageType: PageType = .loading
     
-    @Published var isShowingScanner: Bool = false
-    
     @Published var favoritesModel: FavoritesModel?
+    
+    @Published var isShowingScanner: Bool = false
     
     @Published var isAlert: Bool = false
     private var cardId: String = ""
@@ -23,28 +23,46 @@ class FavoritesViewModel: ObservableObject {
         self.repository = repository
         self.navigationService = navigationService
         self.commonRepository = commonRepository
+        self.getFavorites()
     }
     
     func getFavorites() {
-        self.repository.getFavorites() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let favoritesModel):
-                    self.favoritesModel = favoritesModel
-                    
-                    if self.favoritesModel!.items.isEmpty {
-                        self.pageType = .nothingHereFavorites
+        self.pageType = .loading
+        
+        Task {
+            try? await Task.sleep(nanoseconds: 1000000000)
+            
+            self.repository.getFavorites() {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let favoritesModel):
+                        self.favoritesModel = favoritesModel
+                        
+                        if self.favoritesModel!.items.isEmpty {
+                            self.pageType = .nothingHereFavorites
+                        }
+                        else {
+                            self.pageType = .matchNotFound
+                        }
+                        break
+                    case .failure(let error):
+                        if error.message == "Превышен лимит времени на запрос."
+                            || error.message == "Вероятно, соединение с интернетом прервано." {
+                            self.pageType = .noResultsFound
+                        }
+                        else {
+                            self.pageType = .somethingWentWrong
+                        }
+                        break
                     }
-                    else {
-                        self.pageType = .matchNotFound
-                    }
-                    break
-                case .failure(let error):
-                    break
                 }
             }
         }
+    }
+    
+    func doTask() {
+        
     }
     
     func openScanner() {

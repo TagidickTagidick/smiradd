@@ -8,7 +8,7 @@ class FavoritesRepository: IFavoritesRepository {
     }
     
     func getFavorites(
-        completion: @escaping (Result<FavoritesModel, Error>) -> Void
+        completion: @escaping (Result<FavoritesModel, ErrorModel>) -> Void
     ) {
         self.networkService.get(
             url: "my/favorites"
@@ -24,12 +24,19 @@ class FavoritesRepository: IFavoritesRepository {
                         FavoritesModel.self,
                         from: data
                     )
+                    
                     completion(.success(favoritesModel))
                 } catch {
-                    completion(.failure(error))
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "Invalid json"
+                            )
+                        )
+                    )
                 }
             case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
                 completion(.failure(errorModel))
             }
         }
