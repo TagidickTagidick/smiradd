@@ -14,6 +14,7 @@ struct PageInfoView: View {
             }
             else {
                 VStack {
+                    Spacer()
                     Image({
                             switch pageType {
                             case .matchNotFound:
@@ -163,6 +164,7 @@ struct PageInfoView: View {
                             }
                         }
                     }
+                    Spacer()
                 }
                 .padding(
                     [.horizontal],
@@ -171,8 +173,8 @@ struct PageInfoView: View {
             }
         }
         .frame(
-            width: UIScreen.main.bounds.width - 40,
-            height: UIScreen.main.bounds.height - 134// - safeAreaInsets.top - safeAreaInsets.bottom
+            width: UIScreen.main.bounds.width - 40
+            //height: UIScreen.main.bounds.height - 134// - safeAreaInsets.top - safeAreaInsets.bottom
         )
         .background(
             pageType == .loading || pageType == .matchNotFound || pageType == .shareLocation || pageType == .pageNotFound

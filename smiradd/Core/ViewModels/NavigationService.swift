@@ -14,15 +14,27 @@ final class NavigationService: ObservableObject {
         case profileScreen
         case favoritesScreen
         case filterScreen(isFavorites: Bool)
-        case serviceScreen
         case settingsScreen
-        case qrCodeScreen
+        case qrCodeScreen(
+            id: String,
+            bcTemplateType: String,
+            jobTitle: String
+        )
         case notificationsScreen
         case teamScreen(
             teamId: String,
             teamType: CardType
         )
         case restrorePasswordScreen
+        case achievementScreen(
+            index: Int
+        )
+        case serviceScreen(
+            index: Int
+        )
+        case templatesScreen(
+            isTeam: Bool
+        )
     }
     
     @Published var navPath = NavigationPath()

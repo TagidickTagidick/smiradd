@@ -7,11 +7,8 @@ struct FilterSheetView: View {
     
     @EnvironmentObject private var commonViewModel: CommonViewModel
     
-    @State private var specificitiesHeight: CGFloat = 0
-    
     var body: some View {
-        ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
+        ScrollView {
             VStack (alignment: .leading) {
                 Spacer()
                     .frame(height: 32)
@@ -31,8 +28,8 @@ struct FilterSheetView: View {
                         text: "Ищу команду"
                     )
                     .frame(
-                        minWidth: UIScreen.main.bounds.size.width / 2 - 24,
-                        minHeight: 40
+                        minWidth: UIScreen.main.bounds.size.width / 2 - 24
+                        //minHeight: 40
                     )
                     .background(self.viewModel.isTeam ? textAccent : accent100)
                     .cornerRadius(24)
@@ -50,8 +47,8 @@ struct FilterSheetView: View {
                         text: "Ищу участников"
                     )
                     .frame(
-                        minWidth: UIScreen.main.bounds.size.width / 2 - 24,
-                        minHeight: 40
+                        minWidth: UIScreen.main.bounds.size.width / 2 - 24
+                        //minHeight: 40
                     )
                     .background(!self.viewModel.isTeam ? textAccent : accent100)
                     .cornerRadius(24)
@@ -112,17 +109,20 @@ struct FilterSheetView: View {
                     }
                 }
                 else {
-                    GeometryReader {
-                        proxy in
-                        WrappedLayoutView(
-                            onTap: {
-                                self.viewModel.openFilters()
-                            }
-                        )
-                        .onChange(of: proxy.size.height) {
-                            print(proxy.size.height)
-                            self.specificitiesHeight = proxy.size.height
+                    WrappedLayoutView(
+                        onTap: {
+                            self.viewModel.openFilters()
                         }
+                    )
+                    ForEach(
+                        self.commonViewModel.networkingSpecificities,
+                        id: \.self
+                    ) {
+                        platform in
+                        Spacer()
+                            .frame(
+                                height: 20
+                            )
                     }
                 }
                 Spacer()
@@ -138,7 +138,11 @@ struct FilterSheetView: View {
         }
         .presentationCornerRadius(16)
         .presentationDetents(
-            [.height(276 + self.specificitiesHeight)]
+            [
+                .height(UIScreen.main.bounds.size.height / 2),
+                .medium,
+                .large
+            ]
         )
     }
 }

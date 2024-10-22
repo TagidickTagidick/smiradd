@@ -6,6 +6,11 @@ protocol ICommonRepository {
         completion: @escaping (Result<String, Error>) -> Void
     )
     
+    func uploadVideo(
+        video: URL,
+        completion: @escaping (Result<String, Error>) -> Void
+    )
+    
     func getSpecificities(
         completion: @escaping (Result<[SpecificityModel], Error>) -> Void
     )
@@ -65,5 +70,31 @@ protocol ICommonRepository {
     func patchAroundme(
         id: String,
         completion: @escaping (Result<Void, Error>) -> Void
+    )
+    
+    func postFirebaseCreate(
+        firebaseToken: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    )
+    
+    func getNotifications(
+        completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
+    )
+    
+    func getAroundMeCards(
+        specificity: [String],
+        code: String,
+        completion: @escaping (Result<[CardModel], Error>) -> Void
+    )
+    
+    func getAroundMeTeams(
+        specificity: [String],
+        code: String,
+        completion: @escaping (Result<[TeamModel], Error>) -> Void
+    )
+    
+    func postClear(
+        isTeam: Bool,
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
     )
 }

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct TeamPageView: View {
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     @StateObject private var viewModel: TeamViewModel
     
     init(
@@ -26,11 +28,7 @@ struct TeamPageView: View {
     var body: some View {
         ZStack (alignment: .top) {
             if self.viewModel.pageType == .loading {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
+                CardShimmerView()
             }
             else {
                 if self.viewModel.teamType == .editCard || self.viewModel.teamType == .newCard {
@@ -52,7 +50,7 @@ struct TeamPageView: View {
                         isPresented: $viewModel.isExitTeam,
                         actionText: "Покинуть"
                     ) {
-                        self.viewModel.leaveAndLike()
+                        self.commonViewModel.leaveAndLike()
                     } message: {
                         Text("Чтобы подавать заявку в эту команду вы должны покинуть текущую")
                             .font(
@@ -68,7 +66,7 @@ struct TeamPageView: View {
                                     isPresented: $viewModel.isDeleteTeam,
                                     actionText: "Удалить"
                                 ) {
-                                    self.viewModel.leaveAndLike()
+                                    self.commonViewModel.leaveAndLike()
                                 } message: {
                                     Text("Чтобы подавать заявку в эту команду вы должны удалить свою")
                                         .font(

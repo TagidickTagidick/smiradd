@@ -125,8 +125,8 @@ struct ImagePickerView: UIViewControllerRepresentable {
     ) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
-        picker.sourceType = sourceType
-        picker.mediaTypes = ["public.image", "public.movie"]
+        picker.sourceType = self.sourceType
+        picker.mediaTypes = ["public.image"] //"public.movie"
         return picker
     }
 

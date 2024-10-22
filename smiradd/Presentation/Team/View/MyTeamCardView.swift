@@ -36,7 +36,11 @@ struct MyTeamCardView: View {
                     if let image = state.image {
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .frame(
+                                width: UIScreen.main.bounds.size.width - 40,
+                                height: 228
+                            )
+                            .clipped()
                     } else {
                         Color.gray.opacity(0.2)
                     }
@@ -62,6 +66,7 @@ struct MyTeamCardView: View {
                     .frame(height: 8)
                 HStack {
                     Image("team")
+                        .renderingMode(.template)
                         .frame(
                             width: 20,
                             height: 20

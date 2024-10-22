@@ -16,6 +16,8 @@ struct MyCardView: View {
     
     @EnvironmentObject private var navigationService: NavigationService
     
+    @Namespace var namespace
+    
     var body: some View {
         ZStack {
             if self.template != nil {
@@ -30,7 +32,11 @@ struct MyCardView: View {
                     if let image = state.image {
                         image
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .frame(
+                                width: UIScreen.main.bounds.size.width - 40,
+                                height: 228
+                            )
+                            .clipped()
                     } else {
                         Color.gray.opacity(0.2)
                     }
@@ -210,12 +216,17 @@ struct MyCardView: View {
                             : self.template!.theme == "black"
                         )
                         .onTapGesture {
-                            self.commonViewModel.openQRCode()
-                        }
-                        .navigationDestination(
-                            isPresented: $commonViewModel.isQRCode
-                        ) {
-                            QRCodePageView(cardModel: self.cardModel)
+                            if self.cardModel.bc_template_type == nil {
+                                return
+                            }
+                            
+                            self.navigationService.navigate(
+                                to: .qrCodeScreen(
+                                    id: self.cardModel.id,
+                                    bcTemplateType: self.cardModel.bc_template_type!,
+                                    jobTitle: self.cardModel.job_title
+                                )
+                            )
                         }
                         Spacer()
                         CustomIconView(
@@ -298,20 +309,19 @@ struct MyCardView: View {
             )
         }
         .frame(
+            width: UIScreen.main.bounds.size.width - 40,
             height: 228
         )
         .background(textDefault)
         .cornerRadius(20)
         .onAppear {
-            if self.template == nil {
-                if self.cardModel.bc_template_type != nil {
-                    self.template = self.commonViewModel.templates.first(
-                        where: { $0.id == self.cardModel.bc_template_type }
-                    ) ?? nil
-                }
+            if self.cardModel.bc_template_type != nil {
+                self.template = self.commonViewModel.templates.first(
+                    where: { $0.id == self.cardModel.bc_template_type }
+                ) ?? nil
             }
             
-            if self.cardModel.phone != nil && !self.cardModel.phone!.isEmpty {
+            if !(self.cardModel.phone ?? "").isEmpty {
                 self.phone = self.cardModel.phone!.replacingOccurrences(
                     of: "+",
                     with: "",

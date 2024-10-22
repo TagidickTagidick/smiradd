@@ -2,98 +2,8 @@ import SwiftUI
 import FirebaseCore
 import Firebase
 import FirebaseMessaging
-import GoogleSignIn
 import SDWebImage
 import SDWebImageSwiftUI
-
-
-extension View {
-    func getRootViewController() -> UIViewController {
-        guard let screen = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-            return .init()
-        }
-        
-        guard let root = screen.windows.first?.rootViewController else {
-            return .init()
-        }
-        
-        return root
-    }
-}
-
-//class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
-//    func application(
-//        _ application: UIApplication,
-//        open url: URL,
-//        options: [UIApplication.OpenURLOptionsKey : Any] = [:],
-//        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-//            //application.registerForRemoteNotifications()
-//            FirebaseApp.configure()
-//            print("рырыр")
-////            Messaging.messaging().delegate = self
-////            UNUserNotificationCenter.current().delegate = self
-//            return true
-//        }
-//
-//    @available(iOS 9.0, *)
-//    func application(_ application: UIApplication, open url: URL,
-//                     options: [UIApplication.OpenURLOptionsKey: Any])
-//    -> Bool {
-//        return GIDSignIn.sharedInstance.handle(url)
-//    }
-//
-//    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-//        Messaging.messaging().apnsToken = deviceToken
-//    }
-//
-//
-//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-//        if let fcm = Messaging.messaging().fcmToken {
-//            print("fcm", fcm)
-//        }
-//        else {
-//            print("ырыр")
-//        }
-//    }
-//}
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-    @Published var url: URL?
-    func application(
-        _ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        FirebaseApp.configure()
-        
-        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-            if error != nil || user == nil {
-                // Show the app's signed-out state.
-            } else {
-                // Show the app's signed-in state.
-            }
-        }
-        
-                         
-                         
-                         SDWebImageManager.defaultImageCache = SDImageCachesManager.shared
-        
-        return true
-    }
-    
-    func application(
-        _ app: UIApplication,
-        open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]
-    ) -> Bool {
-//        var handled: Bool
-//        
-//        handled = GIDSignIn.sharedInstance.handle(url)
-//        if handled {
-//            return true
-//        }
-        self.url = url
-        
-        return false
-    }
-}
 
 @main
 struct smiraddApp: App, KeyboardReadable {
@@ -108,8 +18,6 @@ struct smiraddApp: App, KeyboardReadable {
         networkService: NetworkService()
     )
     )
-    
-    @StateObject var locationManager = LocationManager()
     
     @State private var isEnabled: Bool = false
     @State private var isKeyboardVisible: Bool = false
@@ -142,6 +50,10 @@ struct smiraddApp: App, KeyboardReadable {
         navigationService.navigate(to: .cardScreen(cardId: recipeName, cardType: .userCard))
     }
     
+    @StateObject var notificationManager = NotificationManager()
+    
+    @Namespace var namespace
+    
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationService.navPath) {
@@ -153,7 +65,13 @@ struct smiraddApp: App, KeyboardReadable {
                                 SplashScreenView(
                                     commonViewModel: self.commonViewModel,
                                     navigationService: self.navigationService,
-                                    locationManager: self.locationManager,
+                                    locationManager: LocationManager(
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        )
+                                    ),
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     )
@@ -166,7 +84,14 @@ struct smiraddApp: App, KeyboardReadable {
                                     ),
                                     navigationService: self.navigationService,
                                     commonViewModel: self.commonViewModel,
-                                    locationManager: self.locationManager,
+                                    locationManager: LocationManager(
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        )
+                                    ),
+                                    notificationManager: self.notificationManager,
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     )
@@ -179,36 +104,67 @@ struct smiraddApp: App, KeyboardReadable {
                                     ),
                                     navigationService: navigationService,
                                     commonViewModel: self.commonViewModel,
-                                    locationManager: self.locationManager,
+                                    locationManager: LocationManager(
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        )
+                                    ),
+                                    notificationManager: self.notificationManager,
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     )
                                 )
                             case .networkingScreen:
                                 NetworkingPageView(
-                                    repository: NetworkingRepository(
-                                        networkService: NetworkService()
-                                    ),
                                     navigationService: self.navigationService,
-                                    locationManager: self.locationManager,
+                                    locationManager: LocationManager(
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        )
+                                    ),
                                     commonViewModel: self.commonViewModel,
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     )
                                 )
                             case .cardScreen(let cardId, let cardType):
-                                CardPageView(
-                                    repository: CardRepository(
-                                        networkService: NetworkService()
-                                    ),
-                                    commonRepository: CommonRepository(
-                                        networkService: NetworkService()
-                                    ),
-                                    navigationService: self.navigationService,
-                                    commonViewModel: self.commonViewModel,
-                                    cardId: cardId,
-                                    cardType: cardType
-                                )
+//                                if #available(iOS 18.0, *) {
+//                                    CardPageView(
+//                                        repository: CardRepository(
+//                                            networkService: NetworkService()
+//                                        ),
+//                                        commonRepository: CommonRepository(
+//                                            networkService: NetworkService()
+//                                        ),
+//                                        navigationService: self.navigationService,
+//                                        commonViewModel: self.commonViewModel,
+//                                        cardId: cardId,
+//                                        cardType: cardType
+//                                    )
+//                                    .navigationTransition(
+//                                        .zoom(
+//                                            sourceID: cardId,
+//                                            in: namespace
+//                                        )
+//                                    )
+//                                } else {
+                                    CardPageView(
+                                        repository: CardRepository(
+                                            networkService: NetworkService()
+                                        ),
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        ),
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        cardId: cardId,
+                                        cardType: cardType
+                                    )
+                                //}
                             case .profileScreen:
                                 ProfilePageView(
                                     repository: ProfileRepository(
@@ -263,11 +219,69 @@ struct smiraddApp: App, KeyboardReadable {
                                     ),
                                     navigationService: self.navigationService
                                 )
+                            case .notificationsScreen:
+                                NotificationsPageView(
+                                    repository: NotificationsRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    commonViewModel: self.commonViewModel,
+                                    navigationService: self.navigationService
+                                )
+                            case .qrCodeScreen(
+                                let id,
+                                let bcTemplateType,
+                                let jobTitle
+                            ):
+                                QRCodePageView(
+                                    id: id,
+                                    bcTemplateType: bcTemplateType,
+                                    jobTitle: jobTitle
+                                )
+                            case .settingsScreen:
+                                SettingsPageView(
+                                    repository: SettingsRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    commonRepository: CommonRepository(
+                                        networkService: NetworkService()
+                                    ),
+                                    commonViewModel: self.commonViewModel,
+                                    navigationService: self.navigationService
+                                )
+                            case .serviceScreen(
+                                let index
+                            ):
+                                ServicePageView(
+                                    index: index,
+                                    commonViewModel: self.commonViewModel
+                                )
+                            case .achievementScreen(
+                                let index
+                            ):
+                                AchievementPageView(
+                                    index: index,
+                                    commonViewModel: self.commonViewModel
+                                )
+                            case .templatesScreen(
+                                let isTeam
+                            ):
+                                TemplatesPageView(
+                                    isTeam: isTeam
+                                )
                             default:
                                 SplashScreenView(
                                     commonViewModel: self.commonViewModel,
                                     navigationService: self.navigationService,
-                                    locationManager: self.locationManager,
+                                    locationManager: LocationManager(
+                                        navigationService: self.navigationService,
+                                        commonViewModel: self.commonViewModel,
+                                        commonRepository: CommonRepository(
+                                            networkService: NetworkService()
+                                        )
+                                    ),
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
                                     )
@@ -277,7 +291,6 @@ struct smiraddApp: App, KeyboardReadable {
                                 i != .splashScreen &&
                                     i != .signInScreen &&
                                     i != .signUpScreen &&
-                                    i != .qrCodeScreen &&
                                     i != .restrorePasswordScreen &&
                                     !isKeyboardVisible {
                                 CustomBottomNavigationBarView()
@@ -330,7 +343,7 @@ struct smiraddApp: App, KeyboardReadable {
             }
             .onOpenURL { url in
                 print("App was opened via URL: \(url)")
-                GIDSignIn.sharedInstance.handle(url)
+                //GIDSignIn.sharedInstance.handle(url)
                 handleIncomingURL(url)
             }
             .onAppear {
@@ -345,6 +358,9 @@ struct smiraddApp: App, KeyboardReadable {
             .environmentObject(navigationService)
             .environmentObject(commonViewModel)
             .environment(\.sizeCategory, .medium)
+            .task {
+                await self.notificationManager.getAuthStatus()
+            }
         }
     }
 }

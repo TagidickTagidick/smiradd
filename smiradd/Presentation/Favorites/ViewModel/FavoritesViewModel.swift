@@ -23,17 +23,27 @@ class FavoritesViewModel: ObservableObject {
         self.repository = repository
         self.navigationService = navigationService
         self.commonRepository = commonRepository
-        self.getFavorites()
+        self.getFavorites(isRefresh: false)
     }
     
-    func getFavorites() {
+    func getFavorites(isRefresh: Bool = true) {
         self.pageType = .loading
         
-        Task {
-            try? await Task.sleep(nanoseconds: 1000000000)
-            
-            self.repository.getFavorites() {
-                [self] result in
+        let startTime = Date()
+        
+        self.repository.getFavorites() {
+            [self] result in
+            Task {
+                let endTime = Date()
+                
+                let duration = endTime.timeIntervalSince(startTime)
+                
+                if duration < 1.0 && isRefresh {
+                    try? await Task.sleep(
+                        nanoseconds: UInt64(1000000000 - duration * 1000000000)
+                    )
+                }
+                
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let favoritesModel):
@@ -59,10 +69,6 @@ class FavoritesViewModel: ObservableObject {
                 }
             }
         }
-    }
-    
-    func doTask() {
-        
     }
     
     func openScanner() {
@@ -126,6 +132,9 @@ class FavoritesViewModel: ObservableObject {
                     self.favoritesModel!.items.removeAll(
                         where: { $0.id == self.cardId }
                     )
+                    if self.favoritesModel!.items.isEmpty {
+                        self.pageType = .nothingHereFavorites
+                    }
                     break
                 case .failure(let error):
                     break

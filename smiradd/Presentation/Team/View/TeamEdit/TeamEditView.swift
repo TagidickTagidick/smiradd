@@ -3,20 +3,20 @@ import SwiftUI
 struct TeamEditView: View {
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     @EnvironmentObject var viewModel: TeamViewModel
     
     @FocusState var nameIsFocused: Bool
-    
     @FocusState var aboutTeamIsFocused: Bool
-    
     @FocusState var aboutProjectIsFocused: Bool
     
     var body: some View {
         ScrollView {
             VStack (alignment: .leading) {
                 CardImageView(
-                    image: self.$viewModel.logo,
-                    videoUrl: self.$viewModel.logoVideoUrl,
+                    image: self.$viewModel.logoImage,
+                    video: self.$viewModel.logoVideo,
                     imageUrl: self.$viewModel.logoUrl,
                     showTrailing: false,
                     editButton: false
@@ -27,52 +27,22 @@ struct TeamEditView: View {
                         .frame(
                             height: 16
                         )
-                    CustomTextView(
-                        text: "Название команды",
-                        isRequired: true
-                    )
-                    Spacer()
-                        .frame(
-                            height: 12
-                        )
-                    CustomTextFieldView(
-                        value: $viewModel.name,
-                        hintText: "Введите должность",
-                        focused: $nameIsFocused
+                    TeamEditNameView(
+                        nameIsFocused: _nameIsFocused
                     )
                     Spacer()
                         .frame(
                             height: 16
                         )
-                    CustomTextView(text: "О команде")
-                    Spacer()
-                        .frame(
-                            height: 12
-                        )
-                    CustomTextFieldView(
-                        value: $viewModel.aboutTeam,
-                        hintText: "Расскажите о себе",
-                        focused: $aboutTeamIsFocused,
-                        height: 177,
-                        limit: 800,
-                        isLongText: true
+                    TeamEditAboutTeamView(
+                        aboutTeamIsFocused: _aboutTeamIsFocused
                     )
                     Spacer()
                         .frame(
                             height: 16
                         )
-                    CustomTextView(text: "О проекте")
-                    Spacer()
-                        .frame(
-                            height: 12
-                        )
-                    CustomTextFieldView(
-                        value: $viewModel.aboutProject,
-                        hintText: "Расскажите о проекте",
-                        focused: $aboutProjectIsFocused,
-                        height: 177,
-                        limit: 800,
-                        isLongText: true
+                    TeamEditAboutProjectView(
+                        aboutProjectIsFocused: _aboutProjectIsFocused
                     )
                     Spacer()
                         .frame(
@@ -86,17 +56,11 @@ struct TeamEditView: View {
                             height: 12
                         )
                     TeamTemplateView(
-                        teamMainModel: self.viewModel.teamMainModel
+                        teamMainModel: self.commonViewModel.teamMainModel
                     )
                         .onTapGesture {
                             self.viewModel.openTemplates()
                         }
-                        .navigationDestination(
-                            isPresented: $viewModel.templatesOpened
-                        ) {
-                        TeamTemplatesPageView()
-                            .environmentObject(self.viewModel)
-                    }
                     if self.viewModel.teamType == .editCard {
                         Spacer()
                             .frame(
@@ -109,7 +73,7 @@ struct TeamEditView: View {
                             .frame(
                                 height: 12
                             )
-                        ForEach(self.viewModel.teamMainModel.teammates) {
+                        ForEach(self.commonViewModel.teamMainModel.teammates) {
                             teammate in
                             MyCardView(
                                 cardModel: teammate,
@@ -186,11 +150,12 @@ struct TeamEditView: View {
                     20
                 )
             }
+            .background(.white)
         }
         .onTapGesture {
-            nameIsFocused = false
-            aboutTeamIsFocused = false
-            aboutProjectIsFocused = false
+            self.nameIsFocused = false
+            self.aboutTeamIsFocused = false
+            self.aboutProjectIsFocused = false
         }
     }
 }

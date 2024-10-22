@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct BackButtonView: View {
-    @EnvironmentObject private var router: NavigationService
+    @EnvironmentObject private var navigationService: NavigationService
     
     var body: some View {
         ZStack {
@@ -11,11 +11,13 @@ struct BackButtonView: View {
                     width: 48,
                     height: 48
                 )
-            Image(systemName: "arrow.left")
+            Image(
+                systemName: "arrow.left"
+            )
                 .foregroundColor(textDefault)
         }
         .onTapGesture {
-            router.navigateBack()
+            self.navigationService.navigateBack()
         }
     }
 }

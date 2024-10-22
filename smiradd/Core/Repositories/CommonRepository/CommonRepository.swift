@@ -26,6 +26,25 @@ class CommonRepository: ICommonRepository {
         }
     }
     
+    func uploadVideo(
+        video: URL,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        self.networkService.uploadVideo(
+            video: video
+        ) {
+            result in
+            switch result {
+            case .success(let response):
+                completion(.success(response))
+                break
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
     func getSpecificities(
         completion: @escaping (Result<[SpecificityModel], Error>) -> Void
     ) {
@@ -339,6 +358,172 @@ class CommonRepository: ICommonRepository {
             switch result {
             case .success(let response):
                 completion(.success(()))
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
+    func postFirebaseCreate(
+        firebaseToken: String,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        self.networkService.post(
+            url: "firebase-create",
+            body: ["firebase_token": firebaseToken]
+        ) { result in
+            switch result {
+            case .success(let response):
+                completion(.success(()))
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
+    func getNotifications(
+        completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
+    ) {
+        self.networkService.get(
+            url: "notifications"
+        ) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    
+                    let notificationModels = try JSONDecoder().decode(
+                        NotificationsModel.self,
+                        from: data
+                    )
+                    
+                    completion(.success(notificationModels))
+                } catch {
+                    completion(
+                        .failure(
+                            ErrorModel(
+                                statusCode: 500,
+                                message: "Invalid json"
+                            )
+                        )
+                    )
+                }
+            case .failure(let errorModel):
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
+    func getAroundMeCards(
+        specificity: [String],
+        code: String,
+        completion: @escaping (Result<[CardModel], Error>) -> Void
+    ) {
+        var specificityString = ""
+        
+        if !specificity.isEmpty {
+            specificityString = specificity.first!
+            
+            for i in 1 ..< specificity.count {
+                specificityString = specificityString + ",\(specificity[i])"
+            }
+        }
+        
+        self.networkService.get(
+            url: "networkingv2/aroundme/30\(code.isEmpty ? "" : "?code=\(code)\(specificityString.isEmpty ? "" : "\(code.isEmpty ? "?" : "&")specificity=\(specificityString)")")"
+        ) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response["payload"] ?? [],
+                        options: []
+                    )
+                    let cardModels = try JSONDecoder().decode(
+                        [CardModel].self,
+                        from: data
+                    )
+                    completion(.success(cardModels))
+                } catch {
+                    print("рвыфрвыфр \(error)")
+                    completion(.failure(error))
+                }
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
+    func getAroundMeTeams(
+        specificity: [String],
+        code: String,
+        completion: @escaping (Result<[TeamModel], Error>) -> Void
+    ) {
+        var specificityString = ""
+        
+        if !specificity.isEmpty {
+            specificityString = specificity.first!
+            
+            for i in 1 ..< specificity.count {
+                specificityString = specificityString + ",\(specificity[i])"
+            }
+        }
+        
+        self.networkService.get(
+            url: "networkingv2/aroundme/30?team_seek=team\(code.isEmpty ? "" : "&code=\(code)\(specificityString.isEmpty ? "" : "&specificity=\(specificityString)")")"
+        ) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response["payload"] ?? [],
+                        options: []
+                    )
+                    let teamModels = try JSONDecoder().decode(
+                        [TeamModel].self,
+                        from: data
+                    )
+                    completion(.success(teamModels))
+                } catch {
+                    print("рвыфрвыфр \(error)")
+                    completion(.failure(error))
+                }
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
+    
+    func postClear(
+        isTeam: Bool,
+        completion: @escaping (Result<DetailsModel, Error>) -> Void
+    ) {
+        self.networkService.post(
+            url: "networkingv2/clear\(isTeam ? "?team_seek=team" : "")",
+            body: nil
+        ) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    let detailsModel = try JSONDecoder().decode(
+                        DetailsModel.self,
+                        from: data
+                    )
+                    completion(.success(detailsModel))
+                } catch {
+                    completion(.failure(error))
+                }
             case .failure(let errorModel):
                 print("Signup failed: \(errorModel.message)")
                 completion(.failure(errorModel))

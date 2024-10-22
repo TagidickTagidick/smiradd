@@ -24,23 +24,23 @@ struct TeamBodyView: View {
                 VStack (alignment: .leading) {
                     CardImageView(
                         image: self.$imageMock,
-                        videoUrl: self.$videoMock,
+                        video: self.$videoMock,
                         imageUrl: self.$teamLogo,
                         showTrailing: false,
-                        editButton: self.commonViewModel.cards.contains(
-                            where: { $0.id == self.viewModel.teamMainModel.owner_card_id}
+                        editButton: self.commonViewModel.myCards.contains(
+                            where: { $0.id == self.commonViewModel.teamMainModel.owner_card_id}
                         ) ? true : nil,
                         onTapEditButton: {
                             self.viewModel.teamType = .editCard
                         }
                     )
                     .onAppear {
-                        self.teamLogo = self.viewModel.teamMainModel.team.team_logo ?? ""
+                        self.teamLogo = self.commonViewModel.teamMainModel.team.team_logo ?? ""
                     }
                     VStack (alignment: .leading) {
                         Spacer()
                             .frame(height: 16)
-                        Text(self.viewModel.teamMainModel.team.name)
+                        Text(self.commonViewModel.teamMainModel.team.name)
                             .font(
                                 .custom(
                                     "OpenSans-SemiBold",
@@ -50,11 +50,12 @@ struct TeamBodyView: View {
                             .foregroundStyle(textDefault)
                         Spacer()
                             .frame(height: 12)
-                        if self.viewModel.teamMainModel.team.about_team != nil {
-                            if !self.viewModel.teamMainModel.team.about_team!.isEmpty {
-                                CardBio(
+                        if self.commonViewModel.teamMainModel.team.about_team != nil {
+                            if !self.commonViewModel.teamMainModel.team.about_team!.isEmpty {
+                                CardBioView(
                                     title: "О команде",
-                                    bio: self.viewModel.teamMainModel.team.about_team!
+                                    bio: self.commonViewModel.teamMainModel.team.about_team!,
+                                    showButton: true
                                 )
                                 Spacer()
                                     .frame(
@@ -62,11 +63,12 @@ struct TeamBodyView: View {
                                     )
                             }
                         }
-                        if self.viewModel.teamMainModel.team.about_project != nil {
-                            if !self.viewModel.teamMainModel.team.about_project!.isEmpty {
-                                CardBio(
+                        if self.commonViewModel.teamMainModel.team.about_project != nil {
+                            if !self.commonViewModel.teamMainModel.team.about_project!.isEmpty {
+                                CardBioView(
                                     title: "О проекте",
-                                    bio: self.viewModel.teamMainModel.team.about_project!
+                                    bio: self.commonViewModel.teamMainModel.team.about_project!,
+                                    showButton: true
                                 )
                                 Spacer()
                                     .frame(
@@ -80,16 +82,16 @@ struct TeamBodyView: View {
                                 height: 12
                             )
                         MyCardView(
-                            cardModel: self.viewModel.teamMainModel.teammates.first(
+                            cardModel: self.commonViewModel.teamMainModel.teammates.first(
                                 where: {
-                                    $0.id == self.viewModel.teamMainModel.owner_card_id!
+                                    $0.id == self.commonViewModel.teamMainModel.owner_card_id!
                                 }
                             )!,
                             isMyCard: false
                         )
                         .onTapGesture {
                             self.viewModel.openCard(
-                                id: self.viewModel.teamMainModel.owner_card_id!
+                                id: self.commonViewModel.teamMainModel.owner_card_id!
                             )
                         }
                         Spacer()
@@ -124,12 +126,12 @@ struct TeamBodyView: View {
                                 .cornerRadius(16)
                                 .offset(y: 8)
                             MyCardView(
-                                cardModel: self.viewModel.teamMainModel.teammates.first!,
+                                cardModel: self.commonViewModel.teamMainModel.teammates.first!,
                                 isMyCard: false
                             )
                             .onTapGesture {
                                 self.viewModel.openCard(
-                                    id: self.viewModel.teamMainModel.teammates.first!.id
+                                    id: self.commonViewModel.teamMainModel.teammates.first!.id
                                 )
                             }
                             .offset(y: 16)
@@ -138,8 +140,8 @@ struct TeamBodyView: View {
                             .frame(
                                 height: 32
                             )
-                        if !self.commonViewModel.cards.contains(
-                            where: { $0.id == self.viewModel.teamMainModel.owner_card_id}
+                        if !self.commonViewModel.myCards.contains(
+                            where: { $0.id == self.commonViewModel.teamMainModel.owner_card_id}
                         ) && self.viewModel.teamType != .userCard {
                             CustomButtonView(
                                 text: "Покинуть команду",
@@ -166,7 +168,7 @@ struct TeamBodyView: View {
                     .padding([.horizontal], 20)
                     Spacer()
                         .frame(
-                            height: 78 + self.safeAreaInsets.bottom
+                            height: 154 + self.safeAreaInsets.bottom
                         )
                 }
             }
@@ -206,7 +208,9 @@ struct TeamBodyView: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
-                        self.viewModel.like()
+                        self.commonViewModel.like(
+                            id: self.viewModel.teamId
+                        )
                     }
                 }
                 .offset(

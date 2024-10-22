@@ -3,10 +3,8 @@ import SwiftUI
 class TeamViewModel: ObservableObject {
     @Published var pageType: PageType = .matchNotFound
     
-    @Published var teamMainModel: TeamMainModel = TeamMainModel.mock
-    
-    @Published var logo: UIImage?
-    @Published var logoVideoUrl: URL?
+    @Published var logoImage: UIImage?
+    @Published var logoVideo: URL?
     @Published var logoUrl: String = ""
     
     @Published var name: String = ""
@@ -69,7 +67,7 @@ class TeamViewModel: ObservableObject {
                 self.pageType = .matchNotFound
                 switch result {
                 case .success(let teamMainModel):
-                    self.teamMainModel = teamMainModel
+                    self.commonViewModel.teamMainModel = teamMainModel
                     self.initFields()
                     break
                 case .failure(let error):
@@ -91,7 +89,7 @@ class TeamViewModel: ObservableObject {
                 self.pageType = .matchNotFound
                 switch result {
                 case .success(let teamMainModel):
-                    self.teamMainModel = teamMainModel
+                    self.commonViewModel.teamMainModel = teamMainModel
                     self.initFields()
                     break
                 case .failure(let error):
@@ -105,14 +103,18 @@ class TeamViewModel: ObservableObject {
     }
     
     private func initFields() {
-        self.name = self.teamMainModel.team.name
-        self.aboutTeam = self.teamMainModel.team.about_team ?? ""
-        self.aboutProject = self.teamMainModel.team.about_project ?? ""
-        self.logoUrl = self.teamMainModel.team.team_logo ?? ""
+        self.name = self.commonViewModel.teamMainModel.team.name
+        self.aboutTeam = self.commonViewModel.teamMainModel.team.about_team ?? ""
+        self.aboutProject = self.commonViewModel.teamMainModel.team.about_project ?? ""
+        self.logoUrl = self.commonViewModel.teamMainModel.team.team_logo ?? ""
     }
     
     func openTemplates() {
-        self.templatesOpened = true
+        self.navigationService.navigate(
+            to: .templatesScreen(
+                isTeam: true
+            )
+        )
     }
     
     func closeTemplates(id: String) {
@@ -122,7 +124,7 @@ class TeamViewModel: ObservableObject {
             return
         }
         
-        self.teamMainModel.team.bc_template_type = id
+        self.commonViewModel.teamMainModel.team.bc_template_type = id
     }
     
     func startSave() {
@@ -132,23 +134,38 @@ class TeamViewModel: ObservableObject {
     }
     
     private func uploadLogo() {
-        if (logo == nil) {
-            self.saveTeam()
-            return
-        }
-        
-        self.commonRepository.uploadImage(image: logo!) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let url):
-                    self.logoUrl = url
-                    self.saveTeam()
-                case .failure(let error):
-                    print(error)
-                    break
+        if self.logoImage != nil {
+            self.commonRepository.uploadImage(image: self.logoImage!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.logoUrl = url
+                        self.saveTeam()
+                    case .failure(let error):
+                        print(error)
+                        break
+                    }
                 }
             }
+        }
+        else if self.logoVideo != nil {
+            self.commonRepository.uploadVideo(video: self.logoVideo!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.logoUrl = url
+                        self.saveTeam()
+                    case .failure(let error):
+                        print(error)
+                        break
+                    }
+                }
+            }
+        }
+        else {
+            self.saveTeam()
         }
     }
     
@@ -159,15 +176,21 @@ class TeamViewModel: ObservableObject {
                     aboutTeam: self.aboutTeam,
                     aboutProject: self.aboutProject,
                     teamLogo: self.logoUrl,
-                    inviteUrl: self.teamMainModel.team.invite_url,
-                    bcTemplateType: self.teamMainModel.team.bc_template_type ?? ""
+                    inviteUrl: self.commonViewModel.teamMainModel.team.invite_url,
+                    bcTemplateType: self.commonViewModel.teamMainModel.team.bc_template_type ?? ""
                 ) {
                     [self] result in
                     DispatchQueue.main.async {
                         switch result {
-                        case .success(let detailsModel):
-                            print("success")
+                        case .success(let teamModel):
                             self.pageType = .matchNotFound
+                            
+                            self.commonViewModel.myTeamMainModel!.team.bc_template_type = teamModel.bc_template_type
+                            self.commonViewModel.myTeamMainModel!.team.team_logo = teamModel.team_logo
+                            self.commonViewModel.myTeamMainModel!.team.invite_url = teamModel.invite_url
+                            self.commonViewModel.myTeamMainModel!.team.about_team = teamModel.about_team
+                            self.commonViewModel.myTeamMainModel!.team.name = teamModel.name
+                            self.commonViewModel.myTeamMainModel!.team.about_project = teamModel.about_project
                             
                             self.navigationService.navigateBack()
                             
@@ -185,7 +208,7 @@ class TeamViewModel: ObservableObject {
                     aboutTeam: self.aboutTeam,
                     aboutProject: self.aboutProject,
                     teamLogo: self.logoUrl,
-                    bcTemplateType: self.teamMainModel.team.bc_template_type ?? ""
+                    bcTemplateType: self.commonViewModel.teamMainModel.team.bc_template_type ?? ""
                 ) {
                     [self] result in
                     DispatchQueue.main.async {
@@ -193,10 +216,12 @@ class TeamViewModel: ObservableObject {
                         case .success(let teamModel):
                             self.pageType = .matchNotFound
                             
-                            self.commonViewModel.teamMainModel = TeamMainModel(
+                            self.commonViewModel.myTeamMainModel = TeamMainModel(
                                 team: teamModel,
                                 owner_card_id: "",
-                                teammates: self.commonViewModel.cards
+                                teammates: [
+                                    self.commonViewModel.myCards.first!
+                                ]
                             )
                             
                             self.navigationService.navigateBack()
@@ -219,7 +244,7 @@ class TeamViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: id,
-                cardType: self.commonViewModel.cards.first(
+                cardType: self.commonViewModel.myCards.first(
                     where: {
                         $0.id == id
                     }
@@ -238,7 +263,7 @@ class TeamViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let teamMainModel):
-                    self.commonViewModel.teamMainModel = nil
+                    self.commonViewModel.myTeamMainModel = nil
                     self.navigationService.navigateBack()
                     break
                 case .failure(let error):
@@ -268,145 +293,9 @@ class TeamViewModel: ObservableObject {
         )
     }
     
-    func like() {
-        if self.commonViewModel.cards.isEmpty {
-            self.noCardsSheet = true
-            return
-        }
-        
-        if self.commonViewModel.isTeamStorage {
-            if self.commonViewModel.teamMainModel == nil {
-                self.commonRepository.postRequest(
-                    id: self.teamId
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(_):
-                            self.commonViewModel.showAlert()
-                            self.navigationService.navigateBack()
-                            self.commonViewModel.teamViews.removeLast()
-                            break
-                        case .failure(_):
-                            break
-                        }
-                    }
-                }
-            }
-            else {
-                if self.commonViewModel.cards.first(
-                    where: {
-                        $0.id == self.commonViewModel.teamMainModel!.owner_card_id!
-                    }
-                ) == nil {
-                    self.isExitTeam = true
-                }
-                else {
-                    self.isDeleteTeam = true
-                }
-            }
-        }
-        else {
-            if self.commonViewModel.teamMainModel == nil {
-                self.commonRepository.postFavorites(
-                    cardId: self.teamId
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(_):
-                            self.commonViewModel.cardViews.removeLast()
-                            self.navigationService.navigateBack()
-                            break
-                        case .failure(let error):
-                            break
-                        }
-                    }
-                }
-            }
-            else {
-                if self.commonViewModel.cards.first(
-                    where: {
-                        $0.id == self.commonViewModel.teamMainModel!.owner_card_id!
-                    }
-                ) == nil {
-                    self.commonRepository.postFavorites(
-                        cardId: self.teamId
-                    ) {
-                        [self] result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                self.commonViewModel.cardViews.removeLast()
-                                self.navigationService.navigateBack()
-                                break
-                            case .failure(let error):
-                                break
-                            }
-                        }
-                    }
-                }
-                else {
-                    self.commonRepository.postTeamInvite(
-                        id: self.teamId
-                    ) {
-                        [self] result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                self.commonViewModel.cardViews.removeLast()
-                                self.commonViewModel.showAlert()
-                                self.navigationService.navigateBack()
-                                break
-                            case .failure(let error):
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    func leaveAndLike() {
-        self.commonRepository.deleteLeaveTeam() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.commonViewModel.teamMainModel = nil
-                    self.like()
-                    break
-                case .failure(_):
-                    self.navigationService.navigateBack()
-                    break
-                }
-            }
-        }
-    }
-    
-    func deleteAndLike() {
-        self.commonRepository.deleteTeam() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.commonViewModel.teamMainModel = nil
-                    self.like()
-                    break
-                case .failure(let error):
-                    // Handle error
-                    break
-                }
-                
-                self.pageType = .matchNotFound
-            }
-        }
-    }
-    
     func dislike(id: String) {
         if self.teamType == .editCard {
-            if self.teamMainModel.owner_card_id != id {
+            if self.commonViewModel.teamMainModel.owner_card_id != id {
                 self.isKick = true
                 self.kickId = id
             }
@@ -424,13 +313,13 @@ class TeamViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
-                    self.teamMainModel.teammates.removeAll(
+                    self.commonViewModel.teamMainModel.teammates.removeAll(
                         where: {
                             teammate in
                             teammate.id == self.kickId
                         }
                     )
-                    self.commonViewModel.teamMainModel = self.teamMainModel
+                    self.commonViewModel.myTeamMainModel = self.commonViewModel.teamMainModel
                     self.kickId = ""
                     break
                 case .failure(_):
@@ -455,7 +344,7 @@ class TeamViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
-                    self.commonViewModel.teamMainModel = nil
+                    self.commonViewModel.myTeamMainModel = nil
                     self.navigationService.navigateBack()
                     break
                 case .failure(let error):

@@ -14,7 +14,6 @@ struct NetworkingPageView: View {
     private let screenHeight = UIScreen.main.bounds.height
     
     init(
-        repository: INetworkingRepository,
         navigationService: NavigationService,
         locationManager: LocationManager,
         commonViewModel: CommonViewModel,
@@ -22,7 +21,6 @@ struct NetworkingPageView: View {
     ) {
         _viewModel = StateObject(
             wrappedValue: NetworkingViewModel(
-                repository: repository,
                 navigationService: navigationService,
                 locationManager: locationManager,
                 commonViewModel: commonViewModel,
@@ -32,91 +30,117 @@ struct NetworkingPageView: View {
     }
     
     var body: some View {
-        ZStack (alignment: .top) {
-            PageInfoView(
-                pageType: self.viewModel.pageType,
-                onTap: {
-                    if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
-                        if self.viewModel.pageType == .matchNotFound {
-                            self.viewModel.openForumCodeSheet()
-                        }
-                        else {
-                            self.viewModel.startAgain()
+        ZStack (
+            alignment: .top
+        ) {
+            if self.commonViewModel.networkingPageType != .loading {
+                PageInfoView(
+                    pageType: self.commonViewModel.networkingPageType,
+                    onTap: {
+                        if self.commonViewModel.networkingPageType == .matchNotFound || self.commonViewModel.networkingPageType == .pageNotFound {
+                            if self.commonViewModel.networkingPageType == .matchNotFound {
+                                self.viewModel.openForumCodeSheet()
+                            }
+                            else {
+                                self.commonViewModel.startAgain()
+                            }
                         }
                     }
-                }
-            )
-            .padding([.horizontal], 20)
-            .padding([.top], 16)
-            .padding([.bottom], 52)
-            .onChange(
-                of: self.viewModel.pinCode,
-                {
-                    self.viewModel.setForumCode()
-                }
-            )
-//            .frame(
-//                width: UIScreen.main.bounds.size.width - 40,
-//                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
-//            )
-            .offset(y: 52)
-            if self.commonViewModel.isTeamStorage {
-                CardSwiperView(
-                    cards: $commonViewModel.teamViews,
-                    onCardSwiped: {
-                        swipeDirection, index in
-                                switch swipeDirection {
-                                case .left:
-                                    self.viewModel.setSeen(
-                                        id: self.commonViewModel.teamViews[index].teamModel.id!
-                                    )
-                                case .right:
-                                    self.viewModel.setSeen(
-                                        id: commonViewModel.teamViews[index].teamModel.id!
-                                    )
-                                }
-                            },
-                    onCardDragged: {
-                        swipeDirection, index, offset in
-                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
-                            }
                 )
-                .offset(y: 52)
-//                .frame(
-//                    width: UIScreen.main.bounds.size.width,
-//                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-//                )
+                .offset(
+                    y: 70
+                )
+                .onChange(
+                    of: self.viewModel.pinCode,
+                    {
+                        self.viewModel.setForumCode()
+                    }
+                )
+            }
+            if self.commonViewModel.isTeamStorage {
+                CardStack(
+                    model: self.commonViewModel.networkingTeams,
+                  onSwipe: { card, direction in
+                      self.commonViewModel.dislike(id: card.id!)
+                  },
+                  content: { card, _ in
+                    NetworkingTeamView(
+                        teamModel: card,
+                        onDislike: {
+                            self.commonViewModel.dislike(id: card.id!)
+                            withAnimation {
+                                self.commonViewModel.networkingTeams.swipe(
+                                    direction: .left,
+                                    completion: nil
+                                )
+                            }
+                        },
+                        onLike: {
+                            self.commonViewModel.like(id: card.id!)
+                            withAnimation {
+                                self.commonViewModel.networkingTeams.swipe(
+                                    direction: .right,
+                                    completion: nil
+                                )
+                            }
+                        },
+                        onOpen: {
+                            self.viewModel.openTeam(id: card.id!)
+                        }
+                    )
+                  }
+                )
+                .offset(
+                    x: 20,
+                    y: 70// + self.safeAreaInsets.top
+                )
             }
             else {
-                CardSwiperView(
-                    cards: $commonViewModel.cardViews,
-                    onCardSwiped: {
-                        swipeDirection, index in
-                                switch swipeDirection {
-                                case .left:
-                                    self.viewModel.setSeen(
-                                        id: self.commonViewModel.cardViews[index].cardModel.id
-                                    )
-                                case .right:
-                                    self.viewModel.setSeen(
-                                        id: self.commonViewModel.cardViews[index].cardModel.id
-                                    )
-                                }
-                            },
-                    onCardDragged: {
-                        swipeDirection, index, offset in
-                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+                CardStack(
+                    model: self.commonViewModel.networkingCards,
+                  onSwipe: { card, direction in
+                      self.commonViewModel.dislike(id: card.id)
+                  },
+                  content: { card, _ in
+                    NetworkingCardView(
+                        cardModel: card,
+                        onDislike: {
+                            self.commonViewModel.dislike(id: card.id)
+                            withAnimation {
+                                self.commonViewModel.networkingCards.swipe(
+                                    direction: .left,
+                                    completion: nil
+                                )
                             }
+                        },
+                        onLike: {
+                            self.commonViewModel.like(id: card.id)
+                            withAnimation {
+                                self.commonViewModel.networkingCards.swipe(
+                                    direction: .right,
+                                    completion: nil
+                                )
+                            }
+                        },
+                        onOpen: {
+                            self.viewModel.openCard(id: card.id)
+                        }
+                    )
+                  }
                 )
-                .offset(y: 52)
-////                .frame(
-////                    width: UIScreen.main.bounds.size.width,
-////                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-////                )
+                .offset(
+                    x: 20,
+                    y: 70// + self.safeAreaInsets.top
+                )
             }
             NetworkingAppBarView(
                 onTapExit: {
-                    self.viewModel.openExitNetworkingSheet()
+                    if (self.commonViewModel.forumCode ?? "").isEmpty {
+                        self.viewModel.openForumCodeSheet()
+                    }
+                    else {
+                        self.viewModel.openExitNetworkingSheet()
+                    }
                 },
                 onTapFilter: {
                     self.viewModel.openFilterSheet()
@@ -132,126 +156,105 @@ struct NetworkingPageView: View {
                         isFilter: $viewModel.isFilterSheet
                     )
                     .environmentObject(self.viewModel)
+                    .environment(\.sizeCategory, .medium)
                 }
         }
-//        .frame(
-//            width: UIScreen.main.bounds.size.width - 40,
-//            height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
-//        )
-//        ZStack (
-//            alignment: .top
-//        ) {
-//            VStack {
-//                NetworkingAppBarView(
-//                    onTapExit: {
-//                        self.viewModel.openExitNetworkingSheet()
-//                    },
-//                    onTapFilter: {
-//                        self.viewModel.openFilterSheet()
-//                    }
-//                )
-//                .sheet(
-//                    isPresented: $viewModel.isFilterSheet,
-//                    onDismiss: {
-//                        self.viewModel.closeFilterSheet()
-//                    }) {
-//                        FilterSheetView(
-//                            isFilter: $viewModel.isFilterSheet
-//                        )
-//                        .environmentObject(self.viewModel)
-//                    }
-//                Spacer()
-//                    .frame(
-//                        height: 16
-//                    )
-//                ZStack {
-//                    CustomWidget(
-//                        pageType: $viewModel.pageType,
-//                        onTap: {
-//                            if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
-//                                if self.viewModel.pageType == .matchNotFound {
-//                                    self.viewModel.openForumCodeSheet()
-//                                }
-//                                else {
-//                                    self.viewModel.startAgain()
-//                                }
-//                            }
+//        ZStack (alignment: .top) {
+//            PageInfoView(
+//                pageType: self.viewModel.pageType,
+//                onTap: {
+//                    if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
+//                        if self.viewModel.pageType == .matchNotFound {
+//                            self.viewModel.openForumCodeSheet()
 //                        }
-//                    )
-//                    .onChange(
-//                        of: self.viewModel.pinCode,
-//                        {
-//                            self.viewModel.setForumCode()
-//                    }
-//                    )
-//                    .frame(
-//                        width: UIScreen.main.bounds.size.width - 40,
-//                        height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
-//                    )
-//                    if self.commonViewModel.isTeamStorage {
-//                        CardSwiperView(
-//                            cards: $commonViewModel.teamViews,
-//                            onCardSwiped: {
-//                                swipeDirection, index in
-//                                        switch swipeDirection {
-//                                        case .left:
-//                                            self.viewModel.setSeen(
-//                                                id: self.commonViewModel.teamViews[index].teamModel.id!
-//                                            )
-//                                        case .right:
-//                                            self.viewModel.setSeen(
-//                                                id: commonViewModel.teamViews[index].teamModel.id!
-//                                            )
-//                                        }
-//                                    },
-//                            onCardDragged: {
-//                                swipeDirection, index, offset in
-//                                        print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
-//                                    }
-//                        )
-//        //                .frame(
-//        //                    width: UIScreen.main.bounds.size.width,
-//        //                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-//        //                )
-//                    }
-//                    else {
-//                        CardSwiperView(
-//                            cards: $commonViewModel.cardViews,
-//                            onCardSwiped: {
-//                                swipeDirection, index in
-//                                        switch swipeDirection {
-//                                        case .left:
-//                                            self.viewModel.setSeen(
-//                                                id: self.commonViewModel.cardViews[index].cardModel.id
-//                                            )
-//                                        case .right:
-//                                            self.viewModel.setSeen(
-//                                                id: self.commonViewModel.cardViews[index].cardModel.id
-//                                            )
-//                                        }
-//                                    },
-//                            onCardDragged: {
-//                                swipeDirection, index, offset in
-//                                        print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
-//                                    }
-//                        )
-//        //                .frame(
-//        //                    width: UIScreen.main.bounds.size.width,
-//        //                    height: UIScreen.main.bounds.size.height - 58 - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-//        //                )
+//                        else {
+//                            self.viewModel.startAgain()
+//                        }
 //                    }
 //                }
-//            }
-//            .frame(
-//                width: UIScreen.main.bounds.size.width - 40,
-//                height: UIScreen.main.bounds.size.height - 153 - safeAreaInsets.top - safeAreaInsets.bottom
 //            )
+//            .padding([.horizontal], 20)
+//            .padding([.top], 16)
+//            .padding([.bottom], 52)
+//            .onChange(
+//                of: self.viewModel.pinCode,
+//                {
+//                    self.viewModel.setForumCode()
+//                }
+//            )
+//            .offset(y: 52)
+//            if self.commonViewModel.isTeamStorage {
+//                CardSwiperView(
+//                    cards: $commonViewModel.teamViews,
+//                    onCardSwiped: {
+//                        swipeDirection, index in
+//                                switch swipeDirection {
+//                                case .left:
+//                                    self.viewModel.setSeen(
+//                                        id: self.commonViewModel.teamViews[index].teamModel.id!
+//                                    )
+//                                case .right:
+//                                    self.viewModel.setSeen(
+//                                        id: commonViewModel.teamViews[index].teamModel.id!
+//                                    )
+//                                }
+//                            },
+//                    onCardDragged: {
+//                        swipeDirection, index, offset in
+//                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+//                            }
+//                )
+//                .offset(y: 52)
+//            }
+//            else {
+//                CardSwiperView(
+//                    cards: $commonViewModel.cardViews,
+//                    onCardSwiped: {
+//                        swipeDirection, index in
+//                                switch swipeDirection {
+//                                case .left:
+//                                    self.viewModel.setSeen(
+//                                        id: self.commonViewModel.cardViews[index].cardModel.id
+//                                    )
+//                                case .right:
+//                                    self.viewModel.setSeen(
+//                                        id: self.commonViewModel.cardViews[index].cardModel.id
+//                                    )
+//                                }
+//                            },
+//                    onCardDragged: {
+//                        swipeDirection, index, offset in
+//                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
+//                            }
+//                )
+//                .offset(y: 52)
+//            }
+//            NetworkingAppBarView(
+//                onTapExit: {
+//                    self.viewModel.openExitNetworkingSheet()
+//                },
+//                onTapFilter: {
+//                    self.viewModel.openFilterSheet()
+//                }
+//            )
+//            .background(accent50)
+//            .sheet(
+//                isPresented: $viewModel.isFilterSheet,
+//                onDismiss: {
+//                    self.viewModel.closeFilterSheet()
+//                }) {
+//                    FilterSheetView(
+//                        isFilter: $viewModel.isFilterSheet
+//                    )
+//                    .environmentObject(self.viewModel)
+//                    .environment(\.sizeCategory, .medium)
+//                }
 //        }
-        //.ignoresSafeArea()
-        .frame(
-            width: UIScreen.main.bounds.size.width,
-            height: UIScreen.main.bounds.size.height - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-        )
+        
+//        .frame(
+//            width: UIScreen.main.bounds.size.width,
+//            height: UIScreen.main.bounds.size.height - self.safeAreaInsets.bottom - self.safeAreaInsets.top
+//        )
         .background(accent50)
         .customAlert(
                         "Покинуть нетворкинг?",
@@ -271,10 +274,10 @@ struct NetworkingPageView: View {
                     }
                     .customAlert(
                                     "У вас уже есть команда",
-                                    isPresented: $viewModel.isExitTeam,
+                                    isPresented: self.$commonViewModel.isExitTeam,
                                     actionText: "Покинуть"
                                 ) {
-                                    self.viewModel.leaveAndLike()
+                                    self.commonViewModel.leaveAndLike()
                                 } message: {
                                     Text("Чтобы подавать заявку в эту команду вы должны покинуть текущую")
                                         .font(
@@ -287,10 +290,10 @@ struct NetworkingPageView: View {
                                 }
                                 .customAlert(
                                                 "Вы уже - лидер команды",
-                                                isPresented: $viewModel.isDeleteTeam,
+                                                isPresented: self.$commonViewModel.isDeleteTeam,
                                                 actionText: "Удалить"
                                             ) {
-                                                self.viewModel.deleteAndLike()
+                                                self.commonViewModel.deleteAndLike()
                                             } message: {
                                                 Text("Чтобы подавать заявку в эту команду вы должны удалить свою")
                                                     .font(
@@ -315,17 +318,22 @@ struct NetworkingPageView: View {
                 PinEntryView(
                     pinCode: $viewModel.pinCode
                 )
+                .onChange(of: self.viewModel.pinCode) {
+                    if self.viewModel.pinCode.count == 4 {
+                        self.viewModel.setForumCode()
+                    }
+                }
             }
         )
         .networkingAlert(
             "Удалить визитку?",
-            isPresented: $viewModel.noCardsSheet,
+            isPresented: self.$commonViewModel.noCardsSheet,
             actionText: "Удалить",
             image: "no_cards",
             title: "У вас ещё нет визитки",
             description: "Чтобы начать сохранять чужие визитки, вам нужно создать собственную",
             action: {
-                self.viewModel.noCardsSheet = false
+                self.commonViewModel.noCardsSheet = false
             },
             message: {
                 CustomButtonView(
@@ -343,7 +351,7 @@ struct NetworkingPageView: View {
             isPresented: $viewModel.isQuestionForumSheet,
             actionText: "Удалить",
             image: "no_event",
-            title: "Вы сейчас на '\(self.commonViewModel.forumName)'?",
+            title: "Вы сейчас на '\(self.commonViewModel.locationModel?.name ?? "")'?",
             description: "Начните знакомство с остальными участниками прямо сейчас!",
             action: {
                 self.viewModel.answerNoQuestionForumSheet()
@@ -409,7 +417,7 @@ struct NetworkingPageView: View {
             title: "Выберите статус",
             description: "Чтобы продолжить, выберите статус",
             action: {
-                self.viewModel.noCardsSheet = false
+                self.commonViewModel.noCardsSheet = false
             },
             message: {
                 VStack {
@@ -422,7 +430,7 @@ struct NetworkingPageView: View {
                         width: UIScreen.main.bounds.size.width - 160
                     )
                     .onTapGesture {
-                        self.viewModel.setIsSteam(isTeam: true)
+                        self.viewModel.setIsTeam(isTeam: true)
                     }
                     CustomButtonView(
                         text: "Ищу участников",
@@ -433,7 +441,7 @@ struct NetworkingPageView: View {
                         width: UIScreen.main.bounds.size.width - 160
                     )
                     .onTapGesture {
-                        self.viewModel.setIsSteam(isTeam: false)
+                        self.viewModel.setIsTeam(isTeam: false)
                     }
                 }
             }

@@ -39,7 +39,7 @@ protocol INetworkService {
     )
     
     func uploadVideo(
-        data: Data,
+        video: URL,
         completion: @escaping (Result<String, ErrorModel>) -> Void
     )
 }

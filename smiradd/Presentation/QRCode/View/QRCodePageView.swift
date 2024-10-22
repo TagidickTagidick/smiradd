@@ -1,4 +1,5 @@
 import SwiftUI
+import NukeUI
 import CoreImage.CIFilterBuiltins
 
 struct QRCodePageView: View {
@@ -8,7 +9,9 @@ struct QRCodePageView: View {
     
     @State private var template: TemplateModel?
     
-    let cardModel: CardModel
+    let id: String
+    let bcTemplateType: String
+    let jobTitle: String
     
     let context = CIContext()
     let filter = CIFilter.qrCodeGenerator()
@@ -28,44 +31,38 @@ struct QRCodePageView: View {
     var body: some View {
         ZStack {
             if self.template != nil {
-                AsyncImage(
+                LazyImage(
                     url: URL(
-                        string: self.template!.picture_url!.replacingOccurrences(of: "\\", with: "")
-                    )
-                ) { image in
-                    image
-                        .resizable()
-                        .frame(
-                            minWidth: UIScreen.main.bounds.size.width,
-                            minHeight: UIScreen.main.bounds.size.height
+                        string: self.template!.picture_url!.replacingOccurrences(
+                            of: "\\",
+                            with: ""
                         )
-                } placeholder: {
-                    ProgressView()
+                    )
+                ) { state in
+                    if let image = state.image {
+                        image
+                            .resizable()
+                            .frame(
+                                minWidth: UIScreen.main.bounds.size.width,
+                                minHeight: UIScreen.main.bounds.size.height
+                            )
+                            .clipped()
+                    } else {
+                        Color.gray.opacity(0.2)
+                    }
                 }
             }
             VStack (alignment: .leading) {
                 Spacer()
                     .frame(height: self.safeAreaInsets.top)
-                ZStack {
-                    Circle()
-                        .fill(.white.opacity(0.4))
-                        .frame(
-                            width: 48,
-                            height: 48
-                        )
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(textDefault)
-                }
-                .onTapGesture {
-                    self.commonViewModel.closeQRCode()
-                }
+                BackButtonView()
                 Spacer()
                 VStack {
                     Spacer()
                         .frame(height: 12)
                     Image(
                         uiImage: generateQRCode(
-                            from: "https://smiradd.ru/cards/\(self.cardModel.id)"
+                            from: "https://smiradd.ru/cards/\(self.id)"
                         )
                     )
                         .interpolation(.none)
@@ -77,7 +74,7 @@ struct QRCodePageView: View {
                         )
                     Spacer()
                         .frame(height: 4)
-                    Text(self.cardModel.job_title)
+                    Text(self.jobTitle)
                         .font(
                             .custom(
                                 "OpenSans-Bold",
@@ -102,15 +99,14 @@ struct QRCodePageView: View {
             )
         }
         .navigationBarBackButtonHidden()
-        .ignoresSafeArea()
-        .frame(
-            minWidth: UIScreen.main.bounds.size.width,
-            minHeight: UIScreen.main.bounds.size.height
-        )
+//        .frame(
+//            minWidth: UIScreen.main.bounds.size.width,
+//            minHeight: UIScreen.main.bounds.size.height
+//        )
         .onAppear {
-            if self.cardModel.bc_template_type != nil {
+            if self.bcTemplateType != nil {
                 template = self.commonViewModel.templates.first(
-                    where: { $0.id == self.cardModel.bc_template_type }
+                    where: { $0.id == self.bcTemplateType }
                 ) ?? nil
             }
         }

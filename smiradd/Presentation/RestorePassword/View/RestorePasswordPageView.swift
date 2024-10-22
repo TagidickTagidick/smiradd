@@ -3,6 +3,8 @@ import SwiftUI
 struct RestorePasswordPageView: View {
     @StateObject private var viewModel: RestorePasswordViewModel
     
+    @EnvironmentObject private var navigationService: NavigationService
+    
     @FocusState private var emailIsFocused: Bool
     
     @FocusState private var codeIsFocused: Bool
@@ -22,10 +24,23 @@ struct RestorePasswordPageView: View {
     }
     
     var body: some View {
-        VStack{
+        VStack {
             Spacer()
                 .frame(
-                    height: screenHeight / 60
+                    height: screenHeight / 50
+                ) //20
+            HStack {
+                Image(systemName: "arrow.left")
+                    .foregroundColor(buttonClick)
+                    .onTapGesture {
+                        self.navigationService.navigateBack()
+                    }
+                Spacer()
+            }
+            Spacer()
+            Spacer()
+                .frame(
+                    height: screenHeight / 50
                 ) //20
             Image("logo")
             Spacer()
@@ -44,24 +59,43 @@ struct RestorePasswordPageView: View {
             Spacer()
                 .frame(height: screenHeight / 40) //32
             EmailFieldView(
-                email: $viewModel.email,
-                emailIsError: $viewModel.emailIsError,
-                emailErrorText: $viewModel.emailErrorText,
+                email: self.$viewModel.email,
+                emailIsError: self.$viewModel.emailIsError,
+                emailErrorText: self.$viewModel.emailErrorText,
                 emailIsFocused: _emailIsFocused
             )
+            .onChange(of: self.viewModel.email) {
+                self.viewModel.checkEmail()
+            }
             Spacer()
                 .frame(
                     height: screenHeight / 40
                 ) //32
-            CustomButtonView(
-                text: self.viewModel.timeRemaining == 0
-                ? "Отправить код подтверждения"
-                : "Отправить код через: \(self.viewModel.timeRemaining)",
-                color: self.viewModel.timeRemaining == 0
-                ? textDefault : .gray
-            )
-            .onTapGesture {
-                self.viewModel.sendCode()
+            if self.viewModel.timeRemaining == 0 {
+                CustomButtonView(
+                    text: self.viewModel.timeRemaining == 0
+                    ? "Отправить код подтверждения"
+                    : "Отправить код через: \(self.viewModel.timeRemaining)",
+                    color: self.viewModel.timeRemaining == 0 && self.viewModel.isValidEmail
+                    ? textDefault : .gray
+                )
+                .onTapGesture {
+                    self.viewModel.sendCode()
+                }
+            }
+            else {
+                CustomButtonView(
+                    text: self.viewModel.timeRemaining == 0
+                    ? "Отправить код подтверждения"
+                    : "Отправить код через: \(self.viewModel.timeRemaining)",
+                    color: self.viewModel.timeRemaining == 0 && self.viewModel.isValidEmail
+                    ? textDefault : .gray
+                )
+                .onReceive(self.viewModel.timer!) { _ in
+                                if self.viewModel.timeRemaining > 0 {
+                                    self.viewModel.timeRemaining -= 1
+                                }
+                }
             }
             Spacer()
                 .frame(
@@ -71,24 +105,19 @@ struct RestorePasswordPageView: View {
                 Text("Код был отправлен на указанный email")
                 PinEntryView(pinCode: self.$viewModel.code)
                     .onChange(of: self.viewModel.code) {
-                        if (self.viewModel.code.count == 4) {
-                            self.viewModel.confirmCode()
-                        }
+                        self.viewModel.confirmCode()
                     }
             }
             Spacer()
                 .frame(height: screenHeight / 21) //46.56
+            Spacer()
         }
         .padding(
-            [.leading, .trailing],
-            screenHeight / 20
-        )
-        .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity
+            [.horizontal],
+            20
         )
         .navigationBarBackButtonHidden(true)
-        .ignoresSafeArea(.keyboard)
+        //.ignoresSafeArea(.keyboard)
         .background(.white)
         .onTapGesture {
             emailIsFocused = false

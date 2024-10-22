@@ -5,6 +5,8 @@ import Shimmer
 struct FavoritesPageView: View {
     @StateObject private var viewModel: FavoritesViewModel
     
+    @Namespace var topID
+    
     init(
         repository: IFavoritesRepository,
         navigationService: NavigationService,
@@ -20,75 +22,82 @@ struct FavoritesPageView: View {
     }
     
     var body: some View {
-        ZStack (alignment: .top) {
-            if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .loading {
-                ScrollView {
-                    VStack {
-                        if self.viewModel.pageType == .loading {
-                            FavoritesLoadingView()
+        ScrollViewReader {
+            scrollView in
+            ZStack (alignment: .top) {
+                if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .loading {
+                    ScrollView {
+                        VStack {
+                            if self.viewModel.pageType == .loading {
+                                FavoritesLoadingView()
+                            }
+                            else {
+                                FavoritesBodyView(
+                                    favorites: self.viewModel.favoritesModel!.items,
+                                    onDislike: {
+                                        id in
+                                        self.viewModel.openAlert(
+                                            id: id
+                                        )
+                                    },
+                                    onTap: {
+                                        id in
+                                        self.viewModel.navigateToCard(
+                                            id: id
+                                        )
+                                    },
+                                    isAlert: self.$viewModel.isAlert,
+                                    onTapAlert: {
+                                        self.viewModel.dislike()
+                                    }
+                                )
+                                .id(topID)
+                            }
                         }
-                        else {
-                            FavoritesBodyView(
-                                favorites: self.viewModel.favoritesModel!.items,
-                                onDislike: {
-                                    id in
-                                    self.viewModel.openAlert(
-                                        id: id
-                                    )
-                                },
-                                onTap: {
-                                    id in
-                                    self.viewModel.navigateToCard(
-                                        id: id
-                                    )
-                                },
-                                isAlert: self.$viewModel.isAlert,
-                                onTapAlert: {
-                                    self.viewModel.dislike()
-                                }
-                            )
-                        }
+                        .padding(
+                            [.horizontal],
+                            20
+                        )
                     }
                     .padding(
-                        [.horizontal],
-                        20
+                        [.top],
+                        52
                     )
+                    .padding(
+                        [.bottom],
+                        58
+                    )
+                    .refreshable {
+                        self.viewModel.getFavorites()
+                    }
                 }
-                .padding(
-                    [.top],
-                    52
+                else {
+                    VStack {
+                        Spacer()
+                        PageInfoView(
+                            pageType: self.viewModel.pageType,
+                            onTap: {
+                                self.viewModel.getFavorites()
+                            }
+                        )
+                        Spacer()
+                    }
+                }
+                FavoritesAppBarView(
+                    onTapFilters: {
+                        self.viewModel.openFilters()
+                    },
+                    onTapScan: {
+                        self.viewModel.openScanner()
+                    },
+                    isShowingScanner: self.$viewModel.isShowingScanner,
+                    onScan: self.viewModel.handleScan
                 )
-                .padding(
-                    [.bottom],
-                    58
-                )
-                .refreshable {
-                    self.viewModel.getFavorites()
+                .onTapGesture {
+                    scrollView.scrollTo(topID)
                 }
             }
-            else {
-                VStack {
-                    Spacer()
-                    PageInfoView(
-                        pageType: self.viewModel.pageType,
-                        onTap: {
-                            self.viewModel.getFavorites()
-                        }
-                    )
-                    Spacer()
-                }
-            }
-            FavoritesAppBarView(
-                onTapFilters: {
-                    self.viewModel.openFilters()
-                },
-                onTapScan: {
-                    self.viewModel.openScanner()
-                },
-                isShowingScanner: self.$viewModel.isShowingScanner,
-                onScan: self.viewModel.handleScan
-            )
+            .background(accent50)
         }
-        .background(accent50)
     }
 }

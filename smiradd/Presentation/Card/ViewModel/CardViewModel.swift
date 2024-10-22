@@ -1,22 +1,17 @@
 import SwiftUI
+import CardStack
 
 class CardViewModel: ObservableObject {
-    @Published var cardModel: CardModel = CardModel.mock
-    
     @Published var pageType: PageType = .loading
     
-    @Published var achievementsOpened: Bool = false
-    @Published var achievementIndex = -1
-    @Published var achievements: [AchievementModel] = []
-    
     @Published var avatarImage: UIImage?
-    @Published var avatarVideoUrl: URL?
+    @Published var avatarVideo: URL?
     @Published var avatarUrl: String = ""
     
     @Published var jobTitle: String = ""
     @Published var jobTitleIsFocused: Bool = false
     
-    @Published var specificity: String = ""
+    @Published var specificity: String = "Выберите отрасль"
     @Published var specificityIsFocused: Bool = false
     
     @Published var name: String = ""
@@ -42,16 +37,10 @@ class CardViewModel: ObservableObject {
     @Published var cv: String = ""
     
     @Published var logoImage: UIImage?
-    @Published var logoVideoUrl: URL?
+    @Published var logoVideo: URL?
     @Published var logoUrl: String = ""
     
     @Published var bio: String = ""
-    
-    @Published var templatesOpened: Bool = false
-    
-    @Published var servicesOpened: Bool = false
-    @Published var serviceIndex = -1
-    @Published var services: [ServiceModel] = []
     
     var isValidButton: Bool {
         return !self.jobTitle.isEmpty && !self.specificity.isEmpty && !self.name.isEmpty &&
@@ -88,6 +77,8 @@ class CardViewModel: ObservableObject {
         self.cardType = cardType
         if self.cardType == .newCard {
             self.getSpecifity()
+            self.email = self.commonViewModel.profileModel?.email ?? ""
+            self.name = (self.commonViewModel.profileModel?.first_name ?? "") + " " + (self.commonViewModel.profileModel?.last_name ?? "")
         }
         else {
             self.getCard()
@@ -95,21 +86,25 @@ class CardViewModel: ObservableObject {
     }
     
     private func getSpecifity() {
-        if self.commonViewModel.specificities.isEmpty {
-            self.commonRepository.getSpecificities() {
-                [self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let specificityModels):
-                        self.commonViewModel.specificities = specificityModels
-                        break
-                    case .failure(let error):
-                        // Handle error
-                        break
-                    }
-                    
-                    self.pageType = .matchNotFound
+        if !self.commonViewModel.specificities.isEmpty {
+            self.pageType = .matchNotFound
+            
+            return
+        }
+        
+        self.commonRepository.getSpecificities() {
+            [self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let specificityModels):
+                    self.commonViewModel.specificities = specificityModels
+                    break
+                case .failure(let error):
+                    // Handle error
+                    break
                 }
+                
+                self.pageType = .matchNotFound
             }
         }
     }
@@ -117,50 +112,46 @@ class CardViewModel: ObservableObject {
     func getCard() {
         self.pageType = .loading
         
-        Task {
-            try? await Task.sleep(nanoseconds: 1000000000)
-            
-            self.repository.getCard(cardId: self.cardId) {
-                [self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let cardModel):
-                        self.cardModel = cardModel
-                        self.initFields()
-                        break
-                    case .failure(let error):
-                        // Handle error
-                        break
-                    }
-                    
-                    self.pageType = .matchNotFound
+        self.repository.getCard(cardId: self.cardId) {
+            [self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let cardModel):
+                    self.commonViewModel.cardModel = cardModel
+                    self.initFields()
+                    break
+                case .failure(let error):
+                    // Handle error
+                    break
                 }
+                
+                self.pageType = .matchNotFound
             }
         }
     }
     
     private func initFields() {
-        self.jobTitle = self.cardModel.job_title
-        self.specificity = self.cardModel.specificity
-        self.name = self.cardModel.name ?? ""
-        self.phone = self.cardModel.phone == nil
+        self.jobTitle = self.commonViewModel.cardModel.job_title
+        self.specificity = self.commonViewModel.cardModel.specificity
+        self.name = self.commonViewModel.cardModel.name ?? ""
+        self.phone = self.commonViewModel.cardModel.phone == nil
         ? ""
-        : CustomFormatter.formatPhoneNumber(self.cardModel.phone!)
-        self.email = self.cardModel.email
-        self.address = self.cardModel.address ?? ""
-        self.seek = self.cardModel.seek ?? ""
-        self.useful = self.cardModel.useful ?? ""
-        self.telegram = self.cardModel.tg_url ?? "https://t.me/"
-        self.vk = self.cardModel.vk_url ?? "https://vk.com/"
-        self.site = self.cardModel.seek ?? ""
-        self.cv = self.cardModel.cv_url ?? ""
-        self.bio = self.cardModel.bio ?? ""
-        self.avatarUrl = self.cardModel.avatar_url ?? ""
-        if self.services.isEmpty {
-            self.services = self.cardModel.services ?? []
+        : CustomFormatter.formatPhoneNumber(self.commonViewModel.cardModel.phone!)
+        self.email = self.commonViewModel.cardModel.email
+        self.address = self.commonViewModel.cardModel.address ?? ""
+        self.seek = self.commonViewModel.cardModel.seek ?? ""
+        self.useful = self.commonViewModel.cardModel.useful ?? ""
+        self.telegram = self.commonViewModel.cardModel.tg_url ?? "https://t.me/"
+        self.vk = self.commonViewModel.cardModel.vk_url ?? "https://vk.com/"
+        self.site = self.commonViewModel.cardModel.seek ?? ""
+        self.cv = self.commonViewModel.cardModel.cv_url ?? ""
+        self.bio = self.commonViewModel.cardModel.bio ?? ""
+        self.avatarUrl = self.commonViewModel.cardModel.avatar_url ?? ""
+        if self.commonViewModel.services.isEmpty {
+            self.commonViewModel.services = self.commonViewModel.cardModel.services ?? []
         }
-        if self.achievements.isEmpty {
-            self.achievements = self.cardModel.achievements ?? []
+        if self.commonViewModel.achievements.isEmpty {
+            self.commonViewModel.achievements = self.commonViewModel.cardModel.achievements ?? []
         }
     }
     
@@ -234,114 +225,28 @@ class CardViewModel: ObservableObject {
     }
     
     func openAchivement(index: Int) {
-        self.achievementIndex = index
-        self.achievementsOpened = true
+        self.navigationService.navigate(
+            to: .achievementScreen(
+                index: index
+            )
+        )
     }
+    /// SERVICES
     
-    func closeAchievement() {
-        self.achievementsOpened = false
+    func openServices(index: Int) {
+        self.navigationService.navigate(
+            to: .serviceScreen(
+                index: index
+            )
+        )
     }
     
     func openTemplates() {
-        self.templatesOpened = true
-    }
-    
-    func closeTemplates(id: String) {
-        self.templatesOpened = false
-        
-        if (id.isEmpty) {
-            return
-        }
-        
-        self.cardModel.bc_template_type = id
-    }
-    
-    
-    /// SERVICES
-    
-    func openServices(serviceIndex: Int) {
-        self.serviceIndex = serviceIndex
-        self.servicesOpened = true
-    }
-    
-    func saveService(
-        image: UIImage?,
-        imageUrl: String,
-        name: String,
-        description: String,
-        price: String
-    ) {
-        if name.isEmpty || description.isEmpty {
-            return
-        }
-        
-        print(serviceIndex)
-        
-        if self.serviceIndex == -1 {
-            self.services.append(
-                ServiceModel(
-                    name: name,
-                    description: description,
-                    price: Int(price) ?? 0,
-                    cover_url: imageUrl,
-                    cover: image
-                )
+        self.navigationService.navigate(
+            to: .templatesScreen(
+                isTeam: false
             )
-        }
-        else {
-            self.services[self.serviceIndex] = ServiceModel(
-                name: name,
-                description: description,
-                price: Int(price) ?? 0,
-                cover_url: imageUrl,
-                cover: image
-            )
-        }
-        
-        self.closeServices()
-    }
-    
-    func deleteService() {
-        self.closeServices()
-        self.services.remove(at: serviceIndex)
-    }
-    
-    func closeServices() {
-        self.servicesOpened = false
-    }
-    
-    func deleteAchievement() {
-        self.closeAchievement()
-        self.achievements.remove(at: self.achievementIndex)
-    }
-    
-    func saveAchievement(
-        name: String,
-        description: String,
-        url: String
-    ) {
-        if name.isEmpty {
-            return
-        }
-        
-        if self.achievementIndex == -1 {
-            self.achievements.append(
-                AchievementModel(
-                    name: name,
-                    description: description,
-                    url: url
-                )
-            )
-        }
-        else {
-            self.achievements[self.achievementIndex] = AchievementModel(
-                name: name,
-                description: description,
-                url: url
-            )
-        }
-        
-        self.achievementsOpened = false
+        )
     }
     
     func openAlert() {
@@ -360,182 +265,153 @@ class CardViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
-                    self.pageType = .matchNotFound
-                    self.navigationService.navigate(to: .profileScreen)
                     break
                 case .failure(let error):
                     // Handle error
                     break
                 }
             }
+            
+            self.pageType = .matchNotFound
+            self.navigationService.navigateBack()
         }
     }
     
     func startSave() {
+        print("1")
         if self.isValidEmail {
             self.checkEmail()
         }
-        
+        print("2")
         if !self.isValidButton {
             return
         }
-        
+        print("3")
         self.pageType = .loading
         
         self.uploadAvatar()
     }
     
     private func uploadAvatar() {
-        if (avatarImage == nil) {
-            self.uploadLogo()
-            
-            return
-        }
-        
-        self.commonRepository.uploadImage(image: avatarImage!) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let url):
-                    self.avatarUrl = url
-                    self.uploadLogo()
-                case .failure(let error):
-                    print(error)
-                    break
+        if self.avatarImage != nil {
+            self.commonRepository.uploadImage(image: self.avatarImage!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.avatarUrl = url
+                        self.uploadLogo()
+                    case .failure(let error):
+                        print(error)
+                        break
+                    }
                 }
             }
+        }
+        else if self.avatarVideo != nil {
+            self.commonRepository.uploadVideo(video: self.avatarVideo!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.avatarUrl = url
+                        self.uploadLogo()
+                    case .failure(let error):
+                        print(error)
+                        break
+                    }
+                }
+            }
+        }
+        else {
+            self.uploadLogo()
         }
     }
     
     private func uploadLogo() {
-        if (logoImage == nil) {
-            self.uploadServiceCover(index: 0)
-            
-            return
-        }
-        
-        self.commonRepository.uploadImage(image: logoImage!) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let url):
-                    self.logoUrl = url
-                    self.uploadServiceCover(index: 0)
-                case .failure(let error):
-                    // Handle error
-                    break
+        if self.logoImage != nil {
+            self.commonRepository.uploadImage(image: logoImage!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.logoUrl = url
+                        self.uploadServiceCover(index: 0)
+                    case .failure(let error):
+                        // Handle error
+                        break
+                    }
                 }
             }
+        }
+        else if self.logoVideo != nil {
+            self.commonRepository.uploadVideo(video: logoVideo!) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.logoUrl = url
+                        self.uploadServiceCover(index: 0)
+                    case .failure(let error):
+                        // Handle error
+                        break
+                    }
+                }
+            }
+        }
+        else {
+            self.uploadServiceCover(index: 0)
         }
     }
     
     private func uploadServiceCover(
         index: Int
     ) {
-        if self.services.count == index {
+        if self.commonViewModel.services.count == index {
             self.saveCard()
             return
         }
         
-        if self.services[index].cover == nil {
+        if self.commonViewModel.services[index].coverImage != nil {
+            self.commonRepository.uploadImage(
+                image: self.commonViewModel.services[index].coverImage!
+            ) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.commonViewModel.services[index].cover_url = url
+                    case .failure(let error):
+                        break
+                    }
+                    
+                    self.uploadServiceCover(
+                        index: index + 1
+                    )
+                }
+            }
+        }
+        else if self.commonViewModel.services[index].coverVideo != nil {
+            self.commonRepository.uploadVideo(
+                video: self.commonViewModel.services[index].coverVideo!
+            ) {
+                [self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let url):
+                        self.commonViewModel.services[index].cover_url = url
+                    case .failure(let error):
+                        break
+                    }
+                    
+                    self.uploadServiceCover(
+                        index: index + 1
+                    )
+                }
+            }
+        }
+        else {
             self.uploadServiceCover(index: index + 1)
-            return
-        }
-        
-        self.commonRepository.uploadImage(
-            image: self.services[index].cover!
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let url):
-                    self.services[index].cover_url = url
-                case .failure(let error):
-                    break
-                }
-                
-                self.uploadServiceCover(
-                    index: index + 1
-                )
-            }
-        }
-    }
-    
-    func like() {
-        if self.commonViewModel.cards.isEmpty {
-            self.noCardsSheet = true
-            return
-        }
-        
-        self.commonRepository.postFavorites(
-            cardId: self.cardId
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.navigationService.navigateBack()
-                    
-                    if self.commonViewModel.isTeamStorage {
-                        self.commonViewModel.teamsCount -= 1
-                        
-                        self.commonViewModel.teamViews.removeFirst()
-                        
-                        //                        if self.commonViewModel.teamsCount == 1 {
-                        //                            self.getAroundMe()
-                        //                        }
-                    }
-                    else {
-                        self.commonViewModel.cardsCount -= 1
-                        
-                        self.commonViewModel.cardViews.removeFirst()
-                        
-                        //                        if self.commonViewModel.cardsCount == 1 {
-                        //                            self.getAroundMe()
-                        //                        }
-                    }
-                    
-                    break
-                case .failure(let error):
-                    break
-                }
-            }
-        }
-    }
-    
-    func dislike() {
-        self.commonRepository.patchAroundme(
-            id: self.cardId
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.navigationService.navigateBack()
-                    
-                    if self.commonViewModel.isTeamStorage {
-                        self.commonViewModel.teamsCount -= 1
-                        
-                        self.commonViewModel.teamViews.removeFirst()
-                        
-                        //                        if self.commonViewModel.teamsCount == 1 {
-                        //                            self.getAroundMe()
-                        //                        }
-                    }
-                    else {
-                        self.commonViewModel.cardsCount -= 1
-                        
-                        self.commonViewModel.cardViews.removeFirst()
-                        
-                        //                        if self.commonViewModel.cardsCount == 1 {
-                        //                            self.getAroundMe()
-                        //                        }
-                    }
-                    break
-                case .failure(let error):
-                    break
-                }
-            }
         }
     }
     
@@ -564,8 +440,8 @@ class CardViewModel: ObservableObject {
                 specificity: self.specificity,
                 name: self.name,
                 email: self.email,
-                achievements: self.achievements,
-                services: self.services,
+                achievements: self.commonViewModel.achievements,
+                services: self.commonViewModel.services,
                 phone: self.phone,
                 address: self.address,
                 seek: self.seek,
@@ -575,7 +451,7 @@ class CardViewModel: ObservableObject {
                 site: self.site,
                 cv: self.cv,
                 bio: self.bio,
-                bcTemplateType: self.cardModel.bc_template_type ?? "",
+                bcTemplateType: self.commonViewModel.cardModel.bc_template_type ?? "",
                 avatarUrl: self.avatarUrl,
                 logoUrl: self.logoUrl
             ) {
@@ -586,14 +462,14 @@ class CardViewModel: ObservableObject {
                         print("success")
                         self.pageType = .matchNotFound
                         
-                        let index = self.commonViewModel.cards.firstIndex(
+                        let index = self.commonViewModel.myCards.firstIndex(
                             where: {
                                 $0.id == cardModel.id
                             }
                         )
                         
                         if index != nil {
-                            self.commonViewModel.cards[index!] = cardModel
+                            self.commonViewModel.myCards[index!] = cardModel
                         }
                         
                         self.navigationService.navigateBack()
@@ -612,8 +488,8 @@ class CardViewModel: ObservableObject {
                 specificity: self.specificity,
                 name: self.name,
                 email: self.email,
-                achievements: self.achievements,
-                services: self.services,
+                achievements: self.commonViewModel.achievements,
+                services: self.commonViewModel.services,
                 phone: self.phone,
                 address: self.address,
                 seek: self.seek,
@@ -623,7 +499,7 @@ class CardViewModel: ObservableObject {
                 site: self.site,
                 cv: self.cv,
                 bio: self.bio,
-                bcTemplateType: self.cardModel.bc_template_type ?? "",
+                bcTemplateType: self.commonViewModel.cardModel.bc_template_type ?? "",
                 avatarUrl: self.avatarUrl,
                 logoUrl: self.logoUrl
             ) {
@@ -633,7 +509,7 @@ class CardViewModel: ObservableObject {
                     case .success(let cardModel):
                         self.pageType = .matchNotFound
                         
-                        self.commonViewModel.cards.append(cardModel)
+                        self.commonViewModel.myCards.append(cardModel)
                         
                         self.navigationService.navigateBack()
                         

@@ -1,12 +1,15 @@
 import Foundation
+import Combine
 
 class RestorePasswordViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var emailIsError: Bool = false
     @Published var emailErrorText: String = ""
+    @Published var isValidEmail: Bool = false
     
     @Published var timeRemaining: Int = 0
-    @Published var timer: Any? = nil
+    
+    var timer: Publishers.Autoconnect<Timer.TimerPublisher>? = nil
     
     @Published var showPinCode: Bool = false
     @Published var code: String = ""
@@ -25,7 +28,7 @@ class RestorePasswordViewModel: ObservableObject {
     }
     
     func sendCode() {
-        if self.timeRemaining != 0 || self.email.isEmpty {
+        if self.timeRemaining != 0 || !self.isValidEmail {
             return
         }
         
@@ -49,6 +52,10 @@ class RestorePasswordViewModel: ObservableObject {
     }
     
     func confirmCode() {
+        if self.code.count != 4 {
+            return
+        }
+        
         self.repository.postCodeVerify(
             code: self.code,
             email: self.email
@@ -71,5 +78,20 @@ class RestorePasswordViewModel: ObservableObject {
         self.isSheet = false
         
         self.navigationService.navigate(to: .signInScreen)
+    }
+    
+    func checkEmail() {
+        let regex = try! NSRegularExpression(
+            pattern: "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
+            options: [.caseInsensitive]
+        )
+        self.isValidEmail = regex.firstMatch(
+            in: self.email,
+            options: [],
+            range: NSRange(
+                location: 0,
+                length: self.email.utf16.count
+            )
+        ) != nil
     }
 }

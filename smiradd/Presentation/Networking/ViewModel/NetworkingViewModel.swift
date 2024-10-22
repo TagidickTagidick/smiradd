@@ -1,9 +1,7 @@
 import SwiftUI
+import CardStack
 
 class NetworkingViewModel: ObservableObject {
-    
-    @Published var pageType: PageType = .loading
-    
     @Published var isForumCodeSheet: Bool = false
     @Published var isFilterSheet: Bool = false
     
@@ -12,88 +10,126 @@ class NetworkingViewModel: ObservableObject {
     @Published var isQuestionForumSheet: Bool = false
     @Published var isChooseStatusSheet: Bool = false
     @Published var isExitNetworkingSheet: Bool = false
-    @Published var isExitTeam: Bool = false
-    @Published var isDeleteTeam: Bool = false
-    @Published var currentTeamId: String = ""
-    
-    @Published var noCardsSheet: Bool = false
-    
-    private var forumCode: String? {
-        return UserDefaults.standard.string(forKey: "forum_code")
-    }
     
     @Published var isTeam: Bool = false
     
-    private let repository: INetworkingRepository
     private let navigationService: NavigationService
     private let locationManager: LocationManager
     private let commonViewModel: CommonViewModel
     private let commonRepository: CommonRepository
     
     init(
-        repository: INetworkingRepository,
         navigationService: NavigationService,
         locationManager: LocationManager,
         commonViewModel: CommonViewModel,
         commonRepository: CommonRepository
     ) {
-        self.repository = repository
         self.navigationService = navigationService
         self.locationManager = locationManager
         self.commonViewModel = commonViewModel
         self.commonRepository = commonRepository
-        self.commonViewModel.cardViews = []
-        self.commonViewModel.teamViews = []
+        self.commonViewModel.networkingCards.removeAllElements()
+        self.commonViewModel.networkingTeams.removeAllElements()
         self.isTeam = self.commonViewModel.isTeamStorage
         self.onInit()
     }
     
     func onInit() {
-        self.commonViewModel.cardViews = []
-        self.commonViewModel.teamViews = []
+        self.commonViewModel.networkingCards.removeAllElements()
+        self.commonViewModel.networkingTeams.removeAllElements()
         
-        if self.locationManager.location == nil {
-            self.pageType = .shareLocation
+        if self.commonViewModel.location == nil {
+            self.commonViewModel.networkingPageType = .shareLocation
             return
         }
         
-        if !self.commonViewModel.forumName.isEmpty && !UserDefaults.standard.bool(forKey: "first_time_forum") {
-            UserDefaults.standard.set(
-                true,
-                forKey: "first_time_forum"
-            )
-            
-            self.isQuestionForumSheet = true
-            
+        self.commonViewModel.networkingPageType = .matchNotFound
+        
+        self.commonViewModel.getAroundMe()
+        
+//        if !self.commonViewModel.forumName.isEmpty && !UserDefaults.standard.bool(forKey: "first_time_forum") {
+//            UserDefaults.standard.set(
+//                true,
+//                forKey: "first_time_forum"
+//            )
+//            
+//            self.isQuestionForumSheet = true
+//            
+//            return
+//        }
+//        
+//        if !UserDefaults.standard.bool(forKey: "first_time_forum") {
+//            UserDefaults.standard.set(
+//                true,
+//                forKey: "first_time_forum"
+//            )
+//        }
+//        
+//        self.commonViewModel.getAroundMe()
+    }
+    
+    func openForumCodeSheet() {
+        self.isForumCodeSheet = true
+        self.pinCode = ""
+    }
+    
+    func setForumCode() {
+        if self.pinCode.count != 4 {
             return
         }
         
-        if !UserDefaults.standard.bool(forKey: "first_time_forum") {
-            UserDefaults.standard.set(
-                true,
-                forKey: "first_time_forum"
-            )
-        }
+        self.isForumCodeSheet = false
         
-        self.getAroundMe()
+        self.commonRepository.postMyLocation(
+            latitude: 0,
+            longitude: 0,
+            code: self.pinCode
+        ) {
+            [self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let locationModel):
+                    self.commonViewModel.locationModel = locationModel
+                    
+                    self.isQuestionForumSheet = true
+                    
+                    break
+                case .failure(let error):
+                    // Handle error
+                    break
+                }
+            }
+        }
     }
     
     func answerNoQuestionForumSheet() {
         self.isQuestionForumSheet = false
-        self.pageType = .matchNotFound
     }
     
     func answerYesQuestionForumSheet() {
         self.isQuestionForumSheet = false
-        if self.commonViewModel.isTeamForum {
+        
+        print("пфвпвфпф \(self.pinCode)")
+        
+        UserDefaults.standard.set(
+            self.pinCode,
+            forKey: "forum_code"
+        )
+        
+        if self.commonViewModel.locationModel?.type == "TeamForum" {
             self.isChooseStatusSheet = true
         }
         else {
-            self.getAroundMe()
+            UserDefaults.standard.set(
+                false,
+                forKey: "is_team"
+            )
+            
+            self.commonViewModel.getAroundMe()
         }
     }
     
-    func setIsSteam(isTeam: Bool) {
+    func setIsTeam(isTeam: Bool) {
         UserDefaults.standard.set(
             isTeam,
             forKey: "is_team"
@@ -101,152 +137,7 @@ class NetworkingViewModel: ObservableObject {
         
         self.isChooseStatusSheet = false
         
-        self.getAroundMe()
-    }
-    
-    private func getAroundMe() {
-        //self.pageType = .loading
-        
-        self.commonViewModel.cardViews = []
-        self.commonViewModel.teamViews = []
-        
-        self.commonViewModel.cardsCount = 0
-        self.commonViewModel.teamsCount = 0
-        
-        if self.commonViewModel.isTeamStorage {
-            self.repository.getAroundMeTeams(
-                specificity: self.commonViewModel.networkingSpecificities,
-                code: self.forumCode ?? ""
-            ) {
-                [self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let teamModels):
-                        for team in teamModels {
-                            if self.commonViewModel.teamMainModel?.team.id != team.id {
-                                self.commonViewModel.teamViews.append(
-                                    SwipeTeamView(
-                                        teamModel: team,
-                                        onDislike: {
-                                            self.setSeen(id: team.id!)
-                                        },
-                                        onLike: {
-                                            self.like(id: team.id!)
-                                        },
-                                        onOpen: {
-                                            self.navigationService.navigate(
-                                                to: .teamScreen(
-                                                    teamId: team.id!,
-                                                    teamType: .userCard
-                                                )
-                                            )
-                                        }
-                                    )
-                                )
-                                
-                                self.commonViewModel.teamsCount += 1
-                            }
-                        }
-                        
-                        if self.commonViewModel.teamViews.isEmpty {
-                            self.pageType = .matchNotFound
-                        }
-                        else {
-                            self.commonViewModel.isTeamsEmpty = false
-                            self.pageType = .pageNotFound
-                        }
-                        break
-                    case .failure(let error):
-                        self.pageType = .matchNotFound
-                        break
-                    }
-                }
-            }
-        }
-        else {
-            self.repository.getAroundMeCards(
-                specificity: self.commonViewModel.networkingSpecificities,
-                code: self.forumCode ?? ""
-            ) {
-                [self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let cardModels):
-                            for card in cardModels {
-                                if card.like != true {
-                                    self.commonViewModel.cardViews.append(
-                                        SwipeCardView(
-                                            cardModel: card,
-                                            onDislike: {
-                                                self.setSeen(id: card.id)
-                                            },
-                                            onLike: {
-                                                self.like(id: card.id)
-                                            },
-                                            onOpen: {
-                                                self.navigationService.navigate(
-                                                    to: .cardScreen(
-                                                        cardId: card.id,
-                                                        cardType: .userCard
-                                                    )
-                                                )
-                                            }
-                                        )
-                                    )
-                                    
-                                    self.commonViewModel.cardsCount += 1
-                                }
-                        }
-                        
-                        if self.commonViewModel.cardViews.isEmpty {
-                            self.pageType = .matchNotFound
-                        }
-                        else {
-                            self.commonViewModel.isCardsEmpty = false
-                            self.pageType = .pageNotFound
-                        }
-                        break
-                    case .failure(let error):
-                        self.pageType = .matchNotFound
-                        break
-                    }
-                }
-            }
-        }
-    }
-    
-    func setSeen(id: String) {
-        self.commonRepository.patchAroundme(
-            id: id
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    if self.commonViewModel.isTeamStorage {
-                        self.commonViewModel.teamsCount -= 1
-                        
-                        self.commonViewModel.teamViews.removeFirst()
-                        
-                        if self.commonViewModel.teamsCount == 1 {
-                            self.getAroundMe()
-                        }
-                    }
-                    else {
-                        self.commonViewModel.cardsCount -= 1
-                        
-                        self.commonViewModel.cardViews.removeFirst()
-                        
-                        if self.commonViewModel.cardsCount == 1 {
-                            self.getAroundMe()
-                        }
-                    }
-                    break
-                case .failure(let error):
-                    break
-                }
-            }
-        }
+        self.commonViewModel.getAroundMe()
     }
     
     func openFilterSheet() {
@@ -263,7 +154,7 @@ class NetworkingViewModel: ObservableObject {
             forKey: "is_team"
         )
         
-        self.getAroundMe()
+        self.commonViewModel.getAroundMe()
     }
     
     func openExitNetworkingSheet() {
@@ -271,76 +162,16 @@ class NetworkingViewModel: ObservableObject {
     }
     
     func closeExitNetworkingSheet() {
-        UserDefaults.standard.removeObject(forKey: "forum_code")
-        
         self.isExitNetworkingSheet = false
         
-        self.commonViewModel.cardViews = []
-        self.commonViewModel.teamViews = []
+        UserDefaults.standard.removeObject(
+            forKey: "forum_code"
+        )
         
-        self.pageType = .matchNotFound
-    }
-    
-    func openForumCodeSheet() {
-        self.isForumCodeSheet = true
-        self.pinCode = ""
-    }
-    
-    func startAgain() {
-        self.commonViewModel.cardViews = []
-        self.commonViewModel.teamViews = []
+        self.commonViewModel.networkingCards.removeAllElements()
+        self.commonViewModel.networkingTeams.removeAllElements()
         
-        self.commonViewModel.cardsCount = 0
-        self.commonViewModel.teamsCount = 0
-        
-        self.repository.postClear(
-            isTeam: self.isTeam
-        ) {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.getAroundMe()
-                    break
-                case .failure(let error):
-                    break
-                }
-            }
-        }
-    }
-    
-    func setForumCode() {
-        if (self.pinCode.count == 4) {
-            self.isForumCodeSheet = false
-            
-            self.commonRepository.postMyLocation(
-                latitude: 0,
-                longitude: 0,
-                code: self.pinCode
-            ) {
-                [self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let locationModel):
-                        UserDefaults.standard.set(
-                            self.pinCode,
-                            forKey: "forum_code"
-                        )
-                        
-                        if locationModel.name != nil {
-                            self.commonViewModel.forumName = locationModel.name!
-                        }
-                        
-                        self.getAroundMe()
-                        
-                        break
-                    case .failure(let error):
-                        // Handle error
-                        break
-                    }
-                }
-            }
-        }
+        self.commonViewModel.networkingPageType = .matchNotFound
     }
     
     func openFilters() {
@@ -357,145 +188,30 @@ class NetworkingViewModel: ObservableObject {
         self.isTeam = isTeam
     }
     
-    func like(id: String) {
-        if self.commonViewModel.cards.isEmpty {
-            self.noCardsSheet = true
-            return
-        }
-        
-        if self.commonViewModel.isTeamStorage {
-            if self.commonViewModel.teamMainModel == nil {
-                self.commonRepository.postRequest(
-                    id: id
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(_):
-                            self.commonViewModel.showAlert()
-                            self.commonViewModel.teamViews.removeFirst()
-                            break
-                        case .failure(_):
-                            break
-                        }
-                    }
-                }
-            }
-            else {
-                if self.commonViewModel.cards.first(
-                    where: {
-                        $0.id == self.commonViewModel.teamMainModel!.owner_card_id!
-                    }
-                ) == nil {
-                    self.isExitTeam = true
-                }
-                else {
-                    self.isDeleteTeam = true
-                }
-                
-                self.currentTeamId = id
-            }
-        }
-        else {
-            if self.commonViewModel.teamMainModel == nil {
-                self.commonRepository.postFavorites(
-                    cardId: id
-                ) {
-                    [self] result in
-                    DispatchQueue.main.async {
-                        switch result {
-                        case .success(_):
-                            self.commonViewModel.cardViews.removeFirst()
-                            break
-                        case .failure(let error):
-                            break
-                        }
-                    }
-                }
-            }
-            else {
-                if self.commonViewModel.cards.first(
-                    where: {
-                        $0.id == self.commonViewModel.teamMainModel!.owner_card_id!
-                    }
-                ) == nil {
-                    self.commonRepository.postFavorites(
-                        cardId: id
-                    ) {
-                        [self] result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                self.commonViewModel.cardViews.removeFirst()
-                                break
-                            case .failure(let error):
-                                break
-                            }
-                        }
-                    }
-                }
-                else {
-                    self.commonRepository.postTeamInvite(
-                        id: id
-                    ) {
-                        [self] result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success(_):
-                                self.commonViewModel.cardViews.removeFirst()
-                                break
-                            case .failure(let error):
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    func leaveAndLike() {
-        self.commonRepository.deleteLeaveTeam() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.commonViewModel.teamMainModel = nil
-                    self.like(id: self.currentTeamId)
-                    break
-                case .failure(_):
-                    self.navigationService.navigateBack()
-                    break
-                }
-            }
-        }
-    }
-    
-    func deleteAndLike() {
-        self.commonRepository.deleteTeam() {
-            [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(_):
-                    self.commonViewModel.teamMainModel = nil
-                    self.like(id: self.currentTeamId)
-                    break
-                case .failure(let error):
-                    // Handle error
-                    break
-                }
-                
-                self.pageType = .matchNotFound
-            }
-        }
-    }
-    
     func createCard() {
-        self.noCardsSheet = false
+        self.commonViewModel.noCardsSheet = false
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: "",
                 cardType: .newCard
+            )
+        )
+    }
+    
+    func openCard(id: String) {
+        self.navigationService.navigate(
+            to: .cardScreen(
+                cardId: id,
+                cardType: .userCard
+            )
+        )
+    }
+    
+    func openTeam(id: String) {
+        self.navigationService.navigate(
+            to: .teamScreen(
+                teamId: id,
+                teamType: .userCard
             )
         )
     }

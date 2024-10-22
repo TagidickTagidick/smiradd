@@ -2,14 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>asdasd</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>asdasd</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>asdasd</string>
-	<key>NSCameraUsageDescription</key>
-	<string>asdasd</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -21,14 +13,20 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>auth_callback</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>https://smiradd.ru/teams/invite/n9dUh4GKFPsjr2AK2</string>
+				<string>vk51915511</string>
 			</array>
 		</dict>
 	</array>
 	<key>GIDClientID</key>
 	<string>222824816339-3lr2jccintgcgqa3nci5ie0s0fdpts49.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>vkauthorize-silent</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -44,6 +42,10 @@
 		<string>OpenSans-Regular.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
-	<array/>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

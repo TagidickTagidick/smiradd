@@ -97,14 +97,24 @@ struct Canvas<Content : View> : View {
     let content: Content
     @EnvironmentObject var UIState: UIStateModel
     
-    @inlinable init(@ViewBuilder _ content: () -> Content) {
+    @inlinable init(
+        @ViewBuilder _ content: () -> Content
+    ) {
         self.content = content()
     }
     
     var body: some View {
         content
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
-            
+            .frame(
+                maxHeight: 228
+            )
+            .frame(
+                minWidth: 0,
+                maxWidth: .infinity,
+                minHeight: 0,
+                maxHeight: .infinity,
+                alignment: .center
+            )
     }
 }
 
@@ -131,6 +141,10 @@ struct Item<Content: View>: View {
 
     var body: some View {
         content
-            .frame(width: cardWidth, height: _id == UIState.activeCard ? cardHeight : cardHeight - 8, alignment: .center)
+            .frame(
+                width: cardWidth,
+                height: _id == UIState.activeCard ? cardHeight : cardHeight - 8,
+                alignment: .center
+            )
     }
 }

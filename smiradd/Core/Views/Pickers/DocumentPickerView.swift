@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 struct DocumentPickerView: UIViewControllerRepresentable {
     @Binding var image: UIImage?
-    @Binding var imageUrl: String
+    @Binding var video: URL?
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(self)
@@ -28,15 +28,15 @@ struct DocumentPickerView: UIViewControllerRepresentable {
             guard let url = urls.first else { return }
             
             if url.pathExtension.lowercased() == "gif" {
-                if let data = try? Data(contentsOf: url) {
-                    parent.imageUrl = url.absoluteString
+                if (try? Data(contentsOf: url)) != nil {
+                    parent.video = url
                     parent.image = nil
                 }
             }
             else {
                 if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
                     parent.image = image
-                    parent.imageUrl = ""
+                    parent.video = nil
                 }
             }
         }

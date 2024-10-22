@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct CirculationCreationView: View {
-    @Binding var isHelp: Bool
-    
     @State private var pageType: PageType = .matchNotFound
     
     @State private var problem: String = ""
@@ -10,7 +8,7 @@ struct CirculationCreationView: View {
     
     @State private var ticketModel: TicketModel?
     
-    @EnvironmentObject private var viewModel: SettingsViewModel
+    var action: ((String) -> ())
     
     var body: some View {
         ZStack {
@@ -66,26 +64,7 @@ struct CirculationCreationView: View {
                         color: textDefault
                     )
                         .onTapGesture {
-                            self.viewModel.createCirculation(problem: problem)
-//                            let body: [String: String] = ["main_text": problem]
-//                            let finalBody = try! JSONSerialization.data(withJSONObject: body)
-//                            makeRequest(path: "tickets", method: .post, body: finalBody) { (result: Result<TicketModel, Error>) in
-//                                switch result {
-//                                case .success(let ticketModel):
-//                                    self.ticketModel = ticketModel
-//                                    self.pageType = .matchNotFound
-//                                    self.isHelp = false
-//                                case .failure(let error):
-//                                    if error.localizedDescription == "The Internet connection appears to be offline." {
-//                                        self.pageType = .noResultsFound
-//                                    }
-//                                    else {
-//                                        self.pageType = .somethingWentWrong
-//                                    }
-//                                    self.isHelp = false
-//                                    print(error.localizedDescription)
-//                                }
-//                            }
+                            self.action(problem)
                         }
                     Spacer()
                         .frame(height: 20)

@@ -2,9 +2,10 @@ import Foundation
 import SwiftUI
 
 class MockNetworkService: INetworkService {
-    func uploadVideo(data: Data, completion: @escaping (Result<String, ErrorModel>) -> Void) {
+    func uploadVideo(video: URL, completion: @escaping (Result<String, ErrorModel>) -> Void) {
         
     }
+    
     
     
     func put(url: String, body: [String : Any]?, completion: @escaping (Result<[String : Any], ErrorModel>) -> Void) {

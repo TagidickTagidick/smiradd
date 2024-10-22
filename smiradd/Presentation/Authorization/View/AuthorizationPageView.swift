@@ -14,6 +14,7 @@ struct AuthorizationPageView: View {
         navigationService: NavigationService,
         commonViewModel: CommonViewModel,
         locationManager: LocationManager,
+        notificationManager: NotificationManager,
         commonRepository: ICommonRepository
     ) {
         _viewModel = StateObject(
@@ -22,6 +23,7 @@ struct AuthorizationPageView: View {
                 isSignUp: isSignUp,
                 navigationService: navigationService,
                 locationManager: locationManager,
+                notificationManager: notificationManager,
                 commonViewModel: commonViewModel,
                 commonRepository: commonRepository
             )
