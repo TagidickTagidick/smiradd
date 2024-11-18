@@ -10,7 +10,7 @@ class NotificationsRepository: INotificationsRepository {
     func patchNotification(
         id: String,
         accepted: Bool? = nil,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<Void, ErrorModel>) -> Void
     ) {
         self.networkService.patch(
             url: "notification/\(id)\(accepted == nil ? "" : "?accepted=\(accepted ?? false)")"
@@ -20,7 +20,6 @@ class NotificationsRepository: INotificationsRepository {
             case .success(let response):
                 completion(.success(()))
             case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
                 completion(.failure(errorModel))
             }
         }

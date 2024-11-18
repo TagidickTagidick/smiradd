@@ -75,8 +75,6 @@
 		1FF713232CB6E13A005E70FA /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF713222CB6E13A005E70FA /* NotificationManager.swift */; };
 		1FF7132D2CB7F953005E70FA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1FF7132C2CB7F953005E70FA /* GoogleService-Info.plist */; };
 		1FF7132F2CB90192005E70FA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF7132E2CB90192005E70FA /* AppDelegate.swift */; };
-		1FF713322CB90DE4005E70FA /* VKID in Frameworks */ = {isa = PBXBuildFile; productRef = 1FF713312CB90DE4005E70FA /* VKID */; };
-		1FF713342CB90DE4005E70FA /* VKIDCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1FF713332CB90DE4005E70FA /* VKIDCore */; };
 		1FF713382CBC63DB005E70FA /* NotificationsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF713372CBC63DB005E70FA /* NotificationsViewModel.swift */; };
 		1FF7133D2CBC64E9005E70FA /* NotificationsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF7133C2CBC64E9005E70FA /* NotificationsRepository.swift */; };
 		1FF7133F2CBC650C005E70FA /* INotificationsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF7133E2CBC650C005E70FA /* INotificationsRepository.swift */; };
@@ -489,11 +487,9 @@
 				60D0694A2BDD3F0100653AF0 /* FirebaseMessaging in Frameworks */,
 				1FF7137E2CBF8A3F005E70FA /* CardStack in Frameworks */,
 				1FF7131F2CB5787F005E70FA /* NukeUI in Frameworks */,
-				1FF713342CB90DE4005E70FA /* VKIDCore in Frameworks */,
 				60D0691F2BD8F56400653AF0 /* FirebaseAuth in Frameworks */,
 				602221862BE4C96C00AA1293 /* CodeScanner in Frameworks */,
 				1FF712EF2CAC36F7005E70FA /* ExpandableText in Frameworks */,
-				1FF713322CB90DE4005E70FA /* VKID in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1627,8 +1623,6 @@
 				1FE0C6942CA01A78008D9CE3 /* SDWebImageSwiftUI */,
 				1FF712EE2CAC36F7005E70FA /* ExpandableText */,
 				1FF7131E2CB5787F005E70FA /* NukeUI */,
-				1FF713312CB90DE4005E70FA /* VKID */,
-				1FF713332CB90DE4005E70FA /* VKIDCore */,
 				1FF7137D2CBF8A3F005E70FA /* CardStack */,
 			);
 			productName = smiradd;
@@ -1714,7 +1708,6 @@
 				1FE0C6932CA01A78008D9CE3 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				1FF712ED2CAC36F7005E70FA /* XCRemoteSwiftPackageReference "ExpandableText" */,
 				1FF7131D2CB5787F005E70FA /* XCRemoteSwiftPackageReference "Nuke" */,
-				1FF713302CB90DE4005E70FA /* XCRemoteSwiftPackageReference "vkid-ios-sdk" */,
 				1FF7137C2CBF8A3F005E70FA /* XCRemoteSwiftPackageReference "mobile-ios-package-CardStackView" */,
 			);
 			productRefGroup = 60EF5D692BC09EC400DCDD97 /* Products */;
@@ -2193,10 +2186,11 @@
 				CODE_SIGN_ENTITLEMENTS = smiradd/smiradd.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 46;
 				DEVELOPMENT_ASSET_PATHS = "\"smiradd/Preview Content\"";
 				DEVELOPMENT_TEAM = 8TRPV5PMG6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = smiradd/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Разрешите использование камеры для добавления фотографий";
@@ -2208,11 +2202,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.startup.structura.smiradd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2231,10 +2226,11 @@
 				CODE_SIGN_ENTITLEMENTS = smiradd/smiradd.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 46;
 				DEVELOPMENT_ASSET_PATHS = "\"smiradd/Preview Content\"";
 				DEVELOPMENT_TEAM = 8TRPV5PMG6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = smiradd/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Разрешите использование камеры для добавления фотографий";
@@ -2246,11 +2242,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.startup.structura.smiradd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2419,14 +2416,6 @@
 				minimumVersion = 12.8.0;
 			};
 		};
-		1FF713302CB90DE4005E70FA /* XCRemoteSwiftPackageReference "vkid-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/VKCOM/vkid-ios-sdk.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.1;
-			};
-		};
 		1FF7137C2CBF8A3F005E70FA /* XCRemoteSwiftPackageReference "mobile-ios-package-CardStackView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bruxless/mobile-ios-package-CardStackView.git";
@@ -2473,16 +2462,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1FF7131D2CB5787F005E70FA /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = NukeUI;
-		};
-		1FF713312CB90DE4005E70FA /* VKID */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1FF713302CB90DE4005E70FA /* XCRemoteSwiftPackageReference "vkid-ios-sdk" */;
-			productName = VKID;
-		};
-		1FF713332CB90DE4005E70FA /* VKIDCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1FF713302CB90DE4005E70FA /* XCRemoteSwiftPackageReference "vkid-ios-sdk" */;
-			productName = VKIDCore;
 		};
 		1FF7137D2CBF8A3F005E70FA /* CardStack */ = {
 			isa = XCSwiftPackageProductDependency;

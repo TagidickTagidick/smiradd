@@ -9,7 +9,9 @@ struct CardImageView: View {
     @Binding var video: URL?
     @Binding var imageUrl: String
     
-    let showTrailing: Bool
+    let trailing: String?
+    let onTapTrailing: (() -> ())?
+    
     let editButton: Bool?
     var onTapEditButton: (() -> ())? = nil
     
@@ -79,7 +81,7 @@ struct CardImageView: View {
                 HStack {
                     BackButtonView()
                     Spacer()
-                    if self.showTrailing {
+                    if self.trailing != nil {
                         ZStack {
                             Circle()
                                 .fill(.white.opacity(0.4))
@@ -87,12 +89,17 @@ struct CardImageView: View {
                                     width: 48,
                                     height: 48
                                 )
-                            Image("unlock")
-                                .foregroundColor(Color(
+                            Image(self.trailing!)
+                                .foregroundColor(
+                                    Color(
                                     red: 0.8,
                                     green: 0.8,
                                     blue: 0.8
-                                ))
+                                )
+                                )
+                        }
+                        .onTapGesture {
+                            self.onTapTrailing!()
                         }
                     }
                 }

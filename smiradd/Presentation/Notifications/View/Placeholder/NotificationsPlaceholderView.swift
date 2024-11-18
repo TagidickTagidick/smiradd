@@ -2,13 +2,11 @@ import SwiftUI
 
 struct NotificationsPlaceholderView: View {
     
-    @EnvironmentObject private var viewModel: ProfileViewModel
-    
     var body: some View {
         VStack {
             Spacer()
             PageInfoView(
-                pageType: self.viewModel.pageType,
+                pageType: PageType.nothingHereNotifications,
                 onTap: {
                     //self.viewModel.closeNotifications()
                 }

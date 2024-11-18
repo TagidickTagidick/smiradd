@@ -43,14 +43,6 @@ class AuthorizationViewModel: ObservableObject {
         self.commonRepository = commonRepository
     }
     
-    func isValidEmail(_ email: String) -> Bool {
-        let emailRegex = #"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#
-        return NSPredicate(
-            format: "SELF MATCHES %@",
-            emailRegex
-        ).evaluate(with: email)
-    }
-    
     func changeAuthorization() {
         self.navigationService.navigate(
             to: self.isSignUp
@@ -60,7 +52,9 @@ class AuthorizationViewModel: ObservableObject {
     }
     
     func signUp() {
-        guard !self.email.isEmpty, !self.password.isEmpty else {
+        self.checkEmail()
+        
+        guard !self.email.isEmpty, !self.password.isEmpty, !self.emailIsError else {
             return
         }
         
@@ -90,30 +84,28 @@ class AuthorizationViewModel: ObservableObject {
                 case .failure(let errorModel):
                     if errorModel.statusCode == 404 {
                         self.emailIsError = true
-                        break
                     }
                     
                     if errorModel.statusCode == 400 {
-                        print(errorModel.message)
                         if errorModel.message == "User already registered" {
                             self.emailIsError = true
                             self.emailErrorText = "Аккаунт с такой эл. почтой уже существует"
-                            break
                         }
                         else {
                             self.passwordIsError = true
-                            break
                         }
                     }
                     
-                    break
+                    self.isLoading = false
                 }
             }
         }
     }
     
     func signIn() {
-        guard !self.email.isEmpty, !self.password.isEmpty else {
+        self.checkEmail()
+        
+        guard !self.email.isEmpty, !self.password.isEmpty, !self.emailIsError else {
             return
         }
         
@@ -142,20 +134,17 @@ class AuthorizationViewModel: ObservableObject {
                     //self.initUserSettings()
                     break
                 case .failure(let errorModel):
-                    self.isLoading = false
                     if (errorModel.statusCode == 404) {
                         self.emailErrorText = "Не существует аккаунта с такой эл. почтой"
                         self.emailIsError = true
-                        break
                     }
                     
                     if (errorModel.statusCode == 400) {
                         self.passwordErrorText = "Неверный пароль"
                         self.passwordIsError = true
-                        break
                     }
                     
-                    break
+                    self.isLoading = false
                 }
             }
         }
@@ -208,6 +197,12 @@ class AuthorizationViewModel: ObservableObject {
                 switch result {
                 case .success(let locationModel):
                     self.commonViewModel.locationModel = locationModel
+                    
+                    UserDefaults.standard.set(
+                        self.commonViewModel.locationModel?.type == "TeamForum",
+                        forKey: "is_team"
+                    )
+                    
                     break
                 case .failure(let error):
                     break
@@ -274,5 +269,27 @@ class AuthorizationViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .restrorePasswordScreen
         )
+    }
+    
+    func checkEmail() {
+        let regex = try! NSRegularExpression(
+            pattern: "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
+            options: [.caseInsensitive]
+        )
+        if regex.firstMatch(
+            in: self.email,
+            options: [],
+            range: NSRange(
+                location: 0,
+                length: self.email.utf16.count
+            )
+        ) == nil {
+            self.emailIsError = true
+            self.emailErrorText = "Адрес электронной почты не валиден"
+        }
+        else {
+            self.emailIsError = false
+            self.emailErrorText = ""
+        }
     }
 }

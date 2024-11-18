@@ -36,17 +36,25 @@ struct NotificationsPageView: View {
                     }
                     else {
                         NotificationsBodyView(
-                            onAccept: {
+                            onDecline: {
                                 id in
                                 self.viewModel.accept(
                                     id: id,
                                     accepted: false
                                 )
                             },
-                            onTap: {
+                            onAccept: {
                                 id in
-                                self.viewModel.openUserCard(
-                                    id: id
+                                self.viewModel.accept(
+                                    id: id,
+                                    accepted: true
+                                )
+                            },
+                            onTap: {
+                                id, isTeam in
+                                self.viewModel.openCard(
+                                    id: id,
+                                    isTeam: isTeam
                                 )
                             },
                             onRefresh: {

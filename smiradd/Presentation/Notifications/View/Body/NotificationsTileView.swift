@@ -5,7 +5,8 @@ import SDWebImageSwiftUI
 struct NotificationsTileView: View {
     let notificationModel: NotificationModel
     
-    var onAccept: ((String) -> ())
+    let onDecline: ((String) -> ())
+    let onAccept: ((String) -> ())
     
     var body: some View {
         VStack (alignment: .leading) {
@@ -96,7 +97,7 @@ struct NotificationsTileView: View {
                 .foregroundStyle(textDefault)
             Spacer()
                 .frame(width: 16)
-            if self.notificationModel.type != "like" && self.notificationModel.accepted == nil {
+            if self.notificationModel.type == "team_request" || self.notificationModel.type == "team_invite" && self.notificationModel.accepted == nil {
                 HStack {
                     ZStack {
                         Text("Отклонить")
@@ -119,7 +120,7 @@ struct NotificationsTileView: View {
                     .background(Color(red: 0.949, green: 0.949, blue: 0.949))
                     .cornerRadius(19)
                     .onTapGesture {
-                        self.onAccept(notificationModel.id)
+                        self.onDecline(notificationModel.id)
                     }
                     Spacer()
                         .frame(width: 16)

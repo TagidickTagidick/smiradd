@@ -1,9 +1,10 @@
 import SwiftUI
 import PhotosUI
 import Combine
+import CardStack
 
 struct TeamBodyView: View {
-    @EnvironmentObject var router: NavigationService
+    @EnvironmentObject var navigationService: NavigationService
     
     @Environment(\.safeAreaInsets) private var safeAreaInsets
     
@@ -26,7 +27,8 @@ struct TeamBodyView: View {
                         image: self.$imageMock,
                         video: self.$videoMock,
                         imageUrl: self.$teamLogo,
-                        showTrailing: false,
+                        trailing: nil,
+                        onTapTrailing: nil,
                         editButton: self.commonViewModel.myCards.contains(
                             where: { $0.id == self.commonViewModel.teamMainModel.owner_card_id}
                         ) ? true : nil,
@@ -103,46 +105,94 @@ struct TeamBodyView: View {
                             .frame(
                                 height: 12
                             )
-                        ZStack (alignment: .top) {
-                            Spacer()
-                                .background(textDefault)
-                                .frame(
-                                    width: UIScreen.main.bounds.size.width - 56,
-                                    height: 100
+                        if self.viewModel.isEditTeammates {
+                            ForEach(self.commonViewModel.teamMainModel.teammates) {
+                                teammate in
+                                MyCardView(
+                                    cardModel: teammate,
+                                    isMyCard: false,
+                                    onDislike: {
+                                        id in
+                                        self.viewModel.dislike(id: id)
+                                    }
                                 )
-                                .cornerRadius(16)
-                            Spacer()
-                                .background(
-                                    Color(
-                                        red: 0.482,
-                                        green: 0.569,
-                                        blue: 0.761
+                                .onTapGesture {
+                                    self.viewModel.openCard(
+                                        id: teammate.id
                                     )
-                                )
-                                .frame(
-                                    width: UIScreen.main.bounds.size.width - 48,
-                                    height: 100
-                                )
-                                .cornerRadius(16)
-                                .offset(y: 8)
-                            MyCardView(
-                                cardModel: self.commonViewModel.teamMainModel.teammates.first!,
-                                isMyCard: false
-                            )
-                            .onTapGesture {
-                                self.viewModel.openCard(
-                                    id: self.commonViewModel.teamMainModel.teammates.first!.id
-                                )
+                                }
+                                .customAlert(
+                                    "Удалить участника?",
+                                    isPresented: $viewModel.isKick,
+                                    actionText: "Удалить"
+                                ) {
+                                    self.viewModel.kick()
+                                } message: {
+                                    Text("Участник будет удален из команды. Вы действительно хотите удалить участника?")
+                                }
+                                Spacer()
+                                    .frame(
+                                        height: 12
+                                    )
                             }
-                            .offset(y: 16)
                         }
-                        Spacer()
-                            .frame(
-                                height: 32
-                            )
-                        if !self.commonViewModel.myCards.contains(
-                            where: { $0.id == self.commonViewModel.teamMainModel.owner_card_id}
-                        ) && self.viewModel.teamType != .userCard {
+                        else {
+                            ZStack (alignment: .top) {
+                                Spacer()
+                                    .background(textDefault)
+                                    .frame(
+                                        width: UIScreen.main.bounds.size.width - 56,
+                                        height: 100
+                                    )
+                                    .cornerRadius(16)
+                                Spacer()
+                                    .background(
+                                        Color(
+                                            red: 0.482,
+                                            green: 0.569,
+                                            blue: 0.761
+                                        )
+                                    )
+                                    .frame(
+                                        width: UIScreen.main.bounds.size.width - 48,
+                                        height: 100
+                                    )
+                                    .cornerRadius(16)
+                                    .offset(y: 8)
+                                MyCardView(
+                                    cardModel: self.commonViewModel.teamMainModel.teammates.first!,
+                                    isMyCard: false
+                                )
+                                .onTapGesture {
+                                    self.viewModel.isEditTeammates = true
+                                }
+                                .offset(y: 16)
+                            }
+                        }
+                        if self.commonViewModel.myCards.contains(
+                            where: {
+                                $0.id == self.commonViewModel.teamMainModel.owner_card_id
+                            }
+                        ) {
+                            DeleteView(text: "команду")
+                                .onTapGesture {
+                                    self.viewModel.openAlert()
+                                }
+                                .customAlert(
+                                    "Отменить создание команды?",
+                                    isPresented: $viewModel.isAlert,
+                                    actionText: "Удалить"
+                                ) {
+                                    self.viewModel.deleteTeam()
+                                } message: {
+                                    Text("Команда и вся информация о ней будут удалены. Удалить команду?")
+                                }
+                        }
+                        else {
+                            Spacer()
+                                .frame(
+                                    height: 32
+                                )
                             CustomButtonView(
                                 text: "Покинуть команду",
                                 color: Color(
@@ -172,7 +222,7 @@ struct TeamBodyView: View {
                         )
                 }
             }
-            if self.viewModel.teamType == .userCard {
+            if self.commonViewModel.teamMainModel.team.id != self.viewModel.teamId {
                 HStack {
                     ZStack {
                         Circle()
@@ -189,7 +239,20 @@ struct TeamBodyView: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
-                        self.viewModel.dislike(id: "")
+                        self.navigationService.navigateBack()
+                        
+                        if self.viewModel.teamType == .networkingUserCard {
+                            withAnimation {
+                                self.commonViewModel.networkingTeams.swipe(
+                                    direction: .left,
+                                    completion: nil
+                                )
+                            }
+                        }
+                        
+                        self.commonViewModel.dislike(
+                            id: self.viewModel.teamId
+                        )
                     }
                     Spacer()
                         .frame(width: 16)
@@ -208,6 +271,17 @@ struct TeamBodyView: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
+                        self.navigationService.navigateBack()
+                        
+                        if self.viewModel.teamType == .networkingUserCard {
+                            withAnimation {
+                                self.commonViewModel.networkingTeams.swipe(
+                                    direction: .right,
+                                    completion: nil
+                                )
+                            }
+                        }
+                        
                         self.commonViewModel.like(
                             id: self.viewModel.teamId
                         )

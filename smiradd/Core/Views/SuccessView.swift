@@ -1,17 +1,15 @@
 import SwiftUI
 
 struct CustomNotificationView: View {
-    
-    let text: String
-    let isError: Bool
+    @EnvironmentObject private var commonViewModel: CommonViewModel
     
     var body: some View {
         HStack {
-            Image(systemName: "checkmark")
+            Image(systemName: self.commonViewModel.isErrorAlert ? "xmark" : "checkmark")
                 .foregroundColor(.white)
             Spacer()
                 .frame(width: 4)
-            Text(text)
+            Text(self.commonViewModel.alertText)
                 .font(
                     .custom(
                         "OpenSans-Medium",
@@ -34,7 +32,7 @@ struct CustomNotificationView: View {
             height: 72
         )
         .background(
-            isError ? Color(
+            self.commonViewModel.isErrorAlert ? Color(
                 red: 0.898,
                 green: 0.271,
                 blue: 0.267

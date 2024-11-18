@@ -19,13 +19,12 @@ class CommonViewModel: ObservableObject {
     @Published var myCards: [CardModel] = []
     @Published var myTeamMainModel: TeamMainModel?
     
-    @Published var isCardsEmpty: Bool = true
-    
-    @Published var isTeamsEmpty: Bool = true
-    
     @Published var locationModel: LocationModel?
     
+    @Published var alertOffset = CGSize.zero
     @Published var isAlert: Bool = false
+    @Published var isErrorAlert: Bool = false
+    @Published var alertText: String = ""
     
     @Published var profileModel: ProfileModel?
     
@@ -42,22 +41,22 @@ class CommonViewModel: ObservableObject {
     @Published var achievements: [AchievementModel] = []
     @Published var services: [ServiceModel] = []
     
+    @Published var favoritesModel: FavoritesModel?
+    @Published var favoritesPageType: PageType = .loading
+    
     var cardsCount: Int = 0
     var teamsCount: Int = 0
     
-    var timeRemaining = 5
-    var timer = Timer.publish(
-        every: 1,
-        on: .main,
-        in: .common
-    )
-    
-    var isTeamStorage: Bool {
-        return UserDefaults.standard.bool(forKey: "is_team")
+    var isSeekTeamStorage: Bool {
+        return UserDefaults.standard.bool(forKey: "is_seek_team")
     }
     
     var forumCode: String? {
         return UserDefaults.standard.string(forKey: "forum_code")
+    }
+    
+    var isTeamStorage: Bool {
+        return UserDefaults.standard.bool(forKey: "is_team")
     }
     
     private let repository: ICommonRepository
@@ -71,6 +70,9 @@ class CommonViewModel: ObservableObject {
     func removeAll() {
         UserDefaults.standard.removeObject(
             forKey: "forum_code"
+        )
+        UserDefaults.standard.removeObject(
+            forKey: "is_seek_team"
         )
         UserDefaults.standard.removeObject(
             forKey: "is_team"
@@ -99,22 +101,12 @@ class CommonViewModel: ObservableObject {
         }
         else {
             self.networkingSpecificities = newSpecificities
+            self.getAroundMe()
         }
-    }
-    
-    func showAlert() {
-        withAnimation {
-            self.isAlert = true
-        }
-        
-        self.timeRemaining = 5
-        
-        self.timer = Timer.publish(every: 1, on: .main, in: .common)
-        self.timer.connect()
     }
     
     func checkCanGetAroundMe() {
-        if self.isTeamStorage {
+        if self.isSeekTeamStorage {
             self.teamsCount -= 1
             
             if self.teamsCount == 3 {
@@ -139,7 +131,7 @@ class CommonViewModel: ObservableObject {
         self.cardsCount = 0
         self.teamsCount = 0
         
-        if self.isTeamStorage {
+        if self.isSeekTeamStorage {
             self.repository.getAroundMeTeams(
                 specificity: self.networkingSpecificities,
                 code: self.forumCode ?? ""
@@ -159,13 +151,9 @@ class CommonViewModel: ObservableObject {
                         if self.networkingTeams.numberOfElements <= 3 {
                             self.networkingPageType = .pageNotFound
                         }
-//                        else {
-//                            self.commonViewModel.isTeamsEmpty = false
-//                            self.pageType = .pageNotFound
-//                        }
                         break
                     case .failure(let error):
-                        self.networkingPageType = .pageNotFound
+                        self.networkingPageType = .matchNotFound
                         break
                     }
                 }
@@ -190,10 +178,6 @@ class CommonViewModel: ObservableObject {
                         if self.networkingCards.numberOfElements <= 3 {
                             self.networkingPageType = .pageNotFound
                         }
-//                        else {
-//                            self.commonViewModel.isCardsEmpty = false
-//                            self.pageType = .pageNotFound
-//                        }
                         break
                     case .failure(let error):
                         self.networkingPageType = .matchNotFound
@@ -219,8 +203,16 @@ class CommonViewModel: ObservableObject {
             return
         }
         
-        if self.isTeamStorage {
+        if self.isSeekTeamStorage {
+            ///Ищу команду, команды нет
             if self.myTeamMainModel == nil {
+                withAnimation {
+                    self.networkingTeams.swipe(
+                        direction: .right,
+                        completion: nil
+                    )
+                }
+                
                 self.repository.postRequest(
                     id: id
                 ) {
@@ -228,7 +220,10 @@ class CommonViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         switch result {
                         case .success(_):
-                            self.showAlert()
+                            self.showAlert(
+                                isError: false,
+                                text: "Запрос на вступление в команду успешно отправлен"
+                            )
                             
                             self.checkCanGetAroundMe()
                             break
@@ -254,6 +249,14 @@ class CommonViewModel: ObservableObject {
             }
         }
         else {
+            withAnimation {
+                self.networkingCards.swipe(
+                    direction: .right,
+                    completion: nil
+                )
+            }
+            
+            ///Ищу юзера, команды нет
             if self.myTeamMainModel == nil {
                 self.repository.postFavorites(
                     cardId: id
@@ -262,6 +265,7 @@ class CommonViewModel: ObservableObject {
                     self.checkCanGetAroundMe()
                 }
             }
+            ///Ищу юзера, команда есть
             else {
                 if self.myCards.first(
                     where: {
@@ -280,9 +284,36 @@ class CommonViewModel: ObservableObject {
                         id: id
                     ) {
                         _ in
+                        self.showAlert(
+                            isError: false,
+                            text: "Запрос на вступление в команду успешно отправлен"
+                        )
                         self.checkCanGetAroundMe()
                     }
                 }
+            }
+        }
+    }
+    
+    func showAlert(
+        isError: Bool,
+        text: String
+    ) {
+        if self.isAlert {
+            return
+        }
+        
+        self.isErrorAlert = isError
+        self.alertText = text
+        self.alertOffset = CGSize.zero
+        
+        withAnimation {
+            self.isAlert = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            withAnimation {
+                self.isAlert = false
             }
         }
     }
@@ -396,14 +427,8 @@ class CommonViewModel: ObservableObject {
     }
     
     func startAgain() {
-        self.networkingCards.removeAllElements()
-        self.networkingTeams.removeAllElements()
-        
-        self.cardsCount = 0
-        self.teamsCount = 0
-        
         self.repository.postClear(
-            isTeam: self.isTeamStorage
+            isTeam: self.isSeekTeamStorage
         ) {
             [self] result in
             DispatchQueue.main.async {

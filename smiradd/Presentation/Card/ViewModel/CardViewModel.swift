@@ -50,9 +50,13 @@ class CardViewModel: ObservableObject {
     
     @Published var isAlert: Bool = false
     
+    @Published var isDeleteFromFavorites: Bool = false
+    
     @Published var noCardsSheet: Bool = false
     
     let cardId: String
+    
+    var deleteFromFavoritesCardId: String = ""
     
     @Published var cardType: CardType
     
@@ -147,6 +151,7 @@ class CardViewModel: ObservableObject {
         self.cv = self.commonViewModel.cardModel.cv_url ?? ""
         self.bio = self.commonViewModel.cardModel.bio ?? ""
         self.avatarUrl = self.commonViewModel.cardModel.avatar_url ?? ""
+        self.logoUrl = self.commonViewModel.cardModel.company_logo ?? ""
         if self.commonViewModel.services.isEmpty {
             self.commonViewModel.services = self.commonViewModel.cardModel.services ?? []
         }
@@ -278,15 +283,12 @@ class CardViewModel: ObservableObject {
     }
     
     func startSave() {
-        print("1")
         if self.isValidEmail {
             self.checkEmail()
         }
-        print("2")
         if !self.isValidButton {
             return
         }
-        print("3")
         self.pageType = .loading
         
         self.uploadAvatar()
@@ -526,5 +528,57 @@ class CardViewModel: ObservableObject {
     func changeCardType() {
         self.cardType = .editCard
         self.getSpecifity()
+    }
+    
+    func openDeleteFromFavoritesAlert() {
+        self.deleteFromFavoritesCardId = self.cardId
+        self.isDeleteFromFavorites = true
+    }
+    
+    func deleteFromFavorites() {
+        self.isDeleteFromFavorites = false
+        
+        self.commonRepository.deleteFavorites(
+            cardId: self.deleteFromFavoritesCardId
+        ) {
+            [self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    self.commonViewModel.favoritesModel!.items.removeAll(
+                        where: { $0.id == self.deleteFromFavoritesCardId }
+                    )
+                    
+                    if self.commonViewModel.favoritesModel!.items.isEmpty {
+                        self.commonViewModel.favoritesPageType = .nothingHereFavorites
+                    }
+                    
+                    self.navigationService.navigateBack()
+                    
+                    break
+                case .failure(let error):
+                    break
+                }
+            }
+        }
+    }
+    
+    func changeIsDefault(isDefault: Bool) {
+        if !isDefault {
+            self.repository.putDefault(
+                cardId: self.cardId
+            ) {
+                _ in
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.commonViewModel.showAlert(
+                            isError: false,
+                            text: "Вы сделали эту визитку основной"
+                        )
+                    }
+                    self.commonViewModel.cardModel.is_default = true
+                }
+            }
+        }
     }
 }

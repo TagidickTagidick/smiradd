@@ -5,18 +5,22 @@ import Shimmer
 struct FavoritesPageView: View {
     @StateObject private var viewModel: FavoritesViewModel
     
+    @EnvironmentObject private var commonViewModel: CommonViewModel
+    
     @Namespace var topID
     
     init(
         repository: IFavoritesRepository,
         navigationService: NavigationService,
-        commonRepository: ICommonRepository
+        commonRepository: ICommonRepository,
+        commonViewModel: CommonViewModel
     ) {
         _viewModel = StateObject(
             wrappedValue: FavoritesViewModel(
                 repository: repository,
                 navigationService: navigationService,
-                commonRepository: commonRepository
+                commonRepository: commonRepository,
+                commonViewModel: commonViewModel
             )
         )
     }
@@ -25,15 +29,15 @@ struct FavoritesPageView: View {
         ScrollViewReader {
             scrollView in
             ZStack (alignment: .top) {
-                if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .loading {
+                if self.commonViewModel.favoritesPageType == .matchNotFound || self.commonViewModel.favoritesPageType == .loading {
                     ScrollView {
                         VStack {
-                            if self.viewModel.pageType == .loading {
+                            if self.commonViewModel.favoritesPageType == .loading {
                                 FavoritesLoadingView()
                             }
                             else {
                                 FavoritesBodyView(
-                                    favorites: self.viewModel.favoritesModel!.items,
+                                    favorites: self.commonViewModel.favoritesModel!.items,
                                     onDislike: {
                                         id in
                                         self.viewModel.openAlert(
@@ -75,7 +79,7 @@ struct FavoritesPageView: View {
                     VStack {
                         Spacer()
                         PageInfoView(
-                            pageType: self.viewModel.pageType,
+                            pageType: self.commonViewModel.favoritesPageType,
                             onTap: {
                                 self.viewModel.getFavorites()
                             }

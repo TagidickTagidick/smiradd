@@ -4,6 +4,7 @@ import Firebase
 import FirebaseMessaging
 import SDWebImage
 import SDWebImageSwiftUI
+import CardStack
 
 @main
 struct smiraddApp: App, KeyboardReadable {
@@ -47,7 +48,12 @@ struct smiraddApp: App, KeyboardReadable {
             return
         }
 
-        navigationService.navigate(to: .cardScreen(cardId: recipeName, cardType: .userCard))
+        self.navigationService.navigate(
+            to: .cardScreen(
+                cardId: recipeName,
+                cardType: .userCard
+            )
+        )
     }
     
     @StateObject var notificationManager = NotificationManager()
@@ -184,7 +190,8 @@ struct smiraddApp: App, KeyboardReadable {
                                     navigationService: navigationService,
                                     commonRepository: CommonRepository(
                                         networkService: NetworkService()
-                                    )
+                                    ),
+                                    commonViewModel: self.commonViewModel
                                 )
                             case .filterScreen(let isFavorites):
                                 FilterPageView(
@@ -295,35 +302,44 @@ struct smiraddApp: App, KeyboardReadable {
                                     !isKeyboardVisible {
                                 CustomBottomNavigationBarView()
                             }
-                            if self.isTutorial && i == .networkingScreen && (!self.commonViewModel.isCardsEmpty || !self.commonViewModel.isTeamsEmpty) {
+                            if self.isTutorial && i == .networkingScreen && (self.commonViewModel.networkingCards.numberOfElements != 0 || self.commonViewModel.networkingTeams.numberOfElements != 0) {
                                 TutorialView(isTutorial: self.$isTutorial)
                             }
-                            CustomNotificationView(
-                                text: "Запрос на вступление в команду успешно отправлен",
-                                isError: false
-                            )
-                                .onReceive(self.commonViewModel.timer) {
-                                    _ in
+                                VStack {
                                     if self.commonViewModel.isAlert {
-                                        if self.commonViewModel.timeRemaining > 0 {
-                                            self.commonViewModel.timeRemaining -= 1
+                                    CustomNotificationView()
+                                        .offset(y: self.commonViewModel.alertOffset.height)
+                                        .gesture(
+                                            DragGesture()
+                                                .onChanged { gesture in
+                                                    if gesture.translation.height <= 0 {
+                                                        self.commonViewModel.alertOffset = gesture.translation
                                                     }
-                                    }
-                                            }
-                                .onReceive(self.commonViewModel.timer) {
-                                    time in
-                                    if self.commonViewModel.isAlert {
-                                        if self.commonViewModel.timeRemaining == 0 {
-                                            self.commonViewModel.timer.connect().cancel()
-                                            self.commonViewModel.isAlert = false
+                                                }
+                                                .onEnded { _ in
+                                                    if abs(self.commonViewModel.alertOffset.height) > 50 {
+                                                        withAnimation {
+                                                            self.commonViewModel.isAlert = false
+                                                        }
+                                                    } else {
+                                                        withAnimation {
+                                                            self.commonViewModel.alertOffset = .zero
+                                                        }
                                                     }
-                                    }
-                                            }
-
-                            .offset(
-                                y: self.commonViewModel.isAlert ? (-UIScreen.main.bounds.size.height + self.safeAreaInsets.top + 100) : -1000
-                            )
-                                .transition(.move(edge: .top))
+                                                }
+                                        )
+                                        .transition(.move(edge: .top))
+                                        .animation(.spring())
+                                        .padding()
+                                    Spacer()
+                                }
+                            }
+//                            CustomNotificationView()
+//                            .offset(
+//                                y: self.commonViewModel.isAlert ? (-UIScreen.main.bounds.size.height + self.safeAreaInsets.top + 100) : -1000
+//                            )
+//                                .transition(.move(edge: .top))
+//                                .animation(.spring())
                             
                         }
                         .navigationBarBackButtonHidden(true)
@@ -343,6 +359,36 @@ struct smiraddApp: App, KeyboardReadable {
             }
             .onOpenURL { url in
                 print("App was opened via URL: \(url)")
+                if url.absoluteString.contains("https://smiradd.ru/cards/") {
+                    self.navigationService.navigate(
+                        to: .cardScreen(
+                            cardId: String(url.absoluteString.split(separator: "/").last!),
+                            cardType: .userCard
+                        )
+                    )
+                }
+                if url.absoluteString.contains("https://smiradd.ru/teams/invite/") {
+                    let cardId = String(url.absoluteString.split(separator: "/").last!)
+                    if self.commonViewModel.teamMainModel.team.id != cardId {
+                        CommonRepository(
+                            networkService: NetworkService()
+                        ).invite(url: String(url.absoluteString.split(separator: "/").last!)) {
+                            result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(let cardModels):
+                                    self.commonViewModel.showAlert(
+                                        isError: false,
+                                        text: "Вы добавлены в команду"
+                                    )
+                                    break
+                                case .failure(let error):
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
                 //GIDSignIn.sharedInstance.handle(url)
                 handleIncomingURL(url)
             }
@@ -362,5 +408,40 @@ struct smiraddApp: App, KeyboardReadable {
                 await self.notificationManager.getAuthStatus()
             }
         }
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            VStack {
+                Text("Home View")
+                    .font(.largeTitle)
+                    .padding()
+
+                NavigationLink(destination: DetailView()) {
+                    Text("Go to Detail View")
+                        .font(.title)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            .navigationTitle("Home")
+        }
+    }
+}
+
+struct DetailView: View {
+    var body: some View {
+        VStack {
+            Text("Detail View")
+                .font(.largeTitle)
+                .padding()
+
+            // You can add more content here
+        }
+        .navigationTitle("Detail")
     }
 }

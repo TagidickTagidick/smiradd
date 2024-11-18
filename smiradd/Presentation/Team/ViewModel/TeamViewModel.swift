@@ -13,8 +13,7 @@ class TeamViewModel: ObservableObject {
     
     @Published var aboutProject: String = ""
     
-    @Published var templatesOpened: Bool = false
-    @Published var templatesPageType: PageType = .loading
+    @Published var isEditTeammates: Bool = false
     
     @Published var isAlert: Bool = false
     @Published var isLeave: Bool = false
@@ -115,16 +114,6 @@ class TeamViewModel: ObservableObject {
                 isTeam: true
             )
         )
-    }
-    
-    func closeTemplates(id: String) {
-        self.templatesOpened = false
-        
-        if (id.isEmpty) {
-            return
-        }
-        
-        self.commonViewModel.teamMainModel.team.bc_template_type = id
     }
     
     func startSave() {
@@ -228,8 +217,14 @@ class TeamViewModel: ObservableObject {
                             
                             break
                         case .failure(let error):
-                            print(error)
-                            break
+                            if error.message == "Team name already registrated" {
+                                self.commonViewModel.showAlert(
+                                    isError: true,
+                                    text: "Такое название команды уже существует"
+                                )
+                            }
+                            
+                            self.pageType = .matchNotFound
                         }
                     }
                 }
@@ -244,11 +239,7 @@ class TeamViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: id,
-                cardType: self.commonViewModel.myCards.first(
-                    where: {
-                        $0.id == id
-                    }
-                ) == nil ? .favoriteCard : .myCard
+                cardType: .userCard
             )
         )
     }
@@ -294,14 +285,9 @@ class TeamViewModel: ObservableObject {
     }
     
     func dislike(id: String) {
-        if self.teamType == .editCard {
-            if self.commonViewModel.teamMainModel.owner_card_id != id {
-                self.isKick = true
-                self.kickId = id
-            }
-        }
-        else {
-            self.navigationService.navigateBack()
+        if self.commonViewModel.teamMainModel.owner_card_id != id {
+            self.isKick = true
+            self.kickId = id
         }
     }
     

@@ -72,11 +72,6 @@ protocol ICommonRepository {
         completion: @escaping (Result<Void, Error>) -> Void
     )
     
-    func postFirebaseCreate(
-        firebaseToken: String,
-        completion: @escaping (Result<Void, Error>) -> Void
-    )
-    
     func getNotifications(
         completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
     )

@@ -4,8 +4,9 @@ struct NotificationsBodyView: View {
     
     @EnvironmentObject private var commonViewModel: CommonViewModel
     
+    var onDecline: ((String) -> ())
     var onAccept: ((String) -> ())
-    var onTap: ((String) -> ())
+    var onTap: ((String, Bool) -> ())
     var onRefresh: (() -> ())
     
     var body: some View {
@@ -15,13 +16,20 @@ struct NotificationsBodyView: View {
                     notificationModel in
                     NotificationsTileView(
                         notificationModel: notificationModel,
+                        onDecline: {
+                            id in
+                            self.onDecline(id)
+                        },
                         onAccept: {
                             id in
                             self.onAccept(id)
                         }
                     )
                     .onTapGesture {
-                        self.onTap(notificationModel.data.uuid_sender)
+                        self.onTap(
+                            notificationModel.data.uuid_sender,
+                            notificationModel.type == "team_request_answer"
+                        )
                     }
                 }
                 .padding(

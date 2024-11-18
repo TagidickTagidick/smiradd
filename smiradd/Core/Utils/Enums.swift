@@ -11,9 +11,8 @@ enum PageType {
 }
 
 enum CardType {
-    case favoriteCard
     case userCard
-    case myCard
     case editCard
     case newCard
+    case networkingUserCard
 }

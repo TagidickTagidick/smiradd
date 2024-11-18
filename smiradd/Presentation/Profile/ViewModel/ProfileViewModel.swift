@@ -121,7 +121,7 @@ class ProfileViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: id,
-                cardType: .myCard
+                cardType: .userCard
             )
         )
     }
@@ -144,7 +144,7 @@ class ProfileViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .teamScreen(
                 teamId: id,
-                teamType: .myCard
+                teamType: .userCard
             )
         )
     }

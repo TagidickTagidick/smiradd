@@ -31,7 +31,8 @@ struct CardEditView: View {
                     image: $viewModel.avatarImage,
                     video: $viewModel.avatarVideo,
                     imageUrl: $viewModel.avatarUrl,
-                    showTrailing: false,
+                    trailing: nil,
+                    onTapTrailing: nil,
                     editButton: false,
                     onTapEditButton: {
                         self.viewModel.changeCardType()
@@ -129,7 +130,7 @@ struct CardEditView: View {
                 Spacer()
                     .frame(height: 32)
                 VStack (alignment: .leading) {
-                    if self.viewModel.cardType == .editCard {
+                    if self.viewModel.cardType == .editCard && self.commonViewModel.cardModel.is_default == false {
                         DeleteView(text: "визитку")
                             .onTapGesture {
                                 self.viewModel.openAlert()

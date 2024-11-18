@@ -12,56 +12,58 @@ struct FilterSheetView: View {
             VStack (alignment: .leading) {
                 Spacer()
                     .frame(height: 32)
-                Text("Статус")
-                    .font(
-                        .custom(
-                            "OpenSans-SemiBold",
-                            size: 24
+                if self.commonViewModel.isTeamStorage {
+                    Text("Статус")
+                        .font(
+                            .custom(
+                                "OpenSans-SemiBold",
+                                size: 24
+                            )
                         )
-                    )
-                    .foregroundStyle(textDefault)
-                Spacer()
-                    .frame(height: 16)
-                HStack {
-                    FilterButtonView(
-                        isChosen: self.viewModel.isTeam,
-                        text: "Ищу команду"
-                    )
-                    .frame(
-                        minWidth: UIScreen.main.bounds.size.width / 2 - 24
-                        //minHeight: 40
-                    )
-                    .background(self.viewModel.isTeam ? textAccent : accent100)
-                    .cornerRadius(24)
-                    .onTapGesture {
-                        self.viewModel.changeTeamSeek(
-                            isTeam: true
+                        .foregroundStyle(textDefault)
+                    Spacer()
+                        .frame(height: 16)
+                    HStack {
+                        FilterButtonView(
+                            isChosen: self.viewModel.isTeam,
+                            text: "Ищу команду"
                         )
+                        .frame(
+                            minWidth: UIScreen.main.bounds.size.width / 2 - 24
+                            //minHeight: 40
+                        )
+                        .background(self.viewModel.isTeam ? textAccent : accent100)
+                        .cornerRadius(24)
+                        .onTapGesture {
+                            self.viewModel.changeTeamSeek(
+                                isTeam: true
+                            )
+                        }
+                        Spacer()
+                            .frame(
+                                width: 8
+                            )
+                        FilterButtonView(
+                            isChosen: !self.viewModel.isTeam,
+                            text: "Ищу участников"
+                        )
+                        .frame(
+                            minWidth: UIScreen.main.bounds.size.width / 2 - 24
+                            //minHeight: 40
+                        )
+                        .background(!self.viewModel.isTeam ? textAccent : accent100)
+                        .cornerRadius(24)
+                        .onTapGesture {
+                            self.viewModel.changeTeamSeek(
+                                isTeam: false
+                            )
+                        }
                     }
                     Spacer()
                         .frame(
-                            width: 8
+                            height: 24
                         )
-                    FilterButtonView(
-                        isChosen: !self.viewModel.isTeam,
-                        text: "Ищу участников"
-                    )
-                    .frame(
-                        minWidth: UIScreen.main.bounds.size.width / 2 - 24
-                        //minHeight: 40
-                    )
-                    .background(!self.viewModel.isTeam ? textAccent : accent100)
-                    .cornerRadius(24)
-                    .onTapGesture {
-                        self.viewModel.changeTeamSeek(
-                            isTeam: false
-                        )
-                    }
                 }
-                Spacer()
-                    .frame(
-                        height: 24
-                    )
                 HStack {
                     Text("Фильтры")
                         .font(
@@ -136,6 +138,7 @@ struct FilterSheetView: View {
              20
             )
         }
+        .background(.white)
         .presentationCornerRadius(16)
         .presentationDetents(
             [

@@ -23,6 +23,7 @@ struct CardModel: Codable, Identifiable {
     let achievements: [AchievementModel]?
     var avatar_url: String?
     let like: Bool?
+    var is_default: Bool?
     
     static func makeMock(templateId: String) -> CardModel {
             return CardModel(
@@ -45,7 +46,8 @@ struct CardModel: Codable, Identifiable {
                 services: nil,
                 achievements: nil,
                 avatar_url: nil,
-                like: false
+                like: false,
+                is_default: false
             )
         }
     
@@ -71,6 +73,7 @@ struct CardModel: Codable, Identifiable {
         services: nil,
         achievements: nil,
         avatar_url: nil,
-        like: false
+        like: false,
+        is_default: false
     )
 }

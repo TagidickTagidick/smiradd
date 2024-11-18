@@ -64,7 +64,7 @@ struct RestorePasswordPageView: View {
                 emailErrorText: self.$viewModel.emailErrorText,
                 emailIsFocused: _emailIsFocused
             )
-            .onChange(of: self.viewModel.email) {
+            .onChange(of: self.emailIsFocused) {
                 self.viewModel.checkEmail()
             }
             Spacer()

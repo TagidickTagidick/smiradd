@@ -14,7 +14,7 @@ protocol ITeamRepository {
         aboutProject: String,
         teamLogo: String,
         bcTemplateType: String,
-        completion: @escaping (Result<TeamModel, Error>) -> Void
+        completion: @escaping (Result<TeamModel, ErrorModel>) -> Void
     )
     
     func putTeam(

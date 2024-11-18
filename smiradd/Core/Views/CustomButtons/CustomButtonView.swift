@@ -22,5 +22,6 @@ struct CustomButtonView: View {
         )
         .background(color)
         .cornerRadius(28)
+        .buttonStyle(PlainButtonStyle())
     }
 }

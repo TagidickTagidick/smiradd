@@ -84,6 +84,9 @@ struct AuthorizationPageView: View {
                         emailErrorText: self.$viewModel.emailErrorText,
                         emailIsFocused: _emailIsFocused
                     )
+                    .onChange(of: self.emailIsFocused) {
+                        self.viewModel.checkEmail()
+                    }
                     Spacer()
                         .frame(
                             height: self.screenHeight / 70
@@ -107,7 +110,7 @@ struct AuthorizationPageView: View {
                         ) //32
                     CustomButtonView(
                         text: self.viewModel.isSignUp ? "Продолжить" : "Войти",
-                        color: self.viewModel.email.isEmpty || self.viewModel.password.isEmpty || !self.viewModel.isValidEmail(self.viewModel.email)
+                        color: self.viewModel.email.isEmpty || self.viewModel.password.isEmpty
                         ? textAdditional
                         : textDefault
                     )
@@ -138,6 +141,9 @@ struct AuthorizationPageView: View {
                     OtherServiceButtonView(
                         isSignUp: self.viewModel.isSignUp
                     )
+                    .onTapGesture {
+                        
+                    }
                     Spacer()
                         .frame(
                             height: self.screenHeight / 20

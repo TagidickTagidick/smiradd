@@ -56,4 +56,9 @@ protocol ICardRepository {
         logoUrl: String,
         completion: @escaping (Result<CardModel, Error>) -> Void
     )
+    
+    func putDefault(
+        cardId: String,
+        completion: @escaping (Result<CardModel, Error>) -> Void
+    )
 }

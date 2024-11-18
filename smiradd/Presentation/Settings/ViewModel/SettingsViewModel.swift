@@ -45,14 +45,19 @@ class SettingsViewModel: ObservableObject {
     }
     
     func changePassword() {
+        self.password = ""
+        
+        self.isChangePassword = false
+        
+        self.commonViewModel.showAlert(
+            isError: false,
+            text: "Пароль успешно сохранён"
+        )
+        
         self.repository.patchResetPassword(
             password: self.password
         ) {
-            result in
-            DispatchQueue.main.async {
-                self.password = ""
-                self.isChangePassword = false
-            }
+            _ in
         }
     }
     

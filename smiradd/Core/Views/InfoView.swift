@@ -165,6 +165,7 @@ struct PageInfoView: View {
                         }
                     }
                     Spacer()
+                    Spacer()
                 }
                 .padding(
                     [.horizontal],

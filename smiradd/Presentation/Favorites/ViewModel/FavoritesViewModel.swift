@@ -2,10 +2,6 @@ import SwiftUI
 import CodeScanner
 
 class FavoritesViewModel: ObservableObject {
-    @Published var pageType: PageType = .loading
-    
-    @Published var favoritesModel: FavoritesModel?
-    
     @Published var isShowingScanner: Bool = false
     
     @Published var isAlert: Bool = false
@@ -14,20 +10,23 @@ class FavoritesViewModel: ObservableObject {
     private let repository: IFavoritesRepository
     private let navigationService: NavigationService
     private let commonRepository: ICommonRepository
+    private let commonViewModel: CommonViewModel
     
     init(
         repository: IFavoritesRepository,
         navigationService: NavigationService,
-        commonRepository: ICommonRepository
+        commonRepository: ICommonRepository,
+        commonViewModel: CommonViewModel
     ) {
         self.repository = repository
         self.navigationService = navigationService
         self.commonRepository = commonRepository
+        self.commonViewModel = commonViewModel
         self.getFavorites(isRefresh: false)
     }
     
     func getFavorites(isRefresh: Bool = true) {
-        self.pageType = .loading
+        self.commonViewModel.favoritesPageType = .loading
         
         let startTime = Date()
         
@@ -47,22 +46,22 @@ class FavoritesViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let favoritesModel):
-                        self.favoritesModel = favoritesModel
+                        self.commonViewModel.favoritesModel = favoritesModel
                         
-                        if self.favoritesModel!.items.isEmpty {
-                            self.pageType = .nothingHereFavorites
+                        if self.commonViewModel.favoritesModel!.items.isEmpty {
+                            self.commonViewModel.favoritesPageType = .nothingHereFavorites
                         }
                         else {
-                            self.pageType = .matchNotFound
+                            self.commonViewModel.favoritesPageType = .matchNotFound
                         }
                         break
                     case .failure(let error):
                         if error.message == "Превышен лимит времени на запрос."
                             || error.message == "Вероятно, соединение с интернетом прервано." {
-                            self.pageType = .noResultsFound
+                            self.commonViewModel.favoritesPageType = .noResultsFound
                         }
                         else {
-                            self.pageType = .somethingWentWrong
+                            self.commonViewModel.favoritesPageType = .somethingWentWrong
                         }
                         break
                     }
@@ -88,10 +87,13 @@ class FavoritesViewModel: ObservableObject {
         
         switch result {
         case .success(let result):
-            let details = result.string.components(separatedBy: "\n")
-            UIApplication
-                .shared
-                .open(URL(string: details[0])!)
+            let details = result.string.components(separatedBy: "\n")[0]
+            self.navigationService.navigate(
+                to: .cardScreen(
+                    cardId: String(details.split(separator: "/").last!),
+                    cardType: .userCard
+                )
+            )
         case .failure(let error):
             print("Scanning failed: \(error.localizedDescription)")
         }
@@ -109,7 +111,7 @@ class FavoritesViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: id,
-                cardType: .favoriteCard
+                cardType: .userCard
             )
         )
     }
@@ -129,11 +131,11 @@ class FavoritesViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(_):
-                    self.favoritesModel!.items.removeAll(
+                    self.commonViewModel.favoritesModel!.items.removeAll(
                         where: { $0.id == self.cardId }
                     )
-                    if self.favoritesModel!.items.isEmpty {
-                        self.pageType = .nothingHereFavorites
+                    if self.commonViewModel.favoritesModel!.items.isEmpty {
+                        self.commonViewModel.favoritesPageType = .nothingHereFavorites
                     }
                     break
                 case .failure(let error):

@@ -70,7 +70,7 @@ class TeamRepository: ITeamRepository {
         aboutProject: String,
         teamLogo: String,
         bcTemplateType: String,
-        completion: @escaping (Result<TeamModel, Error>) -> Void
+        completion: @escaping (Result<TeamModel, ErrorModel>) -> Void
     ) {
         var body: [String: Any] = [
             "name": name,
@@ -113,7 +113,7 @@ class TeamRepository: ITeamRepository {
                     )
                     completion(.success(teamModel))
                 } catch {
-                    completion(.failure(error))
+                    completion(.failure(ErrorModel(statusCode: 500, message: "")))
                 }
             case .failure(let errorModel):
                 print("Signup failed: \(errorModel.message)")

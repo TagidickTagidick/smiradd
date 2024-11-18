@@ -365,24 +365,6 @@ class CommonRepository: ICommonRepository {
         }
     }
     
-    func postFirebaseCreate(
-        firebaseToken: String,
-        completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        self.networkService.post(
-            url: "firebase-create",
-            body: ["firebase_token": firebaseToken]
-        ) { result in
-            switch result {
-            case .success(let response):
-                completion(.success(()))
-            case .failure(let errorModel):
-                print("Signup failed: \(errorModel.message)")
-                completion(.failure(errorModel))
-            }
-        }
-    }
-    
     func getNotifications(
         completion: @escaping (Result<NotificationsModel, ErrorModel>) -> Void
     ) {

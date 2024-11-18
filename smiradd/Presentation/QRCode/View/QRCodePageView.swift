@@ -5,18 +5,18 @@ import CoreImage.CIFilterBuiltins
 struct QRCodePageView: View {
     @EnvironmentObject private var commonViewModel: CommonViewModel
     
-    @Environment(\.safeAreaInsets) private var safeAreaInsets
-    
     @State private var template: TemplateModel?
     
     let id: String
-    let bcTemplateType: String
+    let bcTemplateType: String?
     let jobTitle: String
     
     let context = CIContext()
     let filter = CIFilter.qrCodeGenerator()
     
-    func generateQRCode(from string: String) -> UIImage {
+    func generateQRCode(
+        from string: String
+    ) -> UIImage {
         filter.message = Data(string.utf8)
 
         if let outputImage = filter.outputImage {
@@ -29,8 +29,16 @@ struct QRCodePageView: View {
     }
     
     var body: some View {
-        ZStack {
-            if self.template != nil {
+        ZStack (alignment: .top) {
+            if self.template == nil {
+                Spacer()
+                    .background(.black)
+                    .frame(
+                        width: UIScreen.main.bounds.size.width,
+                        height: UIScreen.main.bounds.size.height
+                    )
+            }
+            else {
                 LazyImage(
                     url: URL(
                         string: self.template!.picture_url!.replacingOccurrences(
@@ -43,8 +51,8 @@ struct QRCodePageView: View {
                         image
                             .resizable()
                             .frame(
-                                minWidth: UIScreen.main.bounds.size.width,
-                                minHeight: UIScreen.main.bounds.size.height
+                                width: UIScreen.main.bounds.size.width,
+                                height: UIScreen.main.bounds.size.height - 50
                             )
                             .clipped()
                     } else {
@@ -54,7 +62,13 @@ struct QRCodePageView: View {
             }
             VStack (alignment: .leading) {
                 Spacer()
-                    .frame(height: self.safeAreaInsets.top)
+                    .frame(
+                        height: 10
+                    )
+//                Spacer()
+//                    .frame(
+//                        height: self.safeAreaInsets.top
+//                    )
                 BackButtonView()
                 Spacer()
                 VStack {
@@ -98,11 +112,6 @@ struct QRCodePageView: View {
                 20
             )
         }
-        .navigationBarBackButtonHidden()
-//        .frame(
-//            minWidth: UIScreen.main.bounds.size.width,
-//            minHeight: UIScreen.main.bounds.size.height
-//        )
         .onAppear {
             if self.bcTemplateType != nil {
                 template = self.commonViewModel.templates.first(

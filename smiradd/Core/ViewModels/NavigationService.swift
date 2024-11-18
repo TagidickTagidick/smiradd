@@ -17,7 +17,7 @@ final class NavigationService: ObservableObject {
         case settingsScreen
         case qrCodeScreen(
             id: String,
-            bcTemplateType: String,
+            bcTemplateType: String?,
             jobTitle: String
         )
         case notificationsScreen

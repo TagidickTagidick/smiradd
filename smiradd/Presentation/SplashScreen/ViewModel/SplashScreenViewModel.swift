@@ -7,8 +7,6 @@ class SplashScreenViewModel: ObservableObject {
     
     private let commonViewModel: CommonViewModel
     
-    private let navigationService: NavigationService
-    
     private let locationManager: LocationManager
     private var cancellables: Set<AnyCancellable> = []
     
@@ -20,7 +18,6 @@ class SplashScreenViewModel: ObservableObject {
     ) {
         self.commonRepository = commonRepository
         self.commonViewModel = commonViewModel
-        self.navigationService = navigationService
         self.locationManager = locationManager
         self.locationManager.checkLocationAuthorization()
     }

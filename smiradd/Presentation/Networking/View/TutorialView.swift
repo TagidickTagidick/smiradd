@@ -46,7 +46,7 @@ struct TutorialView: View {
         .background(.black.opacity(0.6))
         .frame(
             width: UIScreen.main.bounds.size.width,
-            height: UIScreen.main.bounds.size.height - 58 - safeAreaInsets.bottom
+            height: UIScreen.main.bounds.size.height// - 58 - safeAreaInsets.bottom
         )
         .onTapGesture {
             UserDefaults.standard.set(

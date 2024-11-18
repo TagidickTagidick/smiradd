@@ -33,8 +33,48 @@ struct CardBodyView: View {
                         image: self.$imageMock,
                         video: self.$videoMock,
                         imageUrl: self.$imageUrl,
-                        showTrailing: true,
-                        editButton: self.viewModel.cardType == .myCard ? true : nil,
+                        trailing: self.commonViewModel.myCards.first(
+                            where: {
+                                $0.id == self.viewModel.cardId
+                            }
+                        ) == nil ? self.commonViewModel.cardModel.like == true ? "favorites_active" : "favorites" : self.commonViewModel.cardModel.is_default == true ? "lock" : "unlock",
+                        onTapTrailing: {
+                            if self.commonViewModel.myCards.first(
+                                where: {
+                                    $0.id == self.viewModel.cardId
+                                }
+                            ) == nil {
+                                if self.commonViewModel.cardModel.like == true {
+                                    self.viewModel.openDeleteFromFavoritesAlert()
+                                }
+                                else {
+                                    self.navigationService.navigateBack()
+                                    
+                                    if self.viewModel.cardType == .networkingUserCard {
+                                        withAnimation {
+                                            self.commonViewModel.networkingCards.swipe(
+                                                direction: .right,
+                                                completion: nil
+                                            )
+                                        }
+                                    }
+                                    
+                                    self.commonViewModel.like(
+                                        id: self.viewModel.cardId
+                                    )
+                                }
+                            }
+                            else {
+                                self.viewModel.changeIsDefault(
+                                    isDefault: self.commonViewModel.cardModel.is_default == true
+                                )
+                            }
+                        },
+                        editButton: self.commonViewModel.myCards.first(
+                            where: {
+                                $0.id == self.viewModel.cardId
+                            }
+                        ) == nil ? nil : true,
                         onTapEditButton: {
                             self.viewModel.changeCardType()
                         }
@@ -277,7 +317,11 @@ struct CardBodyView: View {
             .refreshable {
                 self.viewModel.getCard()
             }
-            if self.viewModel.cardType == .userCard && !(self.commonViewModel.cardModel.like ?? false) {
+            if self.commonViewModel.myCards.first(
+                where: {
+                    $0.id == self.viewModel.cardId
+                }
+            ) == nil {
                 HStack {
                     Spacer()
                     ZStack {
@@ -295,13 +339,21 @@ struct CardBodyView: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
+                        if self.commonViewModel.cardModel.like == true {
+                            self.viewModel.openDeleteFromFavoritesAlert()
+                            
+                            return
+                        }
+                        
                         self.navigationService.navigateBack()
                         
-                        withAnimation {
-                            self.commonViewModel.networkingCards.swipe(
-                                direction: .left,
-                                completion: nil
-                            )
+                        if self.viewModel.cardType == .networkingUserCard {
+                            withAnimation {
+                                self.commonViewModel.networkingCards.swipe(
+                                    direction: .left,
+                                    completion: nil
+                                )
+                            }
                         }
                         
                         self.commonViewModel.dislike(
@@ -325,13 +377,26 @@ struct CardBodyView: View {
                             .foregroundColor(.white)
                     }
                     .onTapGesture {
+                        if self.commonViewModel.cardModel.like == true {
+                            withAnimation {
+                                self.commonViewModel.showAlert(
+                                    isError: true,
+                                    text: "Визитка уже добавлена в избранное"
+                                )
+                            }
+                            
+                            return
+                        }
+                        
                         self.navigationService.navigateBack()
                         
-                        withAnimation {
-                            self.commonViewModel.networkingCards.swipe(
-                                direction: .right,
-                                completion: nil
-                            )
+                        if self.viewModel.cardType == .networkingUserCard {
+                            withAnimation {
+                                self.commonViewModel.networkingCards.swipe(
+                                    direction: .right,
+                                    completion: nil
+                                )
+                            }
                         }
                         
                         self.commonViewModel.like(
@@ -355,6 +420,15 @@ struct CardBodyView: View {
                 )
                 print(phone)
             }
+        }
+        .customAlert(
+            "Удалить из избранного?",
+            isPresented: self.$viewModel.isDeleteFromFavorites,
+            actionText: "Удалить"
+        ) {
+            self.viewModel.deleteFromFavorites()
+        } message: {
+            Text("Визитка будет удалена, если у вас нет контактов ее владельца, то вернуть ее можно будет только при личной встрече. Удалить визитку из избранного?")
         }
         .networkingAlert(
             "Удалить визитку?",

@@ -338,4 +338,30 @@ class CardRepository: ICardRepository {
             }
         }
     }
+    
+    func putDefault(
+        cardId: String,
+        completion: @escaping (Result<CardModel, Error>) -> Void
+    ) {
+        self.networkService.put(
+            url: "cards/\(cardId)/default"
+        ) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: response,
+                        options: []
+                    )
+                    let cardModel = try JSONDecoder().decode(CardModel.self, from: data)
+                    completion(.success(cardModel))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let errorModel):
+                print("Signup failed: \(errorModel.message)")
+                completion(.failure(errorModel))
+            }
+        }
+    }
 }

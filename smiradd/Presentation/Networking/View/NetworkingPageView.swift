@@ -57,7 +57,7 @@ struct NetworkingPageView: View {
                     }
                 )
             }
-            if self.commonViewModel.isTeamStorage {
+            if self.commonViewModel.isSeekTeamStorage {
                 CardStack(
                     model: self.commonViewModel.networkingTeams,
                   onSwipe: { card, direction in
@@ -67,22 +67,17 @@ struct NetworkingPageView: View {
                     NetworkingTeamView(
                         teamModel: card,
                         onDislike: {
-                            self.commonViewModel.dislike(id: card.id!)
                             withAnimation {
                                 self.commonViewModel.networkingTeams.swipe(
                                     direction: .left,
                                     completion: nil
                                 )
                             }
+                            
+                            self.commonViewModel.dislike(id: card.id!)
                         },
                         onLike: {
                             self.commonViewModel.like(id: card.id!)
-                            withAnimation {
-                                self.commonViewModel.networkingTeams.swipe(
-                                    direction: .right,
-                                    completion: nil
-                                )
-                            }
                         },
                         onOpen: {
                             self.viewModel.openTeam(id: card.id!)
@@ -105,22 +100,17 @@ struct NetworkingPageView: View {
                     NetworkingCardView(
                         cardModel: card,
                         onDislike: {
-                            self.commonViewModel.dislike(id: card.id)
                             withAnimation {
-                                self.commonViewModel.networkingCards.swipe(
+                                self.commonViewModel.networkingTeams.swipe(
                                     direction: .left,
                                     completion: nil
                                 )
                             }
+                            
+                            self.commonViewModel.dislike(id: card.id)
                         },
                         onLike: {
                             self.commonViewModel.like(id: card.id)
-                            withAnimation {
-                                self.commonViewModel.networkingCards.swipe(
-                                    direction: .right,
-                                    completion: nil
-                                )
-                            }
                         },
                         onOpen: {
                             self.viewModel.openCard(id: card.id)
@@ -159,102 +149,6 @@ struct NetworkingPageView: View {
                     .environment(\.sizeCategory, .medium)
                 }
         }
-//        ZStack (alignment: .top) {
-//            PageInfoView(
-//                pageType: self.viewModel.pageType,
-//                onTap: {
-//                    if self.viewModel.pageType == .matchNotFound || self.viewModel.pageType == .pageNotFound {
-//                        if self.viewModel.pageType == .matchNotFound {
-//                            self.viewModel.openForumCodeSheet()
-//                        }
-//                        else {
-//                            self.viewModel.startAgain()
-//                        }
-//                    }
-//                }
-//            )
-//            .padding([.horizontal], 20)
-//            .padding([.top], 16)
-//            .padding([.bottom], 52)
-//            .onChange(
-//                of: self.viewModel.pinCode,
-//                {
-//                    self.viewModel.setForumCode()
-//                }
-//            )
-//            .offset(y: 52)
-//            if self.commonViewModel.isTeamStorage {
-//                CardSwiperView(
-//                    cards: $commonViewModel.teamViews,
-//                    onCardSwiped: {
-//                        swipeDirection, index in
-//                                switch swipeDirection {
-//                                case .left:
-//                                    self.viewModel.setSeen(
-//                                        id: self.commonViewModel.teamViews[index].teamModel.id!
-//                                    )
-//                                case .right:
-//                                    self.viewModel.setSeen(
-//                                        id: commonViewModel.teamViews[index].teamModel.id!
-//                                    )
-//                                }
-//                            },
-//                    onCardDragged: {
-//                        swipeDirection, index, offset in
-//                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
-//                            }
-//                )
-//                .offset(y: 52)
-//            }
-//            else {
-//                CardSwiperView(
-//                    cards: $commonViewModel.cardViews,
-//                    onCardSwiped: {
-//                        swipeDirection, index in
-//                                switch swipeDirection {
-//                                case .left:
-//                                    self.viewModel.setSeen(
-//                                        id: self.commonViewModel.cardViews[index].cardModel.id
-//                                    )
-//                                case .right:
-//                                    self.viewModel.setSeen(
-//                                        id: self.commonViewModel.cardViews[index].cardModel.id
-//                                    )
-//                                }
-//                            },
-//                    onCardDragged: {
-//                        swipeDirection, index, offset in
-//                                print("Card dragged \(swipeDirection) direction at index \(index) with offset \(offset)")
-//                            }
-//                )
-//                .offset(y: 52)
-//            }
-//            NetworkingAppBarView(
-//                onTapExit: {
-//                    self.viewModel.openExitNetworkingSheet()
-//                },
-//                onTapFilter: {
-//                    self.viewModel.openFilterSheet()
-//                }
-//            )
-//            .background(accent50)
-//            .sheet(
-//                isPresented: $viewModel.isFilterSheet,
-//                onDismiss: {
-//                    self.viewModel.closeFilterSheet()
-//                }) {
-//                    FilterSheetView(
-//                        isFilter: $viewModel.isFilterSheet
-//                    )
-//                    .environmentObject(self.viewModel)
-//                    .environment(\.sizeCategory, .medium)
-//                }
-//        }
-        
-//        .frame(
-//            width: UIScreen.main.bounds.size.width,
-//            height: UIScreen.main.bounds.size.height - self.safeAreaInsets.bottom - self.safeAreaInsets.top
-//        )
         .background(accent50)
         .customAlert(
                         "Покинуть нетворкинг?",

@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct CustomBottomNavigationBarView: View {
-    @EnvironmentObject var router: NavigationService
+    @EnvironmentObject var navigationService: NavigationService
     
     var body: some View {
         HStack {
             Spacer()
             VStack {
-                if router.index == 0 {
+                if self.navigationService.index == 0 {
                     Image("networking_active")
                 }
                 else {
@@ -18,20 +18,20 @@ struct CustomBottomNavigationBarView: View {
                 Text("Нетворкинг")
                     .font(
                         .custom(
-                            "Roboto-\(router.index == 0 ? "Medium" : "Regular")",
+                            "Roboto-\(self.navigationService.index == 0 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
                     .foregroundStyle(textDefault)
             }
             .onTapGesture {
-                router.navigateToRoot()
-                router.navigate(to: .networkingScreen)
-                router.index = 0
+                self.navigationService.navigateToRoot()
+                self.navigationService.navigate(to: .networkingScreen)
+                self.navigationService.index = 0
             }
             Spacer()
             VStack {
-                if router.index == 1 {
+                if self.navigationService.index == 1 {
                     Image("profile_active")
                 }
                 else {
@@ -42,20 +42,20 @@ struct CustomBottomNavigationBarView: View {
                 Text("Профиль")
                     .font(
                         .custom(
-                            "Roboto-\(router.index == 1 ? "Medium" : "Regular")",
+                            "Roboto-\(self.navigationService.index == 1 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
                     .foregroundStyle(textDefault)
             }
             .onTapGesture {
-                router.navigateToRoot()
-                router.navigate(to: .profileScreen)
-                router.index = 1
+                self.navigationService.navigateToRoot()
+                self.navigationService.navigate(to: .profileScreen)
+                self.navigationService.index = 1
             }
             Spacer()
             VStack {
-                if router.index == 2 {
+                if self.navigationService.index == 2 {
                     Image("favorites_active")
                 }
                 else {
@@ -66,16 +66,16 @@ struct CustomBottomNavigationBarView: View {
                 Text("Избранное")
                     .font(
                         .custom(
-                            "Roboto-\(router.index == 2 ? "Medium" : "Regular")",
+                            "Roboto-\(self.navigationService.index == 2 ? "Medium" : "Regular")",
                             size: 12
                         )
                     )
                     .foregroundStyle(textDefault)
             }
             .onTapGesture {
-                router.navigateToRoot()
-                router.navigate(to: .favoritesScreen)
-                router.index = 2
+                self.navigationService.navigateToRoot()
+                self.navigationService.navigate(to: .favoritesScreen)
+                self.navigationService.index = 2
             }
             Spacer()
         }

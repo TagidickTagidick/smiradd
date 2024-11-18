@@ -216,14 +216,10 @@ struct MyCardView: View {
                             : self.template!.theme == "black"
                         )
                         .onTapGesture {
-                            if self.cardModel.bc_template_type == nil {
-                                return
-                            }
-                            
                             self.navigationService.navigate(
                                 to: .qrCodeScreen(
                                     id: self.cardModel.id,
-                                    bcTemplateType: self.cardModel.bc_template_type!,
+                                    bcTemplateType: self.cardModel.bc_template_type,
                                     jobTitle: self.cardModel.job_title
                                 )
                             )

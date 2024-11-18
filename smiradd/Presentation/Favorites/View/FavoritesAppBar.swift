@@ -60,6 +60,7 @@ struct FavoritesAppBarView: View {
                 .sheet(isPresented: self.$isShowingScanner) {
                     CodeScannerView(
                         codeTypes: [.qr],
+                        showViewfinder: true,
                         simulatedData: "Paul Hudson\npaul@hackingwithswift.com",
                         completion: self.onScan
                     )

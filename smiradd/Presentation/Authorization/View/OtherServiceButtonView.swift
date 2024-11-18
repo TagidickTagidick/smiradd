@@ -1,5 +1,4 @@
 import SwiftUI
-import VKID
 
 struct OtherServiceButtonView: View {
     var isSignUp: Bool
@@ -27,18 +26,18 @@ struct OtherServiceButtonView: View {
                 .foregroundStyle(textDefault)
             }
             .onTapGesture {
-                do {
-                    let vkid = try VKID(
-                        config: Configuration(
-                            appCredentials: AppCredentials(
-                                clientId: "51915511",         // ID вашего приложения
-                                clientSecret: "2ca8eec22ca8eec22ca8eec2312fb0c43522ca82ca8eec24a983499e502b84689c6937e"  // ваш защищенный ключ (client_secret)
-                            )
-                        )
-                    )
-                } catch {
-                    preconditionFailure("Failed to initialize VKID: \(error)")
-                }
+//                do {
+//                    let vkid = try VKID(
+//                        config: Configuration(
+//                            appCredentials: AppCredentials(
+//                                clientId: "51915511",         // ID вашего приложения
+//                                clientSecret: "2ca8eec22ca8eec22ca8eec2312fb0c43522ca82ca8eec24a983499e502b84689c6937e"  // ваш защищенный ключ (client_secret)
+//                            )
+//                        )
+//                    )
+//                } catch {
+//                    preconditionFailure("Failed to initialize VKID: \(error)")
+//                }
                 //handleSignInButton()
             }
         }

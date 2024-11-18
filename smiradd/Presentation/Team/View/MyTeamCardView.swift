@@ -101,7 +101,7 @@ struct MyTeamCardView: View {
                 HStack {
                     ShareLink(
                         item: URL(
-                            string: "https://smiradd.ru/team/\(self.teamMainModel.team.id)")!
+                            string: "https://smiradd.ru/teams/invite/\(self.teamMainModel.team.invite_url)")!
                     ) {
                         CustomIconView(
                             icon: "share",
@@ -114,33 +114,36 @@ struct MyTeamCardView: View {
                         .frame(
                             width: 12
                         )
-                    ForEach(
-                        0..<(self.avatars.count > 3 ? 3 : self.avatars.count),
-                        id: \.self
-                    ) {
-                        index in
-                        WebImage(
-                            url: URL(
-                                string: self.avatars[index]
-                            )
-                        ) { image in
-                                image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
+                    ZStack {
+                        ForEach(
+                            0..<(self.avatars.count > 3 ? 3 : self.avatars.count),
+                            id: \.self
+                        ) {
+                            index in
+                            WebImage(
+                                url: URL(
+                                    string: self.avatars[index]
+                                )
+                            ) { image in
+                                    image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(
+                                        width: 52,
+                                        height: 52
+                                    )
+                                    .clipped()
+                                    .clipShape(Circle())
+                                } placeholder: {
+                                        Rectangle().foregroundColor(.gray)
+                                }
                                 .frame(
                                     width: 52,
                                     height: 52
                                 )
-                                .clipped()
                                 .clipShape(Circle())
-                            } placeholder: {
-                                    Rectangle().foregroundColor(.gray)
-                            }
-                            .frame(
-                                width: 52,
-                                height: 52
-                            )
-                            .clipShape(Circle())
+                                .offset(x: CGFloat(index * 30))
+                        }
                     }
                     Spacer()
                 }

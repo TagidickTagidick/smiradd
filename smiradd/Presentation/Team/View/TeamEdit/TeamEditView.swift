@@ -18,7 +18,8 @@ struct TeamEditView: View {
                     image: self.$viewModel.logoImage,
                     video: self.$viewModel.logoVideo,
                     imageUrl: self.$viewModel.logoUrl,
-                    showTrailing: false,
+                    trailing: nil,
+                    onTapTrailing: nil,
                     editButton: false
                 )
                 .frame(height: 360)
@@ -99,7 +100,7 @@ struct TeamEditView: View {
                         }
                         ShareLink(
                             item: URL(
-                                string: "https://smiradd.ru/teams/invite/\(self.viewModel.teamId)"
+                                string: "https://smiradd.ru/team/invite/\(self.commonViewModel.teamMainModel.team.invite_url)"
                             )!
                         ) {
                             CustomButtonView(

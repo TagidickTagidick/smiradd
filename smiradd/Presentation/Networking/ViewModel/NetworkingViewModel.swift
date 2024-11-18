@@ -30,7 +30,7 @@ class NetworkingViewModel: ObservableObject {
         self.commonRepository = commonRepository
         self.commonViewModel.networkingCards.removeAllElements()
         self.commonViewModel.networkingTeams.removeAllElements()
-        self.isTeam = self.commonViewModel.isTeamStorage
+        self.isTeam = self.commonViewModel.isSeekTeamStorage
         self.onInit()
     }
     
@@ -91,6 +91,11 @@ class NetworkingViewModel: ObservableObject {
                 case .success(let locationModel):
                     self.commonViewModel.locationModel = locationModel
                     
+                    UserDefaults.standard.set(
+                        self.commonViewModel.locationModel?.type == "TeamForum",
+                        forKey: "is_team"
+                    )
+                    
                     self.isQuestionForumSheet = true
                     
                     break
@@ -109,8 +114,6 @@ class NetworkingViewModel: ObservableObject {
     func answerYesQuestionForumSheet() {
         self.isQuestionForumSheet = false
         
-        print("пфвпвфпф \(self.pinCode)")
-        
         UserDefaults.standard.set(
             self.pinCode,
             forKey: "forum_code"
@@ -122,7 +125,7 @@ class NetworkingViewModel: ObservableObject {
         else {
             UserDefaults.standard.set(
                 false,
-                forKey: "is_team"
+                forKey: "is_seek_team"
             )
             
             self.commonViewModel.getAroundMe()
@@ -132,7 +135,7 @@ class NetworkingViewModel: ObservableObject {
     func setIsTeam(isTeam: Bool) {
         UserDefaults.standard.set(
             isTeam,
-            forKey: "is_team"
+            forKey: "is_seek_team"
         )
         
         self.isChooseStatusSheet = false
@@ -143,7 +146,7 @@ class NetworkingViewModel: ObservableObject {
     func openFilterSheet() {
         self.isFilterSheet = true
         
-        self.isTeam = self.commonViewModel.isTeamStorage
+        self.isTeam = self.commonViewModel.isSeekTeamStorage
     }
     
     func closeFilterSheet() {
@@ -151,7 +154,7 @@ class NetworkingViewModel: ObservableObject {
         
         UserDefaults.standard.set(
             self.isTeam,
-            forKey: "is_team"
+            forKey: "is_seek_team"
         )
         
         self.commonViewModel.getAroundMe()
@@ -166,6 +169,10 @@ class NetworkingViewModel: ObservableObject {
         
         UserDefaults.standard.removeObject(
             forKey: "forum_code"
+        )
+        
+        UserDefaults.standard.removeObject(
+            forKey: "is_team"
         )
         
         self.commonViewModel.networkingCards.removeAllElements()
@@ -202,7 +209,7 @@ class NetworkingViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .cardScreen(
                 cardId: id,
-                cardType: .userCard
+                cardType: .networkingUserCard
             )
         )
     }
@@ -211,7 +218,7 @@ class NetworkingViewModel: ObservableObject {
         self.navigationService.navigate(
             to: .teamScreen(
                 teamId: id,
-                teamType: .userCard
+                teamType: .networkingUserCard
             )
         )
     }

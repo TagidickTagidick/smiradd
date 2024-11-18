@@ -23,15 +23,19 @@ class NotificationsViewModel: ObservableObject {
     }
     
     private func readNotifications() {
-        for i in 0 ..< self.commonViewModel.notificationsModel!.items.count {
-            if self.commonViewModel.notificationsModel!.items[i].status != "READED" {
-                self.repository.patchNotification(
-                    id: self.commonViewModel.notificationsModel!.items[i].id,
-                    accepted: self.commonViewModel.notificationsModel!.items[i].accepted
-                ) {_ in }
+        DispatchQueue.main.async {
+            for i in 0 ..< self.commonViewModel.notificationsModel!.items.count {
+                if self.commonViewModel.notificationsModel!.items[i].status != "READED" {
+                    self.repository.patchNotification(
+                        id: self.commonViewModel.notificationsModel!.items[i].id,
+                        accepted: self.commonViewModel.notificationsModel!.items[i].accepted
+                    ) {
+                        _ in
+                    }
+                }
+                
+                self.commonViewModel.notificationsModel!.items[i].status = "READED"
             }
-            
-            self.commonViewModel.notificationsModel!.items[i].status = "READED"
         }
     }
     
@@ -65,7 +69,13 @@ class NotificationsViewModel: ObservableObject {
                             self.commonViewModel.myTeamMainModel!.teammates.append(CardModel.mock)
                         }
                     }
-                case .failure(_):
+                case .failure(let errorModel):
+                    if errorModel.message == "You are in team" {
+                        self.commonViewModel.showAlert(
+                            isError: true,
+                            text: "Вы уже находитесь в команде"
+                        )
+                    }
                     break
                 }
             }
@@ -116,12 +126,25 @@ class NotificationsViewModel: ObservableObject {
         }
     }
     
-    func openUserCard(id: String) {
-        self.navigationService.navigate(
-            to: .cardScreen(
-                cardId: id,
-                cardType: .userCard
+    func openCard(
+        id: String,
+        isTeam: Bool
+    ) {
+        if isTeam {
+            self.navigationService.navigate(
+                to: .teamScreen(
+                    teamId: id,
+                    teamType: .userCard
+                )
             )
-        )
+        }
+        else {
+            self.navigationService.navigate(
+                to: .cardScreen(
+                    cardId: id,
+                    cardType: .userCard
+                )
+            )
+        }
     }
 }

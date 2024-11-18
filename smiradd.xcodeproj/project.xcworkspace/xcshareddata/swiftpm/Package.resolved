@@ -1,5 +1,5 @@
 {
-  "originHash" : "055d77a596d861a1c832b2f280fc04dcb46bdf966af962a8886a99fe1cd8dfef",
+  "originHash" : "6b8b172b1bd962f7af128ad9999f81423fed2c45289390865c8d55140502c3f9",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -197,15 +197,6 @@
       "state" : {
         "revision" : "0226e21f9bf355d40e07e5f5e1c33679d50e167f",
         "version" : "1.5.1"
-      }
-    },
-    {
-      "identity" : "vkid-ios-sdk",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/VKCOM/vkid-ios-sdk.git",
-      "state" : {
-        "revision" : "fe57f354da858be377e9090a79df04ac3dba399f",
-        "version" : "2.2.1"
       }
     }
   ],
